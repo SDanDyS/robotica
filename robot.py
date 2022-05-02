@@ -1,3 +1,10 @@
-from vision.robotVision import robotVision
+from vision.robotVision import *
+from threading import *
 
 robot = robotVision()
+robo = test()
+
+#INVOKE THE THREAD. UPON PRESSING Q THE THREAD WILL TERMINATE.
+#CREATE SOME SORT OF HANDLER IN CASE THE THREAD SHOULD START AGAIN
+robot.FLAG = 1
+robot.start()
