@@ -47,21 +47,12 @@ class robotVision(Thread):
 
     def detectCookie(self):
         # turn scene gray and put a threshold on noise
-        gray = cv.cvtColor(self.frame, cv.COLOR_BGR2GRAY)
-        self.blur = cv.GaussianBlur(gray,(5, 5), 0)
+        self.gray = cv.cvtColor(self.frame, cv.COLOR_RGB2GRAY)
+        self.blur = cv.GaussianBlur(self.gray,(39, 39), 0)#75 75 works good too
         _, self.thresh = cv.threshold(self.blur, 75, 255, 0, cv.THRESH_BINARY)
-        self.thresh = cv.erode(self.thresh, None, iterations = 3)
+        self.dilated = cv.dilate(self.thresh, (7, 7), iterations = 3)
         self.findContours()
-
-        for contour in self.contours:
-            (x, y, w, h) = cv.boundingRect(contour)
-
-            # if (cv.contourArea(contour) < 20):
-            #     continue
-            
-            # cv.rectangle(self.frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
-        self.generateConvexHull()
-        self.drawContours(self.convex_hull)
+        self.drawContours()
 
     def releaseStream(self):
         # When everything done, release the capture
@@ -69,10 +60,14 @@ class robotVision(Thread):
         cv.destroyAllWindows()
 
     def imshow(self):
-        cv.imshow("videoFrame", self.frame)
+        cv.imshow("Gray capture (First cycle)", self.gray)
+        cv.imshow("Blur capture (Second cycle)", self.blur)
+        cv.imshow("Thresh capture (Third cycle)", self.thresh)
+        cv.imshow("Dilated capture (Fourth cycle)", self.dilated)
+        cv.imshow("Video capture (Final result)", self.frame)
 
     def findContours(self):
-        self.contours, self.hierarchy = cv.findContours(self.thresh, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+        self.contours, self.hierarchy = cv.findContours(self.dilated, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
 
     def generateConvexHull(self):
         self.convex_hull = []
