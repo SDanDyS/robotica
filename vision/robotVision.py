@@ -11,7 +11,6 @@ class robotVision(Thread):
             print("Cannot open camera")
             exit()
         while True:
-            print("test robot multithreader")
             # Capture frame-by-frame
             self.ret, self.frame = self.cap.read()
 
@@ -47,12 +46,30 @@ class robotVision(Thread):
 
     def detectCookie(self):
         # turn scene gray and put a threshold on noise
-        self.gray = cv.cvtColor(self.frame, cv.COLOR_RGB2GRAY)
+        self.gray = cv.cvtColor(self.frame, cv.COLOR_BGR2GRAY)
         self.blur = cv.GaussianBlur(self.gray,(39, 39), 0)#75 75 works good too
         _, self.thresh = cv.threshold(self.blur, 75, 255, 0, cv.THRESH_BINARY)
         self.dilated = cv.dilate(self.thresh, (7, 7), iterations = 3)
         self.findContours()
-        self.drawContours()
+
+        for cnt in self.contours:
+            area = cv.contourArea(cnt)
+            perimeter = cv.arcLength(cnt, True)
+
+            m = cv.moments(cnt)
+
+            if ((m['m10'] and m['m00']) and (m['m01'] and m['m00'])):
+                #calculate centroid of mass
+                cx = int(m['m10']/m['m00'])
+                cy = int(m['m01']/m['m00'])
+
+            if (perimeter != 0 and area != 0):
+                #the rounding -> how round it is
+                formFactor = 4 * math.pi * area / perimeter**2
+
+            if (area > 100):
+                self.drawContours(cnt)
+        # self.drawContours()
 
     def releaseStream(self):
         # When everything done, release the capture
@@ -68,12 +85,6 @@ class robotVision(Thread):
 
     def findContours(self):
         self.contours, self.hierarchy = cv.findContours(self.dilated, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-
-    def generateConvexHull(self):
-        self.convex_hull = []
-        for cnt in self.contours:
-            hull = cv.convexHull(cnt)
-            self.convex_hull.append(hull)
 
     def drawContourBasedOnArea(self):
         for cnt in self.contours:
@@ -93,8 +104,3 @@ class robotVision(Thread):
             cv.drawContours(self.frame, target, -1, (0,255,0), 3)
         else:
             cv.drawContours(self.frame, [target], -1, (0,255,0), 3)
-
-class test(Thread):
-    def run(self):
-        while True:
-            print("sync call")
