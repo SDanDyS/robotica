@@ -6,7 +6,7 @@ from threading import *
 class robotVision(Thread):
 
     def run(self):
-        self.cap = cv.VideoCapture(0)
+        self.cap = cv.VideoCapture(1)
         if not self.cap.isOpened():
             print("Cannot open camera")
             exit()
@@ -40,14 +40,34 @@ class robotVision(Thread):
         # Threshold the HSV image to get only blue colors
         mask = cv.inRange(hsv, lower_blue, upper_blue)
 
-        result = cv.bitwise_and(self.frame, self.frame, mask = mask)
+        bluecnts = cv.findContours(mask.copy(), cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[-2]
 
-        self.frame = result
+        if (len(bluecnts) > 0):
+            #return the biggest contourArea
+            blue_area = max(bluecnts, key=cv.contourArea)
+
+            #29087.5 blauw blokje
+            #get the contourArea in pixels
+            area = cv.contourArea(blue_area)
+
+            cv.putText(self.frame, str(area), (50, 50), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2, cv.LINE_4)
+
+            m = cv.moments(blue_area)
+
+            if ((m['m10'] and m['m00']) and (m['m01'] and m['m00'])):
+                #calculate centroid of mass
+                cx = int(m['m10']/m['m00'])
+                cy = int(m['m01']/m['m00'])
+                cv.circle(self.frame, (cx, cy), 5, (255, 255, 255), -1)
+            # res = cv.bitwise_and(self.frame, self.frame, mask = mask)
+            # self.frame = res
+            (xg, yg, wg, hg) = cv.boundingRect(blue_area)
+            cv.rectangle(self.frame,(xg, yg), (xg + wg, yg + hg), (0, 255, 0), 2)
 
     def detectCookie(self):
         # turn scene gray and put a threshold on noise
         self.gray = cv.cvtColor(self.frame, cv.COLOR_BGR2GRAY)
-        self.blur = cv.GaussianBlur(self.gray,(39, 39), 0)#75 75 works good too
+        self.blur = cv.GaussianBlur(self.gray,(39, 39), 0)
         _, self.thresh = cv.threshold(self.blur, 75, 255, 0, cv.THRESH_BINARY)
         self.dilated = cv.dilate(self.thresh, (7, 7), iterations = 3)
         self.findContours()
@@ -77,25 +97,14 @@ class robotVision(Thread):
         cv.destroyAllWindows()
 
     def imshow(self):
-        cv.imshow("Gray capture (First cycle)", self.gray)
-        cv.imshow("Blur capture (Second cycle)", self.blur)
-        cv.imshow("Thresh capture (Third cycle)", self.thresh)
-        cv.imshow("Dilated capture (Fourth cycle)", self.dilated)
+        # cv.imshow("Gray capture (First cycle)", self.gray)
+        # cv.imshow("Blur capture (Second cycle)", self.blur)
+        # cv.imshow("Thresh capture (Third cycle)", self.thresh)
+        # cv.imshow("Dilated capture (Fourth cycle)", self.dilated)
         cv.imshow("Video capture (Final result)", self.frame)
 
     def findContours(self):
-        self.contours, self.hierarchy = cv.findContours(self.dilated, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-
-    def drawContourBasedOnArea(self):
-        for cnt in self.contours:
-            area = cv.contourArea(cnt)
-            perimeter = cv.arcLength(cnt, True)
-
-            if (perimeter != 0 and area != 0):
-                formFactor = 4 * math.pi * area / perimeter**2
-
-            if (area > 1000):
-                self.drawContours(cnt)
+        self.contours, self.hierarchy = cv.findContours(self.dilated, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
 
     def drawContours(self, target = "default"):
         if (target == "default"):
