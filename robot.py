@@ -7,5 +7,6 @@ robot = robotVision()
 # CREATE SOME SORT OF HANDLER IN CASE THE THREAD SHOULD START AGAIN
 robot.FLAG = 2
 robot.start()
-robot.getFocalLength(248, 11, 24)
-print(robot.getDistance(170, 11))
+# robot.getFocalLength(248, 11, 24)
+robot.getFocalLength()
+print("Distance: " + str(robot.getDistance(800)))

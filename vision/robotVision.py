@@ -6,6 +6,13 @@ from threading import *
 
 
 class robotVision(Thread):
+    # The width of the object
+    WIDTH_OBJECT = 7.5
+    # The distance to the object in the KNOWN_IMAGE
+    KNOWN_DISTANCE = 40
+    # The image that is known to be KNOWN_DISTANCE away
+    KNOWN_IMAGE = 'vision/images/40cm.jpg'
+
     focalLength = 0
 
     def run(self):
@@ -45,24 +52,26 @@ class robotVision(Thread):
 
         bluecnts = self.findContours(mask)
         if (len(bluecnts) > 0):
-            #return the biggest contourArea and determine centroid
+            # return the biggest contourArea and determine centroid
             blue_area = max(bluecnts, key=cv.contourArea)
             self.centroid(blue_area)
 
             (xg, yg, wg, hg) = cv.boundingRect(blue_area)
-            cv.rectangle(self.frame,(xg, yg), (xg + wg, yg + hg), (0, 255, 0), 2)
-            cv.putText(self.frame, "Area detected...", (50, 50), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2, cv.LINE_4)
+            cv.rectangle(self.frame, (xg, yg),
+                         (xg + wg, yg + hg), (0, 255, 0), 2)
+            cv.putText(self.frame, "Area detected...", (50, 50),
+                       cv.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2, cv.LINE_4)
 
     def snapshot(self):
         i = 0
         while (i < 5):
             cv.imwrite("assets/capture"+str(i)+".png", self.frame)
-            i  += 1
+            i += 1
 
-    def centroid(self, momentsToCalculate, draw = True):
+    def centroid(self, momentsToCalculate, draw=True):
         m = cv.moments(momentsToCalculate)
         if ((m['m10'] and m['m00']) and (m['m01'] and m['m00'])):
-            #calculate centroid of mass and draw it
+            # calculate centroid of mass and draw it
             cx = int(m['m10']/m['m00'])
             cy = int(m['m01']/m['m00'])
             if (draw):
@@ -79,8 +88,7 @@ class robotVision(Thread):
         cv.imshow("Video capture (Final result)", self.frame)
 
     def findContours(self, mask):
-       return cv.findContours(mask.copy(), cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[-2]
-
+        return cv.findContours(mask.copy(), cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[-2]
 
     def drawContours(self, target="default"):
         if (target == "default"):
@@ -90,12 +98,33 @@ class robotVision(Thread):
         else:
             cv.drawContours(self.frame, [target], -1, (0, 255, 0), 3)
 
+    # Get the width of the object in pixels
+    def getPixelWidth(self, img):
+        # define range of blue color in HSV
+        lower_blue = np.array([110, 50, 50])
+        upper_blue = np.array([130, 255, 255])
+
+        # Threshold the HSV image to get only blue colors
+        mask = cv.inRange(img, lower_blue, upper_blue)
+
+        bluecnts = self.findContours(mask.copy())
+        if (len(bluecnts) > 0):
+            blue_area = max(bluecnts, key=cv.contourArea)
+
+        return cv.minAreaRect(blue_area)
+
     # Calculate the focal length of the camera
-    def getFocalLength(self, pixelWidth, width, distance=10):
+    def getFocalLength(self, pixelWidth=0, width=WIDTH_OBJECT, distance=KNOWN_DISTANCE):
+        if not pixelWidth:
+            img = cv.imread(self.KNOWN_IMAGE)
+            pixelWidth = self.getPixelWidth(img)[1][0]
+        print("pixelWidth: " + str(pixelWidth))
+
         self.focalLength = (pixelWidth * distance) / width
+        print("focalLength: " + str(self.focalLength))
 
     # Calculate the distance to an object
-    def getDistance(self, pixelWidth, width):
+    def getDistance(self, pixelWidth, width=WIDTH_OBJECT):
         if self.focalLength:
             return (width * self.focalLength) / pixelWidth
         else:
