@@ -9,7 +9,7 @@ class robotVision(Thread):
     focalLength = 0
 
     def run(self):
-        self.cap = cv.VideoCapture(0)
+        self.cap = cv.VideoCapture(1)
         if not self.cap.isOpened():
             print("Cannot open camera")
             exit()
@@ -43,7 +43,7 @@ class robotVision(Thread):
         # Threshold the HSV image to get only blue colors
         mask = cv.inRange(self.hsv, lower_blue, upper_blue)
 
-        bluecnts = self.findContours(mask.copy())
+        bluecnts = self.findContours(mask)
         if (len(bluecnts) > 0):
             #return the biggest contourArea and determine centroid
             blue_area = max(bluecnts, key=cv.contourArea)
@@ -53,12 +53,17 @@ class robotVision(Thread):
             cv.rectangle(self.frame,(xg, yg), (xg + wg, yg + hg), (0, 255, 0), 2)
             cv.putText(self.frame, "Area detected...", (50, 50), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2, cv.LINE_4)
 
+    def snapshot(self):
+        i = 0
+        while (i < 5):
+            cv.imwrite("assets/capture"+str(i)+".png", self.frame)
+            i  += 1
+
     def centroid(self, momentsToCalculate, draw = True):
         m = cv.moments(momentsToCalculate)
         if ((m['m10'] and m['m00']) and (m['m01'] and m['m00'])):
             #calculate centroid of mass and draw it
             cx = int(m['m10']/m['m00'])
-            print(cx)
             cy = int(m['m01']/m['m00'])
             if (draw):
                 cv.circle(self.frame, (cx, cy), 5, (255, 255, 255), -1)
