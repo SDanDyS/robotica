@@ -1,12 +1,15 @@
 import math
+from cv2 import findContours
 import numpy as np
 import cv2 as cv
 from threading import *
 
+
 class robotVision(Thread):
+    focalLength = 0
 
     def run(self):
-        self.cap = cv.VideoCapture(1)
+        self.cap = cv.VideoCapture(0)
         if not self.cap.isOpened():
             print("Cannot open camera")
             exit()
@@ -34,8 +37,8 @@ class robotVision(Thread):
 
     def detectMovingObject(self):
         # define range of blue color in HSV
-        lower_blue = np.array([110,50,50])
-        upper_blue = np.array([130,255,255])
+        lower_blue = np.array([110, 50, 50])
+        upper_blue = np.array([130, 255, 255])
 
         # Threshold the HSV image to get only blue colors
         mask = cv.inRange(self.hsv, lower_blue, upper_blue)
@@ -74,10 +77,21 @@ class robotVision(Thread):
        return cv.findContours(mask.copy(), cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[-2]
 
 
-    def drawContours(self, target = "default"):
+    def drawContours(self, target="default"):
         if (target == "default"):
-            cv.drawContours(self.frame, self.contours, -1, (0,255,0), 3)
+            cv.drawContours(self.frame, self.contours, -1, (0, 255, 0), 3)
         elif (isinstance(target, list)):
-            cv.drawContours(self.frame, target, -1, (0,255,0), 3)
+            cv.drawContours(self.frame, target, -1, (0, 255, 0), 3)
         else:
-            cv.drawContours(self.frame, [target], -1, (0,255,0), 3)
+            cv.drawContours(self.frame, [target], -1, (0, 255, 0), 3)
+
+    # Calculate the focal length of the camera
+    def getFocalLength(self, pixelWidth, width, distance=10):
+        self.focalLength = (pixelWidth * distance) / width
+
+    # Calculate the distance to an object
+    def getDistance(self, pixelWidth, width):
+        if self.focalLength:
+            return (width * self.focalLength) / pixelWidth
+        else:
+            raise ValueError("Focal length was not calculated")
