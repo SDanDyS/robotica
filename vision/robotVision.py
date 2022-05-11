@@ -3,7 +3,8 @@ from cv2 import findContours
 import numpy as np
 import cv2 as cv
 from threading import *
-
+import os
+import time
 
 class robotVision(Thread):
     # The width of the object
@@ -11,7 +12,7 @@ class robotVision(Thread):
     # The distance to the object in the KNOWN_IMAGE
     KNOWN_DISTANCE = 40
     # The image that is known to be KNOWN_DISTANCE away
-    KNOWN_IMAGE = 'vision/images/40cm.jpg'
+    KNOWN_IMAGE = 'assets/images/40cm.jpg'
 
     focalLength = 0
 
@@ -29,7 +30,11 @@ class robotVision(Thread):
                 print("Can't receive frame (stream end?). Exiting ...")
                 break
 
-            self.hsv = cv.cvtColor(self.frame, cv.COLOR_BGR2HSV)
+            #bilateralFilter
+            # cv.GaussianBlur(img,(5,5),0)
+            blur = cv.GaussianBlur(self.frame, (37, 37), 0)
+            self.hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)
+            # self.frame = blur
 
             if (self.FLAG == 1):
                 self.detectCookie()
@@ -44,6 +49,7 @@ class robotVision(Thread):
 
     def detectMovingObject(self):
         # define range of blue color in HSV
+        #[[128, 255, 255], [90, 50, 70]]
         lower_blue = np.array([110, 50, 50])
         upper_blue = np.array([130, 255, 255])
 
@@ -55,16 +61,27 @@ class robotVision(Thread):
             # return the biggest contourArea and determine centroid
             blue_area = max(bluecnts, key=cv.contourArea)
             self.centroid(blue_area)
+            
+            self.getFocalLength()
+            pixelWidth = self.getPixelWidth(self.frame)
+            distance = self.getDistance(pixelWidth[1][0])
+            # print(distance)
 
             (xg, yg, wg, hg) = cv.boundingRect(blue_area)
-            cv.rectangle(self.frame, (xg, yg),
-                         (xg + wg, yg + hg), (0, 255, 0), 2)
-            cv.putText(self.frame, "Area detected...", (50, 50),
-                       cv.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2, cv.LINE_4)
+            cv.rectangle(self.frame, (xg, yg), (xg + wg, yg + hg), (0, 255, 0), 2)
+            cv.putText(self.frame, "Area detected...", (50, 50), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2, cv.LINE_4)
+
+            # time.sleep(2.4)
+            print(distance)
+            # print(str(pixelWidth[1][0]))
 
     def snapshot(self):
         i = 0
         while (i < 5):
+            #delete the image if exists prior to generating a new one
+            if os.path.exists("assets/capture"+str(i)+".png"):
+                os.remove("assets/capture"+str(i)+".png")
+
             cv.imwrite("assets/capture"+str(i)+".png", self.frame)
             i += 1
 

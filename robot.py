@@ -8,5 +8,5 @@ robot = robotVision()
 robot.FLAG = 2
 robot.start()
 # robot.getFocalLength(248, 11, 24)
-robot.getFocalLength()
-print("Distance: " + str(robot.getDistance(800)))
+# robot.getFocalLength()
+# print("Distance: " + str(robot.getDistance(800)))
