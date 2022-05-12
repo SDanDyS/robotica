@@ -6,6 +6,11 @@ from threading import *
 import os
 import time
 
+from imutils.video.pivideostream import PiVideoStream
+from picamera.array import PiRGBArray
+from picamera import PiCamera
+import imutils
+
 class robotVision(Thread):
     # The width of the object
     WIDTH_OBJECT = 7.5
@@ -17,18 +22,25 @@ class robotVision(Thread):
     focalLength = 0
 
     def run(self):
-        self.cap = cv.VideoCapture(1)
-        if not self.cap.isOpened():
-            print("Cannot open camera")
-            exit()
+        # init camera
+        vs = PiVideoStream().start()
+        time.sleep(2)
+        
+        #self.cap = cv.VideoCapture(0)
+        #if not self.cap.isOpened():
+            #print("Cannot open camera")
+            #exit()
         while True:
             # Capture frame-by-frame
-            self.ret, self.frame = self.cap.read()
+            frame = vs.read()
+            #frame = imutils.resize(frame, width=400)
+            self.frame = frame
+            #self.ret, self.frame = self.cap.read()
 
             # if frame is read correctly ret is True
-            if not self.ret:
-                print("Can't receive frame (stream end?). Exiting ...")
-                break
+            #if not self.ret:
+                #print("Can't receive frame (stream end?). Exiting ...")
+                #break
 
             #bilateralFilter
             # cv.GaussianBlur(img,(5,5),0)
@@ -50,8 +62,8 @@ class robotVision(Thread):
     def detectMovingObject(self):
         # define range of blue color in HSV
         #[[128, 255, 255], [90, 50, 70]]
-        lower_blue = np.array([110, 50, 50])
-        upper_blue = np.array([130, 255, 255])
+        lower_blue = np.array([90, 50, 50])
+        upper_blue = np.array([128, 255, 255])
 
         # Threshold the HSV image to get only blue colors
         mask = cv.inRange(self.hsv, lower_blue, upper_blue)
@@ -72,7 +84,7 @@ class robotVision(Thread):
             cv.putText(self.frame, "Area detected...", (50, 50), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2, cv.LINE_4)
 
             # time.sleep(2.4)
-            print(distance)
+            #print(distance)
             # print(str(pixelWidth[1][0]))
 
     def snapshot(self):
@@ -135,10 +147,10 @@ class robotVision(Thread):
         if not pixelWidth:
             img = cv.imread(self.KNOWN_IMAGE)
             pixelWidth = self.getPixelWidth(img)[1][0]
-        print("pixelWidth: " + str(pixelWidth))
+        #print("pixelWidth: " + str(pixelWidth))
 
         self.focalLength = (pixelWidth * distance) / width
-        print("focalLength: " + str(self.focalLength))
+        #print("focalLength: " + str(self.focalLength))
 
     # Calculate the distance to an object
     def getDistance(self, pixelWidth, width=WIDTH_OBJECT):
