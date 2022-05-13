@@ -5,12 +5,8 @@ import cv2 as cv
 from threading import *
 import os
 import time
-import importlib
 
 from imutils.video.pivideostream import PiVideoStream
-#from vision.PiVideoStream import *
-from picamera.array import PiRGBArray
-from picamera import PiCamera
 import imutils
 
 class robotVision(Thread):
@@ -24,26 +20,37 @@ class robotVision(Thread):
     focalLength = 0
 
     def run(self):
-        # init camera
-        vs = PiVideoStream(resolution=(320, 320), rotation=90).start()
-        #vs = PiVideoStream().start()
-        time.sleep(2)
+        self.camIsPi = False
         
-        #self.cap = cv.VideoCapture(0)
-        #if not self.cap.isOpened():
-            #print("Cannot open camera")
-            #exit()
+        # Check whether cam arg is Pi camera
+        if self.camSelector == "pi":
+            print("Selecting PiCamera")
+            self.camIsPi = True
+            resolution = (320, 320)
+            rotation = 90
+            vs = PiVideoStream(resolution=resolution, rotation=rotation).start()
+            time.sleep(1)
+        # Otherwise select USB camera
+        elif self.camSelector.isnumeric():
+            print("Selecting regular USB camera")
+            self.camIsPi = False
+            self.cap = cv.VideoCapture(self.camSelector)
+
+            if not self.cap.isOpened():
+                print("Cannot open camera")
+                exit()
         while True:
             # Capture frame-by-frame
-            frame = vs.read()
-            #frame = imutils.resize(frame, width=400)
-            self.frame = frame
-            #self.ret, self.frame = self.cap.read()
-
-            # if frame is read correctly ret is True
-            #if not self.ret:
-                #print("Can't receive frame (stream end?). Exiting ...")
-                #break
+            if self.camIsPi == True:
+                self.frame = vs.read()
+                #frame = imutils.resize(frame, width=400)
+            else:
+                self.ret, self.frame = self.cap.read()
+                
+                # if frame is read correctly ret is True
+                if not self.ret:
+                    print("Can't receive frame (stream end?). Exiting ...")
+                    break
 
             #bilateralFilter
             # cv.GaussianBlur(img,(5,5),0)
