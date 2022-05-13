@@ -29,7 +29,13 @@ class robotVision(Thread):
         if self.camSelector == "pi":
             print("Selecting PiCamera")
             self.camIsPi = True
-            resolution = (320, 320)
+            
+            resW = 320
+            resH = 320
+            resolution = (resW, resH)
+            self.screenWidth  = resW
+            self.screenHeight = resH
+
             rotation = 90
             vs = PiVideoStream(resolution=resolution, rotation=rotation).start()
             time.sleep(1)
