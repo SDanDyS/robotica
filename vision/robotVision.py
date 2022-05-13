@@ -42,6 +42,9 @@ class robotVision(Thread):
             if not self.cap.isOpened():
                 print("Cannot open camera")
                 exit()
+            self.screenWidth  = self.cap.get(cv.CAP_PROP_FRAME_WIDTH)   # float `width`
+            self.screenHeight = self.cap.get(cv.CAP_PROP_FRAME_HEIGHT)  # float `height`
+
         while True:
             # Capture frame-by-frame
             if self.camIsPi == True:
@@ -55,11 +58,12 @@ class robotVision(Thread):
                     print("Can't receive frame (stream end?). Exiting ...")
                     break
 
-            #bilateralFilter
-            # cv.GaussianBlur(img,(5,5),0)
+            cv.circle(self.frame, (int(self.screenWidth / 2), int(self.screenHeight / 2)), 5, (255, 255, 255), -1)
+
             blur = cv.GaussianBlur(self.frame, (37, 37), 0)
             self.hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)
-            # self.frame = blur
+            #distance and width
+            self.getFocalLength(self.screenWidth, 20, 21)
 
             if (self.FLAG == 1):
                 self.detectCookie()
@@ -86,19 +90,15 @@ class robotVision(Thread):
             # return the biggest contourArea and determine centroid
             blue_area = max(bluecnts, key=cv.contourArea)
             self.centroid(blue_area)
-            
-            self.getFocalLength()
-            pixelWidth = self.getPixelWidth(self.frame)
-            distance = self.getDistance(pixelWidth[1][0])
-            # print(distance)
+            distance = self.getDistance(self.cx(blue_area), self.screenWidth)
 
             (xg, yg, wg, hg) = cv.boundingRect(blue_area)
             cv.rectangle(self.frame, (xg, yg), (xg + wg, yg + hg), (0, 255, 0), 2)
-            cv.putText(self.frame, "Area detected...", (50, 50), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2, cv.LINE_4)
 
-            # time.sleep(2.4)
-            #print(distance)
-            # print(str(pixelWidth[1][0]))
+            if (distance != 0):
+                self.widthToCm(self.cx(blue_area), distance, self.focalLength)
+                cv.line(self.frame, (int(0), int(self.screenHeight / 2)), (int(self.cx(blue_area)), int(self.cy(blue_area))), (0, 255, 0), 2)
+            # cv.putText(self.frame, "Area detected...", (50, 50), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2, cv.LINE_4)
 
     def snapshot(self):
         i = 0
@@ -121,6 +121,22 @@ class robotVision(Thread):
         # return for external use
         return m
 
+    def cx(self, momentsToCalculate):
+        m = cv.moments(momentsToCalculate)
+        cx = 0
+        if ((m['m10'] and m['m00'])):
+            # calculate centroid of mass for x axis
+            cx = int(m['m10']/m['m00'])
+        return cx
+
+    def cy(self, momentsToCalculate):
+        m = cv.moments(momentsToCalculate)
+        cy = 0
+        if ((m['m01'] and m['m00'])):
+            # calculate centroid of mass and draw it
+            cy = int(m['m01']/m['m00'])
+        return cy
+        
     def releaseStream(self):
         # When everything done, release the capture
         self.cap.release()
@@ -132,42 +148,38 @@ class robotVision(Thread):
     def findContours(self, mask):
         return cv.findContours(mask.copy(), cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[-2]
 
-    def drawContours(self, target="default"):
-        if (target == "default"):
-            cv.drawContours(self.frame, self.contours, -1, (0, 255, 0), 3)
-        elif (isinstance(target, list)):
-            cv.drawContours(self.frame, target, -1, (0, 255, 0), 3)
-        else:
-            cv.drawContours(self.frame, [target], -1, (0, 255, 0), 3)
-
     # Get the width of the object in pixels
     def getPixelWidth(self, img):
-        # define range of blue color in HSV
-        lower_blue = np.array([110, 50, 50])
-        upper_blue = np.array([130, 255, 255])
+    #     # define range of blue color in HSV
+        lower_blue = np.array([90, 50, 50])
+        upper_blue = np.array([128, 255, 255])
 
         # Threshold the HSV image to get only blue colors
         mask = cv.inRange(img, lower_blue, upper_blue)
 
-        bluecnts = self.findContours(mask.copy())
+        bluecnts = self.findContours(mask)
         if (len(bluecnts) > 0):
             blue_area = max(bluecnts, key=cv.contourArea)
 
         return cv.minAreaRect(blue_area)
 
     # Calculate the focal length of the camera
-    def getFocalLength(self, pixelWidth=0, width=WIDTH_OBJECT, distance=KNOWN_DISTANCE):
-        if not pixelWidth:
-            img = cv.imread(self.KNOWN_IMAGE)
-            pixelWidth = self.getPixelWidth(img)[1][0]
-        #print("pixelWidth: " + str(pixelWidth))
-
+    def getFocalLength(self, pixelWidth, distance, width):
         self.focalLength = (pixelWidth * distance) / width
         #print("focalLength: " + str(self.focalLength))
 
     # Calculate the distance to an object
-    def getDistance(self, pixelWidth, width=WIDTH_OBJECT):
+    def getDistance(self, pixelWidth, width, focal=False):
+        if (pixelWidth == 0):
+            return 0
         if self.focalLength:
             return (width * self.focalLength) / pixelWidth
+        elif (focal):
+            return (width * focal) / pixelWidth
         else:
             raise ValueError("Focal length was not calculated")
+
+    def widthToCm(self, pixel, distance, focal):
+        w = (pixel * distance) / focal
+        print("CM: " + str(w))
+        return w
