@@ -66,12 +66,12 @@ class robotVision(Thread):
             # return the biggest contourArea and determine centroid
             blue_area = max(bluecnts, key=cv.contourArea)
             self.centroid(blue_area)
-            distance = self.getDistance(self.cx(blue_area), self.screenWidth)
-
+            # distance = self.getDistance(self.cx(blue_area), self.screenWidth)
+            # print (distance)
             (xg, yg, wg, hg) = cv.boundingRect(blue_area)
             cv.rectangle(self.frame, (xg, yg), (xg + wg, yg + hg), (0, 255, 0), 2)
             if (distance != 0):
-                self.widthToCm(self.cx(blue_area), distance, self.focalLength)
+                self.widthToCm(self.cx(blue_area), 20, self.focalLength)
                 cv.line(self.frame, (int(0), int(self.screenHeight / 2)), (int(self.cx(blue_area)), int(self.cy(blue_area))), (0, 255, 0), 2)
             # cv.putText(self.frame, "Area detected...", (50, 50), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2, cv.LINE_4)
 
@@ -141,7 +141,7 @@ class robotVision(Thread):
     # Calculate the focal length of the camera
     def getFocalLength(self, pixelWidth, distance, width):
         self.focalLength = (pixelWidth * distance) / width
-        print("focalLength: " + str(self.focalLength))
+        # print("focalLength: " + str(self.focalLength))
 
     # Calculate the distance to an object
     def getDistance(self, pixelWidth, width, focal=False):
@@ -150,6 +150,7 @@ class robotVision(Thread):
         if self.focalLength:
             return (width * self.focalLength) / pixelWidth
         elif (focal):
+            ##later stages swap this to the if statement rather then elif. Right now it is never reached
             return (width * focal) / pixelWidth
         else:
             raise ValueError("Focal length was not calculated")
