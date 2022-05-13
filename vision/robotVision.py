@@ -30,8 +30,8 @@ class robotVision(Thread):
                 print("Can't receive frame (stream end?). Exiting ...")
                 break
 
-            self.width  = self.cap.get(cv.CAP_PROP_FRAME_WIDTH)   # float `width`
-            self.height = self.cap.get(cv.CAP_PROP_FRAME_HEIGHT)  # float `height`
+            self.screenWidth  = self.cap.get(cv.CAP_PROP_FRAME_WIDTH)   # float `width`
+            self.screenHeight = self.cap.get(cv.CAP_PROP_FRAME_HEIGHT)  # float `height`
 
             gray = cv.cvtColor(self.frame, cv.COLOR_BGR2GRAY)
             ret,thresh = cv.threshold(gray,127,255,0)
@@ -43,7 +43,7 @@ class robotVision(Thread):
 
             blur = cv.GaussianBlur(self.frame, (37, 37), 0)
             self.hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)
-            self.getFocalLength(self.width, 50, 57)
+            self.getFocalLength(self.screenWidth, 50, 57)
 
             if (self.FLAG == 1):
                 self.detectCookie()
@@ -74,7 +74,7 @@ class robotVision(Thread):
             (xg, yg, wg, hg) = cv.boundingRect(blue_area)
             cv.rectangle(self.frame, (xg, yg), (xg + wg, yg + hg), (0, 255, 0), 2)
             self.widthToCm(self.cx(blue_area), 20, self.focalLength)
-            cv.line(self.frame, (int(0), int(self.height / 2)), (int(self.cx(blue_area)), int(self.cy(blue_area))), (0, 255, 0), 2)
+            cv.line(self.frame, (int(0), int(self.screenHeight / 2)), (int(self.cx(blue_area)), int(self.cy(blue_area))), (0, 255, 0), 2)
             # cv.putText(self.frame, "Area detected...", (50, 50), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2, cv.LINE_4)
 
     def snapshot(self):
