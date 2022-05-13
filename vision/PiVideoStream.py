@@ -5,10 +5,11 @@ from threading import Thread
 import cv2
 
 class PiVideoStream:
-    def __init__(self, resolution=(320, 240), framerate=32):
     #def __init__(self, resolution=(1280, 720), framerate=60):
+    def __init__(self, resolution=(640, 640), framerate=32):
         # initialize the camera and stream
         self.camera = PiCamera()
+        self.camera.rotation = 90
         self.camera.resolution = resolution
         self.camera.framerate = framerate
         self.rawCapture = PiRGBArray(self.camera, size=resolution)

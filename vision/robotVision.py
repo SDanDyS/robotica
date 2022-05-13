@@ -5,8 +5,10 @@ import cv2 as cv
 from threading import *
 import os
 import time
+import importlib
 
 from imutils.video.pivideostream import PiVideoStream
+#from vision.PiVideoStream import *
 from picamera.array import PiRGBArray
 from picamera import PiCamera
 import imutils
@@ -23,7 +25,8 @@ class robotVision(Thread):
 
     def run(self):
         # init camera
-        vs = PiVideoStream().start()
+        vs = PiVideoStream(resolution=(320, 320), rotation=90).start()
+        #vs = PiVideoStream().start()
         time.sleep(2)
         
         #self.cap = cv.VideoCapture(0)
