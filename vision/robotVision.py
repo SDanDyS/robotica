@@ -6,8 +6,11 @@ from threading import *
 import os
 import time
 
-from imutils.video.pivideostream import PiVideoStream
-import imutils
+try:
+    from imutils.video.pivideostream import PiVideoStream
+    import imutils
+except ImportError:
+    print("Couldn't import PiCamera, continuing wihout...")
 
 class robotVision(Thread):
     # The width of the object
