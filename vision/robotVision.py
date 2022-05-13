@@ -37,7 +37,7 @@ class robotVision(Thread):
         elif self.camSelector.isnumeric():
             print("Selecting regular USB camera")
             self.camIsPi = False
-            self.cap = cv.VideoCapture(self.camSelector)
+            self.cap = cv.VideoCapture(int(self.camSelector))
 
             if not self.cap.isOpened():
                 print("Cannot open camera")
