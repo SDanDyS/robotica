@@ -6,6 +6,12 @@ from threading import *
 import os
 import time
 
+try:
+    from imutils.video.pivideostream import PiVideoStream
+    import imutils
+except ImportError:
+    print("Couldn't import PiCamera, continuing wihout...")
+
 class robotVision(Thread):
     # The width of the object
     WIDTH_OBJECT = 7.5
@@ -17,22 +23,46 @@ class robotVision(Thread):
     focalLength = 0
 
     def run(self):
-        self.cap = cv.VideoCapture(0)
-        if not self.cap.isOpened():
-            print("Cannot open camera")
-            exit()
+        self.camIsPi = False
+        
+        # Check whether cam arg is Pi camera
+        if self.camSelector == "pi":
+            print("Selecting PiCamera")
+            self.camIsPi = True
+            
+            resW = 320
+            resH = 320
+            resolution = (resW, resH)
+            self.screenWidth  = resW
+            self.screenHeight = resH
 
-        self.screenWidth  = self.cap.get(cv.CAP_PROP_FRAME_WIDTH)   # float `width`
-        self.screenHeight = self.cap.get(cv.CAP_PROP_FRAME_HEIGHT)  # float `height`
+            rotation = 90
+            vs = PiVideoStream(resolution=resolution, rotation=rotation).start()
+            time.sleep(1)
+        # Otherwise select USB camera
+        elif self.camSelector.isnumeric():
+            print("Selecting regular USB camera")
+            self.camIsPi = False
+            self.cap = cv.VideoCapture(int(self.camSelector))
+
+            if not self.cap.isOpened():
+                print("Cannot open camera")
+                exit()
+            self.screenWidth  = self.cap.get(cv.CAP_PROP_FRAME_WIDTH)   # float `width`
+            self.screenHeight = self.cap.get(cv.CAP_PROP_FRAME_HEIGHT)  # float `height`
 
         while True:
             # Capture frame-by-frame
-            self.ret, self.frame = self.cap.read()
-
-            # if frame is read correctly ret is True
-            if not self.ret:
-                print("Can't receive frame (stream end?). Exiting ...")
-                break
+            if self.camIsPi == True:
+                self.frame = vs.read()
+                #frame = imutils.resize(frame, width=400)
+            else:
+                self.ret, self.frame = self.cap.read()
+                
+                # if frame is read correctly ret is True
+                if not self.ret:
+                    print("Can't receive frame (stream end?). Exiting ...")
+                    break
 
             cv.circle(self.frame, (int(self.screenWidth / 2), int(self.screenHeight / 2)), 5, (255, 255, 255), -1)
 
@@ -70,6 +100,7 @@ class robotVision(Thread):
             # print (distance)
             (xg, yg, wg, hg) = cv.boundingRect(blue_area)
             cv.rectangle(self.frame, (xg, yg), (xg + wg, yg + hg), (0, 255, 0), 2)
+
             if (distance != 0):
                 self.widthToCm(self.cx(blue_area), 20, self.focalLength)
                 cv.line(self.frame, (int(0), int(self.screenHeight / 2)), (int(self.cx(blue_area)), int(self.cy(blue_area))), (0, 255, 0), 2)
@@ -141,7 +172,7 @@ class robotVision(Thread):
     # Calculate the focal length of the camera
     def getFocalLength(self, pixelWidth, distance, width):
         self.focalLength = (pixelWidth * distance) / width
-        # print("focalLength: " + str(self.focalLength))
+        #print("focalLength: " + str(self.focalLength))
 
     # Calculate the distance to an object
     def getDistance(self, pixelWidth, width, focal=False):
