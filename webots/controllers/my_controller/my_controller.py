@@ -45,9 +45,9 @@ while robot.step(TIME_STEP) != -1:
         command_motors((motor_cmd[key]))
 pass
 
-#if(afstand < 20):
-    #leftMotor.setVelocity(0.1 * MAX_SPEED)
-    #rightMotor.setVelocity(-0.1 * MAX_SPEED)
-#else:
-    #leftMotor.setVelocity(0.1 * MAX_SPEED)
-    #rightMotor.setVelocity(0.1 * MAX_SPEED)
+# if(afstand < 20):
+#leftMotor.setVelocity(0.1 * MAX_SPEED)
+#rightMotor.setVelocity(-0.1 * MAX_SPEED)
+# else:
+#leftMotor.setVelocity(0.1 * MAX_SPEED)
+#rightMotor.setVelocity(0.1 * MAX_SPEED)
