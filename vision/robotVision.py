@@ -1,4 +1,4 @@
-import math
+from math import sqrt
 from cv2 import findContours
 import numpy as np
 import cv2 as cv
@@ -12,6 +12,7 @@ try:
 except ImportError:
     print("Couldn't import PiCamera, continuing wihout...")
 
+
 class robotVision(Thread):
     # The width of the object
     WIDTH_OBJECT = 7.5
@@ -24,20 +25,21 @@ class robotVision(Thread):
 
     def run(self):
         self.camIsPi = False
-        
+
         # Check whether cam arg is Pi camera
         if self.camSelector == "pi":
             print("Selecting PiCamera")
             self.camIsPi = True
-            
+
             resW = 320
             resH = 320
             resolution = (resW, resH)
-            self.screenWidth  = resW
+            self.screenWidth = resW
             self.screenHeight = resH
 
             rotation = 90
-            vs = PiVideoStream(resolution=resolution, rotation=rotation).start()
+            vs = PiVideoStream(resolution=resolution,
+                               rotation=rotation).start()
             time.sleep(1)
         # Otherwise select USB camera
         elif self.camSelector.isnumeric():
@@ -48,8 +50,10 @@ class robotVision(Thread):
             if not self.cap.isOpened():
                 print("Cannot open camera")
                 exit()
-            self.screenWidth  = self.cap.get(cv.CAP_PROP_FRAME_WIDTH)   # float `width`
-            self.screenHeight = self.cap.get(cv.CAP_PROP_FRAME_HEIGHT)  # float `height`
+            self.screenWidth = self.cap.get(
+                cv.CAP_PROP_FRAME_WIDTH)   # float `width`
+            self.screenHeight = self.cap.get(
+                cv.CAP_PROP_FRAME_HEIGHT)  # float `height`
 
         while True:
             # Capture frame-by-frame
@@ -58,13 +62,14 @@ class robotVision(Thread):
                 #frame = imutils.resize(frame, width=400)
             else:
                 self.ret, self.frame = self.cap.read()
-                
+
                 # if frame is read correctly ret is True
                 if not self.ret:
                     print("Can't receive frame (stream end?). Exiting ...")
                     break
 
-            cv.circle(self.frame, (int(self.screenWidth / 2), int(self.screenHeight / 2)), 5, (255, 255, 255), -1)
+            cv.circle(self.frame, (int(self.screenWidth / 2),
+                      int(self.screenHeight / 2)), 5, (255, 255, 255), -1)
 
             blur = cv.GaussianBlur(self.frame, (37, 37), 0)
             self.hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)
@@ -99,17 +104,19 @@ class robotVision(Thread):
             # distance = self.getDistance(self.cx(blue_area), self.screenWidth)
             # print (distance)
             (xg, yg, wg, hg) = cv.boundingRect(blue_area)
-            cv.rectangle(self.frame, (xg, yg), (xg + wg, yg + hg), (0, 255, 0), 2)
+            cv.rectangle(self.frame, (xg, yg),
+                         (xg + wg, yg + hg), (0, 255, 0), 2)
 
             # if (distance != 0):
             self.widthToCm(self.cx(blue_area), 20, self.focalLength)
-            cv.line(self.frame, (int(0), int(self.screenHeight / 2)), (int(self.cx(blue_area)), int(self.cy(blue_area))), (0, 255, 0), 2)
+            cv.line(self.frame, (int(0), int(self.screenHeight / 2)),
+                    (int(self.cx(blue_area)), int(self.cy(blue_area))), (0, 255, 0), 2)
             # cv.putText(self.frame, "Area detected...", (50, 50), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2, cv.LINE_4)
 
     def snapshot(self):
         i = 0
         while (i < 5):
-            #delete the image if exists prior to generating a new one
+            # delete the image if exists prior to generating a new one
             if os.path.exists("assets/capture"+str(i)+".png"):
                 os.remove("assets/capture"+str(i)+".png")
 
@@ -142,7 +149,7 @@ class robotVision(Thread):
             # calculate centroid of mass and draw it
             cy = int(m['m01']/m['m00'])
         return cy
-        
+
     def releaseStream(self):
         # When everything done, release the capture
         self.cap.release()
@@ -156,7 +163,7 @@ class robotVision(Thread):
 
     # Get the width of the object in pixels
     def getPixelWidth(self, img):
-    #     # define range of blue color in HSV
+        # define range of blue color in HSV
         lower_blue = np.array([90, 50, 50])
         upper_blue = np.array([128, 255, 255])
 
@@ -181,7 +188,7 @@ class robotVision(Thread):
         if self.focalLength:
             return (width * self.focalLength) / pixelWidth
         elif (focal):
-            ##later stages swap this to the if statement rather then elif. Right now it is never reached
+            # later stages swap this to the if statement rather then elif. Right now it is never reached
             return (width * focal) / pixelWidth
         else:
             raise ValueError("Focal length was not calculated")
@@ -190,3 +197,8 @@ class robotVision(Thread):
         w = (pixel * distance) / focal
         print("CM: " + str(w))
         return w
+
+    # Get the distance from the camera to the object from the distance from the sensor to the object and the hight of the camera
+    def getCameraDistance(distanceToObject, hightToCamera):
+        cameraDistance = distanceToObject**2 + hightToCamera**2
+        return sqrt(cameraDistance)
