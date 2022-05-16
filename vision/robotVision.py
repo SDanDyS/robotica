@@ -96,15 +96,14 @@ class robotVision(Thread):
             # return the biggest contourArea and determine centroid
             blue_area = max(bluecnts, key=cv.contourArea)
             self.centroid(blue_area)
-            # distance = self.getDistance(self.cx(blue_area), self.screenWidth)
-            # print (distance)
             (xg, yg, wg, hg) = cv.boundingRect(blue_area)
             cv.rectangle(self.frame, (xg, yg), (xg + wg, yg + hg), (0, 255, 0), 2)
 
-            # if (distance != 0):
-            self.widthToCm(self.cx(blue_area), 20, self.focalLength)
+            objW = self.objectWidth(self.cx(blue_area), 20, self.focalLength)
+            screenW = self.objectWidth(int(self.screenWidth / 2), 20, self.focalLength)
+            rCM = objW - screenW
+            print(rCM)
             cv.line(self.frame, (int(0), int(self.screenHeight / 2)), (int(self.cx(blue_area)), int(self.cy(blue_area))), (0, 255, 0), 2)
-            # cv.putText(self.frame, "Area detected...", (50, 50), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2, cv.LINE_4)
 
     def snapshot(self):
         i = 0
@@ -154,39 +153,12 @@ class robotVision(Thread):
     def findContours(self, mask):
         return cv.findContours(mask.copy(), cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[-2]
 
-    # Get the width of the object in pixels
-    def getPixelWidth(self, img):
-    #     # define range of blue color in HSV
-        lower_blue = np.array([90, 50, 50])
-        upper_blue = np.array([128, 255, 255])
-
-        # Threshold the HSV image to get only blue colors
-        mask = cv.inRange(img, lower_blue, upper_blue)
-
-        bluecnts = self.findContours(mask)
-        if (len(bluecnts) > 0):
-            blue_area = max(bluecnts, key=cv.contourArea)
-
-        return cv.minAreaRect(blue_area)
-
     # Calculate the focal length of the camera
     def getFocalLength(self, pixelWidth, distance, width):
         self.focalLength = (pixelWidth * distance) / width
         #print("focalLength: " + str(self.focalLength))
 
-    # Calculate the distance to an object
-    def getDistance(self, pixelWidth, width, focal=False):
-        if (pixelWidth == 0):
-            return 0
-        if self.focalLength:
-            return (width * self.focalLength) / pixelWidth
-        elif (focal):
-            ##later stages swap this to the if statement rather then elif. Right now it is never reached
-            return (width * focal) / pixelWidth
-        else:
-            raise ValueError("Focal length was not calculated")
-
-    def widthToCm(self, pixel, distance, focal):
+    def objectWidth(self, pixel, distance, focal):
         w = (pixel * distance) / focal
         print("CM: " + str(w))
         return w
