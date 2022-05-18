@@ -10,6 +10,12 @@ class http_server:
         def __init__(self, view):
             requestHandler.view = view
             server = HTTPServer(('', 8080), requestHandler)
+            
+#             server = HTTPServer(('localhost', 4443), requestHandler)
+#             httpd.socket = ssl.wrap_socket(httpd.socket,
+#                 keyfile=""
+#                 certfile="", server_side=True)
+            
             server.serve_forever()
 
 class requestHandler(BaseHTTPRequestHandler):

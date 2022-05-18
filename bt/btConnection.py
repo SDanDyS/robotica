@@ -2,13 +2,9 @@ from bluetooth import *
 import threading
 import time
 import logging
+import re
 
 class btServer(threading.Thread):
-    # __init__(self):
-    #time.sleep(1)
-
-
-    
     def run(self):
         # Send data to remote control
         def send(self):
@@ -17,7 +13,8 @@ class btServer(threading.Thread):
                 #if len(data) == 0: break
                 data = 1
                         
-                sock.send(str(data))
+                #sock.send(str(data))
+                sock.send("ahoi")
                 sock.send("\n")
         
         # Receive data from remote control        
@@ -26,8 +23,12 @@ class btServer(threading.Thread):
                 data = sock.recv(buf_size)
                 #if data:
                 #time.sleep(0.1)
+                numeric_string = re.sub("[^0-9]","",data.decode("utf-8"))
+
+                logging.debug(numeric_string)
+                
                 if not data: break
-                logging.debug(data)
+                #logging.debug(data)
 
         #MAC address of ESP32
         addr = "84:CC:A8:69:97:D2"
@@ -35,7 +36,7 @@ class btServer(threading.Thread):
         #service_matches = find_service( uuid = uuid, address = addr )
         service_matches = find_service( address = addr )
 
-        buf_size = 16;
+        buf_size = 32;
 
         if len(service_matches) == 0:
             logging.error("Something went wrong with the bluetooth connection")
@@ -59,8 +60,8 @@ class btServer(threading.Thread):
 
         logging.info("Bluetooth connected!")
     
-        #send_thread = threading.Thread(target=send)
+        send_thread = threading.Thread(target=send)
         receive_thread = threading.Thread(target=receive)
         
-        #send_thread.start()
+        send_thread.start()
         receive_thread.start()

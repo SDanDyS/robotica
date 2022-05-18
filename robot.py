@@ -5,6 +5,7 @@ from bt.btConnection import *
 from threading import *
 import logging
 
+# Set logging level (debug, info, warning, error, critical)
 logging.basicConfig(level=logging.DEBUG)
 
 # Grab arguments from Python command
