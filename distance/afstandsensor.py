@@ -30,7 +30,7 @@ def distance():
         StartTime = time.time()
 
     # save time of arrival
-    while GPIO.input(GPIO_ECHO) == 1:
+    while (GPIO.input(GPIO_ECHO) == 1):
         StopTime = time.time()
 
     # time difference between start and arrival
@@ -42,15 +42,15 @@ def distance():
     return distance
 
 
-if __name__ == '__main__':
-    try:
-        while True:
-            dist = distance()
-            if 20 < dist < 40:
-                print("Measured Distance = %.1f cm" % dist)
-                time.sleep(1)
+# if __name__ == '__main__':
+#     try:
+#         while True:
+#             dist = distance()
+#             if 20 < dist < 40:
+#                 print("Measured Distance = %.1f cm" % dist)
+#                 time.sleep(1)
 
-        # Reset by pressing CTRL + C
-    except KeyboardInterrupt:
-        print("Measurement stopped by User")
-        GPIO.cleanup()
+#         # Reset by pressing CTRL + C
+#     except KeyboardInterrupt:
+#         print("Measurement stopped by User")
+#         GPIO.cleanup()

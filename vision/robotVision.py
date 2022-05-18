@@ -1,5 +1,6 @@
 import math
 from cv2 import findContours
+from distance.afstandsensor import distance
 import numpy as np
 import cv2 as cv
 from threading import *
@@ -14,16 +15,12 @@ except ImportError:
 
 
 class robotVision(Thread):
-    # The width of the object
-    WIDTH_OBJECT = 7.5
-    # The distance to the object in the KNOWN_IMAGE
-    KNOWN_DISTANCE = 40
-    # The image that is known to be KNOWN_DISTANCE away
-    KNOWN_IMAGE = 'assets/images/40cm.jpg'
-
-    focalLength = 0
-
     def run(self):
+        self.lower_blue = np.array([90, 50, 70])
+        self.upper_blue = np.array([128, 255, 255])
+        self.lower_white = np.array([0,0,0], dtype=np.uint8)
+        self.upper_white = np.array([0,0,255], dtype=np.uint8)
+
         self.camIsPi = False
 
         # Check whether cam arg is Pi camera
@@ -38,8 +35,7 @@ class robotVision(Thread):
             self.screenHeight = resH
 
             rotation = 90
-            vs = PiVideoStream(resolution=resolution,
-                               rotation=rotation).start()
+            vs = PiVideoStream(resolution=resolution, rotation=rotation).start()
             time.sleep(1)
         # Otherwise select USB camera
         elif self.camSelector.isnumeric():
@@ -50,10 +46,8 @@ class robotVision(Thread):
             if not self.cap.isOpened():
                 print("Cannot open camera")
                 exit()
-            self.screenWidth = self.cap.get(
-                cv.CAP_PROP_FRAME_WIDTH)   # float `width`
-            self.screenHeight = self.cap.get(
-                cv.CAP_PROP_FRAME_HEIGHT)  # float `height`
+            self.screenWidth = self.cap.get(cv.CAP_PROP_FRAME_WIDTH)   # float `width`
+            self.screenHeight = self.cap.get(cv.CAP_PROP_FRAME_HEIGHT)  # float `height`
 
         while True:
             # Capture frame-by-frame
@@ -68,18 +62,23 @@ class robotVision(Thread):
                     print("Can't receive frame (stream end?). Exiting ...")
                     break
 
-            cv.circle(self.frame, (int(self.screenWidth / 2),
-                      int(self.screenHeight / 2)), 5, (255, 255, 255), -1)
+            cv.circle(self.frame, (int(self.screenWidth / 2), int(self.screenHeight / 2)), 5, (255, 255, 255), -1)
 
             blur = cv.GaussianBlur(self.frame, (37, 37), 0)
             self.hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)
             #distance and width
             self.getFocalLength(self.screenWidth, 20, 21)
 
+            #FLAG 1 REPRESENTS DETECTING COOKIES
+            #FLAG 2 REPRESENTS SIMPLY DETECING A MOVING OBJECT
+            #FLAG 3 REPRESENTS THE WHITE (CHANGE TO BLACK?) PARKOUR -> NOT REQUIRED RIGHT NOW
             if (self.FLAG == 1):
-                self.detectCookie()
-            else:
-                self.detectMovingObject()
+                angle = self.detectObject(self.lower_blue, self.upper_blue)
+                #request distance() again, if distance is a certain distance, init detectObject with gripper to True
+            elif (self.FLAG == 2):
+                angle = self.detectObject(self.lower_blue, self.upper_blue, forcedDistance=200)
+            elif (self.FLAG == 3):
+                angle = self.detectObject(self.lower_white, self.upper_white)
 
             self.imshow()
 
@@ -87,41 +86,45 @@ class robotVision(Thread):
                 self.releaseStream()
                 break
 
-    def detectMovingObject(self):
-        # define range of blue color in HSV
-        #[[128, 255, 255], [90, 50, 70]]
-        lower_blue = np.array([90, 50, 70])
-        upper_blue = np.array([128, 255, 255])
-
+    def detectObject(self, lower, upper, gripper=False, forcedDistance = False):
         # Threshold the HSV image to get only blue colors
-        mask = cv.inRange(self.hsv, lower_blue, upper_blue)
+        mask = cv.inRange(self.hsv, lower, upper)
 
-        bluecnts = self.findContours(mask)
-        if (len(bluecnts) > 0):
+        cnts = self.findContours(mask)
+        if (len(cnts) > 0):
             # return the biggest contourArea and determine centroid
-            blue_area = max(bluecnts, key=cv.contourArea)
-            self.centroid(blue_area)
-            (xg, yg, wg, hg) = cv.boundingRect(blue_area)
-            cv.rectangle(self.frame, (xg, yg),
-                         (xg + wg, yg + hg), (0, 255, 0), 2)
+            area = max(cnts, key=cv.contourArea)
+            self.centroid(area)
+            (xg, yg, wg, hg) = cv.boundingRect(area)
+            cv.rectangle(self.frame, (xg, yg), (xg + wg, yg + hg), (0, 255, 0), 2)
 
-            objW = self.objectWidth(self.cx(blue_area), 20, self.focalLength)
-            screenW = self.objectWidth(int(self.screenWidth / 2), 20, self.focalLength)
-            rCM = objW - screenW
+            # WE ARE NOT ACTUALLY CALCULATING WIDTH OF THE OBJECT, BUT RATHER POINT 0 TO POINT CENTROID X
+
+            dist = distance()
+            rCM = 0
+            if (forcedDistance):
+                if (dist != 0):
+                    objW = self.objectWidth(self.cx(area), forcedDistance, self.focalLength)
+                    screenW = self.objectWidth(int(self.screenWidth / 2), forcedDistance, self.focalLength)
+                    rCM = objW - screenW                
+            elif (dist != 0 and dist < 199):
+                objW = self.objectWidth(self.cx(area), dist, self.focalLength)
+                screenW = self.objectWidth(int(self.screenWidth / 2), dist, self.focalLength)
+                rCM = objW - screenW
+
+            # either no object was detected to determine width or the threshold has been hit and therefore...
+            # no position has to change
             if (rCM != 0):
-                atan = self.angle_atan(20, rCM)
-                print(atan)
-            cv.line(self.frame, (int(0), int(self.screenHeight / 2)), (int(self.cx(blue_area)), int(self.cy(blue_area))), (0, 255, 0), 2)
-
-    def snapshot(self):
-        i = 0
-        while (i < 5):
-            # delete the image if exists prior to generating a new one
-            if os.path.exists("assets/capture"+str(i)+".png"):
-                os.remove("assets/capture"+str(i)+".png")
-
-            cv.imwrite("assets/capture"+str(i)+".png", self.frame)
-            i += 1
+                if (not gripper):
+                    if (rCM > 0.5 or rCM < -0.5):
+                        atan = self.angle_atan(dist, rCM)
+                        print(atan)
+                        return atan
+                else:
+                    atan = self.angle_atan(dist, rCM)
+                    print(atan)
+                    return atan
+            return 0
 
     def centroid(self, momentsToCalculate, draw=True):
         m = cv.moments(momentsToCalculate)
