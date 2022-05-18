@@ -7,7 +7,7 @@ import re
 class btServer(threading.Thread):
     def run(self):
         # Send data to remote control
-        def send(self):
+        def send():
             while True:
                 #data = input()
                 #if len(data) == 0: break
