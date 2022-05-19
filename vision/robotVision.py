@@ -1,6 +1,6 @@
 import math
 from cv2 import findContours
-# from distance.afstandsensor import sensorDistance
+from distance.afstandsensor import sensorDistance
 import numpy as np
 import cv2 as cv
 from threading import *
@@ -112,18 +112,18 @@ class robotVision(Thread):
 
             # WE ARE NOT ACTUALLY CALCULATING WIDTH OF THE OBJECT, BUT RATHER POINT 0 TO POINT CENTROID X
 
-            # dist = sensorDistance()
-            dist = 200
+            dist = sensorDistance()
             rCM = 0
             if (forcedDistance):
-                if (dist != 0):
+                if (forcedDistance != 0):
                     objW = self.pointZeroToObjectCentroid(self.cx(area), forcedDistance, self.focalLength)
                     screenW = self.pointZeroToObjectCentroid(int(self.screenWidth / 2), forcedDistance, self.focalLength)
                     rCM = objW - screenW                
             elif (dist != 0 and dist < 199):
-                objW = self.pointZeroToObjectCentroid(self.cx(area), dist, self.focalLength)
-                screenW = self.pointZeroToObjectCentroid(int(self.screenWidth / 2), dist, self.focalLength)
-                rCM = objW - screenW
+                distanceToCamera = self.getCameraDistance(dist, 12)
+                objW = self.pointZeroToObjectCentroid(self.cx(area), distanceToCamera, self.focalLength)
+                screenCentroid = self.pointZeroToObjectCentroid(int(self.screenWidth / 2), distanceToCamera, self.focalLength)
+                rCM = objW - screenCentroid
 
             # either no object was detected to determine width or the threshold has been hit and therefore...
             # no position has to change
