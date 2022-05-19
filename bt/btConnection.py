@@ -6,6 +6,7 @@ import re
 
 class btServer(threading.Thread):
     def run(self):
+        
         # Send data to remote control
         def send():
             while True:
@@ -21,14 +22,51 @@ class btServer(threading.Thread):
         def receive():
             while True:
                 data = sock.recv(buf_size)
-                #if data:
-                #time.sleep(0.1)
-                numeric_string = re.sub("[^0-9]","",data.decode("utf-8"))
-
-                logging.debug(numeric_string)
+                #numeric_string = re.sub("[^0-9]","",data.decode("utf-8"))
+    
+                    
+                utfData = data.decode("utf-8")
+                
+                splitValues = utfData.split(",")
+                
+                for value in splitValues:
+                    # Get LY value
+                    try:
+                        lyValue = value.split("LY", 1)
+                        if lyValue[1]:
+                            print("LY value:")
+                            print(lyValue[1])
+                    except:
+                        pass
+                    
+                    # Get LX value
+                    try:
+                        lxValue = value.split("LX", 1)
+                        if lxValue[1]:
+                            print("LX value:")
+                            print(lxValue[1])
+                    except:
+                        pass
+                    
+                    # Get RY value
+                    try:
+                        ryValue = value.split("RY", 1)
+                        if ryValue[1]:
+                            print("RY value:")
+                            print(ryValue[1])
+                    except:
+                        pass
+                    
+                    # Get RX value
+                    try:
+                        rxValue = value.split("RX", 1)
+                        if rxValue[1]:
+                            print("RX value:")
+                            print(rxValue[1])
+                    except:
+                        pass
                 
                 if not data: break
-                #logging.debug(data)
 
         #MAC address of ESP32
         addr = "84:CC:A8:69:97:D2"
