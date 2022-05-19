@@ -56,6 +56,8 @@ while robot.step(TIME_STEP) != -1:
 
     if key == ord('J'):
         arm.rotateArm("foot motor", 10)
+    elif key == ord('L'):
+        arm.rotateArm("foot motor", -10)
 pass
 
 # if(afstand < 20):
