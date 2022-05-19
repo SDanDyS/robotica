@@ -1,10 +1,14 @@
 from controller import Robot, Motor, Keyboard
+from arm_controller import Arm
 
 TIME_STEP = 64
 
 MAX_SPEED = 2
 CRUISING_SPEED = 0.3
 TURN_SPEED = CRUISING_SPEED / 2.0
+
+ARM_Motors = ["foot motor", "first rod motor"]
+ARM_SENSORS = ["foot sensor", "first rod sensor"]
 
 # create the Robot instance.
 robot = Robot()
@@ -20,6 +24,11 @@ leftMotor.setVelocity(0.0)
 # set up the motor speeds at 10% of the MAX_SPEED.
 # leftMotor.setVelocity(0.0 * MAX_SPEED)
 # rightMotor.setVelocity(0.0 * MAX_SPEED)
+
+# Setup the robot arm
+arm = Arm(robot)
+arm.addMotors(ARM_Motors)
+arm.addSensors(ARM_SENSORS)
 
 keyboard = Keyboard()
 keyboard.enable(TIME_STEP)
