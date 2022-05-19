@@ -16,8 +16,8 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation 0.15847426213064986 0.7565617092338545 -0.6344291042845488 0.6377751983278345
-  position -2.068648531538592 0.6891404416228722 1.3923993287811527
+  orientation -0.22215472261658012 0.5221386090547212 0.8234188194069597 0.9538687875285915
+  position -0.3561796176865886 -1.4937752616946796 0.7506986163897905
 }
 TexturedBackground {
 }
@@ -26,10 +26,136 @@ TexturedBackgroundLight {
 RectangleArena {
   floorSize 2 2
 }
-DEF TRACKED_ROBOT Robot {
-  translation 0.5477110968902843 -0.6722110096407319 0.066391508778409
-  rotation -0.0004942122454983701 0.00028533604909683 0.9999998371687845 2.094395141013639
+DEF OBSTACLE_GREEN Solid {
+  translation 0.282729 -0.23299 0.025
+  rotation 0.08186798416599658 0.0730449858724437 -0.993962807758666 0.78828
   children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0 1 0
+        roughness 1
+        metalness 0
+      }
+      geometry DEF BO Box {
+        size 0.2 0.6 0.05
+      }
+    }
+  ]
+  name "green obstacle"
+  boundingObject USE BO
+  rotationStep 0.00261799
+}
+DEF TRACKED_ROBOT Robot {
+  translation 0.547744 -0.672268 0.07
+  rotation 0 0 -1 -2.094395
+  children [
+    Transform {
+      translation 0.08 0 0
+      children [
+        HingeJoint {
+          jointParameters HingeJointParameters {
+            axis 0 0 1
+            anchor 0 0 0.075
+          }
+          device [
+            PositionSensor {
+              name "foot sensor"
+            }
+            RotationalMotor {
+              name "foot motor"
+            }
+          ]
+          endPoint Solid {
+            translation 0 0 0.075
+            children [
+              Transform {
+                translation 0.028 0 0.095
+                children [
+                  HingeJoint {
+                    jointParameters HingeJointParameters {
+                      axis 0 1 0
+                      anchor 0 0 -0.08
+                    }
+                    device [
+                      PositionSensor {
+                        name "first rod sensor"
+                      }
+                      RotationalMotor {
+                        name "first rod motor"
+                      }
+                    ]
+                    endPoint Solid {
+                      translation 6.831566266678191e-07 -8.326672684688673e-16 1.960153952211552e-05
+                      rotation 0 1 0 0
+                      children [
+                        Solid {
+                          children [
+                            DEF first_rod Group {
+                              children [
+                                Transform {
+                                  translation 0 0 0.1
+                                  children [
+                                    DEF first_rod_block Shape {
+                                      appearance PBRAppearance {
+                                        baseColor 0 1 0
+                                        roughness 1
+                                        metalness 0
+                                      }
+                                      geometry Box {
+                                        size 0.03 0.03 0.03
+                                      }
+                                    }
+                                  ]
+                                }
+                                Shape {
+                                  appearance PBRAppearance {
+                                    baseColor 0 1 0
+                                    roughness 1
+                                    metalness 0
+                                  }
+                                  geometry Cylinder {
+                                    height 0.17
+                                    radius 0.008
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                      boundingObject USE first_rod
+                    }
+                  }
+                ]
+              }
+              DEF foot_join Shape {
+                appearance PBRAppearance {
+                  baseColor 0 1 0
+                  roughness 1
+                  metalness 0
+                }
+                geometry Box {
+                  size 0.04 0.04 0.05
+                }
+              }
+            ]
+            boundingObject USE foot_join
+            physics Physics {
+            }
+          }
+        }
+        DEF foot Shape {
+          appearance PBRAppearance {
+            baseColor 1 0 0
+            roughness 1
+            metalness 0
+          }
+          geometry Box {
+            size 0.05 0.05 0.1
+          }
+        }
+      ]
+    }
     DEF GEOM Shape {
       appearance PBRAppearance {
         baseColor 0 0 1
@@ -253,33 +379,11 @@ DEF TRACKED_ROBOT Robot {
       geometriesCount 40
     }
   ]
-  name "tracked robot"
+  name "tracked robot(1)"
   boundingObject USE GEOM
   physics Physics {
     density -1
     mass 40
   }
-  controller "<extern>"
-  supervisor TRUE
-  linearVelocity 9.651275691692973e-18 1.64611319379007e-17 4.3090592426612455e-16
-  angularVelocity -2.170138264665734e-16 1.9468780393500496e-16 1.4398629074085455e-17
-}
-DEF OBSTACLE_GREEN Solid {
-  translation 0.282729 -0.23299 0.025
-  rotation 0.08186798416599658 0.0730449858724437 -0.993962807758666 0.78828
-  children [
-    Shape {
-      appearance PBRAppearance {
-        baseColor 0 1 0
-        roughness 1
-        metalness 0
-      }
-      geometry DEF BO Box {
-        size 0.2 0.6 0.05
-      }
-    }
-  ]
-  name "green obstacle"
-  boundingObject USE BO
-  rotationStep 0.00261799
+  controller "my_controller"
 }
