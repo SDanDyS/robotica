@@ -30,10 +30,10 @@ pa=GPIO.PWM(ena,1000)
 pb=GPIO.PWM(enb,1000)
 pa.start(25)
 pb.start(25)
-print("\n")
-print("The default speed & direction of motor is LOW & Forward.....")
-print("r-run s-stop f-forward b-backward l-low m-medium h-high e-exit")
-print("\n")
+#print("\n")
+#print("The default speed & direction of motor is LOW & Forward.....")
+#print("r-run s-stop f-forward b-backward l-low m-medium h-high e-exit")
+#print("\n")
 
 def main():
     #versturen
@@ -49,10 +49,13 @@ def main():
     #ontvangen        
     def rx_and_echo():
         sock.send("\nsend anything\n")
+        
+        #pa.ChangeDutyCycle(50)
+    
         while True:
             data = sock.recv(buf_size)
             #if data:
-            numeric_string = re.sub("[^0-9]","",data.decode("utf-8"))
+            #numeric_string = re.sub("[^0-9]","",data.decode("utf-8"))
             #print(numeric_string)
 #             numeric_string2 = numeric_string[4:8]
 #             numeric_string = numeric_string[0:4]
@@ -71,13 +74,19 @@ def main():
             #print("splitValues:")
             #print(splitValues)
             
+            ly = 0
+            lx = 0
+            ry = 0
+            rx = 0
+            
             for value in splitValues:
                 # Get LY value
                 try:
                     lyValue = value.split("LY", 1)
                     if lyValue[1]:
-                        print("LY value:")
-                        print(lyValue[1])
+                        ly = lyValue[1]
+                        #print("LY value:")
+                        #print(lyValue[1])
                 except:
                     pass
                 
@@ -85,8 +94,9 @@ def main():
                 try:
                     lxValue = value.split("LX", 1)
                     if lxValue[1]:
-                        print("LX value:")
-                        print(lxValue[1])
+                        lx = lxValue[1]
+                        #print("LX value:")
+                        #print(lxValue[1])
                 except:
                     pass
                 
@@ -94,8 +104,9 @@ def main():
                 try:
                     ryValue = value.split("RY", 1)
                     if ryValue[1]:
-                        print("RY value:")
-                        print(ryValue[1])
+                        ry = ryValue[1]
+                        #print("RY value:")
+                        #print(ryValue[1])
                 except:
                     pass
                 
@@ -103,21 +114,29 @@ def main():
                 try:
                     rxValue = value.split("RX", 1)
                     if rxValue[1]:
+                        rx = rxValue[1]
                         print("RX value:")
                         print(rxValue[1])
+                        
+                        if int(rx) < 1000:
+                            print("joystick moved")
+                            pa.ChangeDutyCycle(50)
+                        elif int(rx) > 1000:
+                            print("no movement")
+                            pa.ChangeDutyCycle(25)
                 except:
                     pass
+            #print("New values are %s %s %s %s" % (ly, lx, ry, rx))
 
-            #print("oneValue:")
-            #print(oneValue)
-            #print(oneValue[1]) #int value
-#             
+        
             # exec
-#             if oneValue[1]:
-#                 if int(oneValue[1]) > 1000:
-#                     pa.ChangeDutyCycle(50)
-#                 elif int(oneValue[1]) < 1000:
-#                     pa.ChangeDutyCycle(10)
+            #if rx:
+#             print("int(rx):")
+#             print(int(rx))
+#             if int(rx) < 1000:
+#                 pa.ChangeDutyCycle(75)
+#             elif int(rx) > 1000:
+#                 pa.ChangeDutyCycle(10)
 # 
             #(numeric_string)
             #print(numeric_string2)
@@ -134,7 +153,7 @@ def main():
 #     
 #                 
 #                 
-#                 #print("run")
+                #print("run")
 #                 if(temp1==1):
 #                     GPIO.output(in1,GPIO.HIGH)
 #                     GPIO.output(in2,GPIO.LOW)
@@ -189,12 +208,16 @@ def main():
     sock.connect((host, port))
 
     print("connected")
+    
+    GPIO.output(in1,GPIO.HIGH)
+    GPIO.output(in2,GPIO.LOW)
 
     proc1 = Process(target=input_and_send)
     proc1.start()
 
     proc2 = Process(target=rx_and_echo)
     proc2.start()
+
     
     #input_and_send()
     #rx_and_echo()
