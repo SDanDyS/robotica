@@ -1,6 +1,6 @@
 import math
 from cv2 import findContours
-from distance.afstandsensor import distance
+# from distance.afstandsensor import sensorDistance
 import numpy as np
 import cv2 as cv
 from threading import *
@@ -68,17 +68,29 @@ class robotVision(Thread):
             self.hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)
             #distance and width
             self.getFocalLength(self.screenWidth, 20, 21)
+            angle = self.detectObject(self.lower_blue, self.upper_blue)
 
-            #FLAG 1 REPRESENTS DETECTING COOKIES
-            #FLAG 2 REPRESENTS SIMPLY DETECING A MOVING OBJECT
-            #FLAG 3 REPRESENTS THE WHITE (CHANGE TO BLACK?) PARKOUR -> NOT REQUIRED RIGHT NOW
+            # #FLAG 1 REPRESENTS DETECTING COOKIES
+            # #FLAG 2 REPRESENTS SIMPLY DETECING A MOVING OBJECT
             if (self.FLAG == 1):
-                angle = self.detectObject(self.lower_blue, self.upper_blue)
-                #request distance() again, if distance is a certain distance, init detectObject with gripper to True
+                d = sensorDistance()
+
+                if (d > 10):
+                    # Z forward movement
+                    angle = self.detectObject(self.lower_blue, self.upper_blue)
+                    
+                    #X movement based on angle
+                    #if distance is 10 cm, we should call the method to use the gripper. pass the angle to the method
+                elif (d <= 10):
+                        armAngle = self.detectObject(self.lower_blue, self.upper_blue, True)
+                        print(armAngle)
+                        ##gripperMethod(armAngle)
+                        #to change the gripper and bring it up and down. Due to knowing the angle, we can rotate the negative to positive
+                        #and vice versa
+                        #example : 10 degrees angle, so after finish we do -10 passed to the gripper
+                        # -10 degrees angle, so after finish we do 10 passed to the gripper
             elif (self.FLAG == 2):
                 angle = self.detectObject(self.lower_blue, self.upper_blue, forcedDistance=200)
-            elif (self.FLAG == 3):
-                angle = self.detectObject(self.lower_white, self.upper_white)
 
             self.imshow()
 
@@ -100,16 +112,17 @@ class robotVision(Thread):
 
             # WE ARE NOT ACTUALLY CALCULATING WIDTH OF THE OBJECT, BUT RATHER POINT 0 TO POINT CENTROID X
 
-            dist = distance()
+            # dist = sensorDistance()
+            dist = 200
             rCM = 0
             if (forcedDistance):
                 if (dist != 0):
-                    objW = self.objectWidth(self.cx(area), forcedDistance, self.focalLength)
-                    screenW = self.objectWidth(int(self.screenWidth / 2), forcedDistance, self.focalLength)
+                    objW = self.pointZeroToObjectCentroid(self.cx(area), forcedDistance, self.focalLength)
+                    screenW = self.pointZeroToObjectCentroid(int(self.screenWidth / 2), forcedDistance, self.focalLength)
                     rCM = objW - screenW                
             elif (dist != 0 and dist < 199):
-                objW = self.objectWidth(self.cx(area), dist, self.focalLength)
-                screenW = self.objectWidth(int(self.screenWidth / 2), dist, self.focalLength)
+                objW = self.pointZeroToObjectCentroid(self.cx(area), dist, self.focalLength)
+                screenW = self.pointZeroToObjectCentroid(int(self.screenWidth / 2), dist, self.focalLength)
                 rCM = objW - screenW
 
             # either no object was detected to determine width or the threshold has been hit and therefore...
@@ -168,7 +181,7 @@ class robotVision(Thread):
     def getFocalLength(self, pixelWidth, distance, width):
         self.focalLength = (pixelWidth * distance) / width
 
-    def objectWidth(self, pixel, distance, focal):
+    def pointZeroToObjectCentroid(self, pixel, distance, focal):
         w = (pixel * distance) / focal
         return w
 
