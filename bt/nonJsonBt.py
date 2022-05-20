@@ -188,7 +188,7 @@ def main():
     buf_size = 32;
 
     if len(service_matches) == 0:
-        print("couldn't find the SampleServer service =(")
+        logging.error("Something went wrong with the bluetooth connection")
         sys.exit(0)
 
     for s in range(len(service_matches)):
