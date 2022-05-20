@@ -39,6 +39,7 @@ def sensorDistance():
     # and divide by 2, because there and back
     distance = (TimeElapsed * 34300) / 2
 
+<<<<<<< HEAD
     return distance
 
 def calibrate_distance(arr, n):
@@ -74,3 +75,6 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         print("Measurement stopped by User")
         GPIO.cleanup()
+=======
+    return distance
+>>>>>>> 208b1d10db702fd31b1ab9c6b1d4a08998cbed3b

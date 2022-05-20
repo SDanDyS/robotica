@@ -28,7 +28,10 @@ leftMotor.setVelocity(0.0)
 # Setup the robot arm
 arm = Arm(robot)
 arm.addMotors(ARM_Motors)
-arm.addSensors(ARM_SENSORS)
+arm.addSensors(ARM_SENSORS, TIME_STEP)
+arm.rotationSpeed = 5
+arm.firstRodSpeed = 1.5
+arm.setFirstRodBoundaries(0, 120)
 
 keyboard = Keyboard()
 keyboard.enable(TIME_STEP)
@@ -52,6 +55,15 @@ while robot.step(TIME_STEP) != -1:
     key = keyboard.getKey()
     if key in motor_cmd.keys():
         command_motors((motor_cmd[key]))
+
+    if key == ord('J'):
+        arm.rotateArm("foot motor", 10)
+    elif key == ord('L'):
+        arm.rotateArm("foot motor", -10)
+    elif key == ord('K'):
+        arm.moveFirstRod("first rod motor", 5)
+    elif key == ord('I'):
+        arm.moveFirstRod("first rod motor", -5)
 pass
 
 # if(afstand < 20):
