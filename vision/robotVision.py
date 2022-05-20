@@ -68,13 +68,13 @@ class robotVision(Thread):
             self.hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)
             #distance and width
             self.getFocalLength(self.screenWidth, 20, 21)
-            angle = self.detectObject(self.lower_blue, self.upper_blue)
 
             # #FLAG 1 REPRESENTS DETECTING COOKIES
             # #FLAG 2 REPRESENTS SIMPLY DETECING A MOVING OBJECT
             if (self.FLAG == 1):
                 d = sensorDistance()
-
+                self.distance = d
+                print(d)
                 if (d > 10):
                     # Z forward movement
                     angle = self.detectObject(self.lower_blue, self.upper_blue)
@@ -83,7 +83,7 @@ class robotVision(Thread):
                     #if distance is 10 cm, we should call the method to use the gripper. pass the angle to the method
                 elif (d <= 10):
                         armAngle = self.detectObject(self.lower_blue, self.upper_blue, True)
-                        print(armAngle)
+                        #print("Arm", armAngle)
                         ##gripperMethod(armAngle)
                         #to change the gripper and bring it up and down. Due to knowing the angle, we can rotate the negative to positive
                         #and vice versa
@@ -96,6 +96,7 @@ class robotVision(Thread):
 
             if cv.waitKey(1) == ord('q'):
                 self.releaseStream()
+                GPIO.cleanup()
                 break
 
     def detectObject(self, lower, upper, gripper=False, forcedDistance = False):
@@ -112,15 +113,14 @@ class robotVision(Thread):
 
             # WE ARE NOT ACTUALLY CALCULATING WIDTH OF THE OBJECT, BUT RATHER POINT 0 TO POINT CENTROID X
 
-            dist = sensorDistance()
             rCM = 0
             if (forcedDistance):
                 if (forcedDistance != 0):
                     objW = self.pointZeroToObjectCentroid(self.cx(area), forcedDistance, self.focalLength)
                     screenW = self.pointZeroToObjectCentroid(int(self.screenWidth / 2), forcedDistance, self.focalLength)
                     rCM = objW - screenW                
-            elif (dist != 0 and dist < 199):
-                distanceToCamera = self.getCameraDistance(dist, 12)
+            elif (self.distance != 0 and self.distance < 199):
+                distanceToCamera = self.getCameraDistance(self.distance, 12)
                 objW = self.pointZeroToObjectCentroid(self.cx(area), distanceToCamera, self.focalLength)
                 screenCentroid = self.pointZeroToObjectCentroid(int(self.screenWidth / 2), distanceToCamera, self.focalLength)
                 rCM = objW - screenCentroid
@@ -130,12 +130,12 @@ class robotVision(Thread):
             if (rCM != 0):
                 if (not gripper):
                     if (rCM > 0.5 or rCM < -0.5):
-                        atan = self.angle_atan(dist, rCM)
-                        print(atan)
+                        atan = self.angle_atan(self.distance, rCM)
+                        #print("Gripper active ", atan)
                         return atan
                 else:
-                    atan = self.angle_atan(dist, rCM)
-                    print(atan)
+                    atan = self.angle_atan(self.distance, rCM)
+                    #print(atan)
                     return atan
             return 0
 
@@ -186,7 +186,7 @@ class robotVision(Thread):
         return w
 
     # Get the distance from the camera to the object from the distance from the sensor to the object and the hight of the camera
-    def getCameraDistance(distanceToObject, heightToCamera):
+    def getCameraDistance(self, distanceToObject, heightToCamera):
         cameraDistance = distanceToObject**2 + heightToCamera**2
         return math.sqrt(cameraDistance)
 

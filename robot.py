@@ -14,5 +14,5 @@ vision = robotVision()
 # INVOKE THE THREAD. UPON PRESSING Q THE THREAD WILL TERMINATE.
 # CREATE SOME SORT OF HANDLER IN CASE THE THREAD SHOULD START AGAIN
 vision.camSelector = args["camera"]
-vision.FLAG = 2
+vision.FLAG = 1
 vision.start()
