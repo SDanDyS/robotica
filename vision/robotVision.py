@@ -90,18 +90,18 @@ class robotVision(Thread):
                     
                     if ((int(freq[0]) + 1) != int(distanceConfirmed) and (int(freq[0]) - 1) != int(distanceConfirmed) and (int(freq[0])) != int(distanceConfirmed)):
                         print("Dismissable ", freq[0], distanceConfirmed, self.distance)
-                        #continue
-                    else:
-                        print(freq[0])
+                        continue
                     
                     if (self.distance > 10):
                         # Z forward movement
                         angle = self.detectObject(self.lower_blue, self.upper_blue)
+                        print("bigger than 10: ", self.distance)
                         
                         #X movement based on angle
                         #if distance is 10 cm, we should call the method to use the gripper. pass the angle to the method
                     elif (self.distance <= 10):
                         armAngle = self.detectObject(self.lower_blue, self.upper_blue, True)
+                        print("less than 10: ", self.distance)
                         #print("Arm", armAngle)
                         ##gripperMethod(armAngle)
                         #to change the gripper and bring it up and down. Due to knowing the angle, we can rotate the negative to positive
@@ -118,10 +118,10 @@ class robotVision(Thread):
                 GPIO.cleanup()
                 break
 
-    def detectObject(self, lower, upper, gripper=False, forcedDistance = False):
+    def detectObject(self, lower, upper, gripper = False, forcedDistance = False):
         # Threshold the HSV image to get only blue colors
         mask = cv.inRange(self.hsv, lower, upper)
-
+        print(gripper)
         cnts = self.findContours(mask)
         if (len(cnts) > 0):
             # return the biggest contourArea and determine centroid
@@ -147,10 +147,9 @@ class robotVision(Thread):
             # either no object was detected to determine width or the threshold has been hit and therefore...
             # no position has to change
             if (rCM != 0):
-                if (not gripper):
+                if (gripper is False):
                     if (rCM > 0.5 or rCM < -0.5):
                         atan = self.angle_atan(self.distance, rCM)
-                        #print("Gripper active ", atan)
                         return atan
                 else:
                     atan = self.angle_atan(self.distance, rCM)
