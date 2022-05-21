@@ -89,27 +89,29 @@ class robotVision(Thread):
                     self.absoluteDistance = []
                     
                     if ((int(freq[0]) + 1) != int(distanceConfirmed) and (int(freq[0]) - 1) != int(distanceConfirmed) and (int(freq[0])) != int(distanceConfirmed)):
-                        print("Dismissable ", freq[0], distanceConfirmed, self.distance)
                         continue
                     
                     if (self.distance > 10):
-                        # Z forward movement
                         angle = self.detectObject(self.lower_blue, self.upper_blue)
-                        print("bigger than 10: ", self.distance)
-                        
                         #X movement based on angle
-                        #if distance is 10 cm, we should call the method to use the gripper. pass the angle to the method
+                        # Z forward movement -> provide the distance and...
+                        ## internally wietze and chris will handle the speed
+                        if (angle == 0):
+                            #ONLY Z FORWARD -> provide the distance and...
+                            ## internally wietze and chris will handle the speed
                     elif (self.distance <= 10):
                         armAngle = self.detectObject(self.lower_blue, self.upper_blue, True)
-                        print("less than 10: ", self.distance)
-                        #print("Arm", armAngle)
-                        ##gripperMethod(armAngle)
-                        #to change the gripper and bring it up and down. Due to knowing the angle, we can rotate the negative to positive
-                        #and vice versa
-                        #example : 10 degrees angle, so after finish we do -10 passed to the gripper
-                        # -10 degrees angle, so after finish we do 10 passed to the gripper
+                        if (armAngle == 0):
+                            #ARM SHOULD GO STRAIGHT DOWN
+                            ##gripperMethod(armAngle)
+                            #to change the gripper and bring it up and down. Due to knowing the angle, we can rotate the negative to positive
+                            #and vice versa
+                            #example : 10 degrees angle, so after finish we do -10 passed to the gripper
+                            # -10 degrees angle, so after finish we do 10 passed to the gripper
             elif (self.FLAG == 2):
                 angle = self.detectObject(self.lower_blue, self.upper_blue, forcedDistance=200)
+                #PASS ANGLE TO wietze AND chris, they handle the speed Y
+                #ONLY Y FORWARD BACKWARD BASED ON ANGLE
 
             self.imshow()
 
@@ -131,7 +133,6 @@ class robotVision(Thread):
             cv.rectangle(self.frame, (xg, yg), (xg + wg, yg + hg), (0, 255, 0), 2)
 
             # WE ARE NOT ACTUALLY CALCULATING WIDTH OF THE OBJECT, BUT RATHER POINT 0 TO POINT CENTROID X
-
             rCM = 0
             if (forcedDistance):
                 if (forcedDistance != 0):
@@ -153,7 +154,6 @@ class robotVision(Thread):
                         return atan
                 else:
                     atan = self.angle_atan(self.distance, rCM)
-                    #print(atan)
                     return atan
             return 0
 
