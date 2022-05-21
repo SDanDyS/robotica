@@ -1,6 +1,6 @@
 import math
 from cv2 import findContours
-from distance.afstandsensor import sensorDistance
+from distance.afstandsensor import *
 import numpy as np
 import cv2 as cv
 from threading import *
@@ -20,6 +20,8 @@ class robotVision(Thread):
         self.upper_blue = np.array([128, 255, 255])
         self.lower_white = np.array([0,0,0], dtype=np.uint8)
         self.upper_white = np.array([0,0,255], dtype=np.uint8)
+        self.absoluteDistance = []
+        self.i = 0
 
         self.camIsPi = False
 
@@ -72,16 +74,32 @@ class robotVision(Thread):
             # #FLAG 1 REPRESENTS DETECTING COOKIES
             # #FLAG 2 REPRESENTS SIMPLY DETECING A MOVING OBJECT
             if (self.FLAG == 1):
-                d = sensorDistance()
-                self.distance = d
-                print(d)
-                if (d > 10):
-                    # Z forward movement
-                    angle = self.detectObject(self.lower_blue, self.upper_blue)
+                self.distance = sensorDistance()
+                
+                if (self.i == 0):
+                    while (self.i < 5):
+                        freq = str(self.distance).split(".")
+                        self.absoluteDistance.append(freq[0])
+                        self.i += 1
+                else:
+                    freq = str(self.distance).split(".")
+                    distanceConfirmed = calibrate_distance(self.absoluteDistance, len(self.absoluteDistance))
                     
-                    #X movement based on angle
-                    #if distance is 10 cm, we should call the method to use the gripper. pass the angle to the method
-                elif (d <= 10):
+                    self.i = 0
+                    self.absoluteDistance = []
+                    
+                    if (freq[0] != distanceConfirmed):
+                        print("Dismissable ", freq[0], distanceConfirmed, self.distance)
+                        continue
+                    
+                    self.distance  
+                    if (self.distance > 10):
+                        # Z forward movement
+                        angle = self.detectObject(self.lower_blue, self.upper_blue)
+                        
+                        #X movement based on angle
+                        #if distance is 10 cm, we should call the method to use the gripper. pass the angle to the method
+                    elif (self.distance <= 10):
                         armAngle = self.detectObject(self.lower_blue, self.upper_blue, True)
                         #print("Arm", armAngle)
                         ##gripperMethod(armAngle)
