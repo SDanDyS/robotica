@@ -88,11 +88,12 @@ class robotVision(Thread):
                     self.i = 0
                     self.absoluteDistance = []
                     
-                    if (freq[0] != distanceConfirmed):
+                    if ((int(freq[0]) + 1) != int(distanceConfirmed) and (int(freq[0]) - 1) != int(distanceConfirmed) and (int(freq[0])) != int(distanceConfirmed)):
                         print("Dismissable ", freq[0], distanceConfirmed, self.distance)
-                        continue
+                        #continue
+                    else:
+                        print(freq[0])
                     
-                    self.distance  
                     if (self.distance > 10):
                         # Z forward movement
                         angle = self.detectObject(self.lower_blue, self.upper_blue)
