@@ -1,6 +1,6 @@
 import math
 from cv2 import findContours
-from distance.afstandsensor import sensorDistance
+from distance.afstandsensor import *
 import numpy as np
 import cv2 as cv
 from threading import *
@@ -20,6 +20,8 @@ class robotVision(Thread):
         self.upper_blue = np.array([128, 255, 255])
         self.lower_white = np.array([0,0,0], dtype=np.uint8)
         self.upper_white = np.array([0,0,255], dtype=np.uint8)
+        self.absoluteDistance = []
+        self.i = 0
 
         self.camIsPi = False
 
@@ -72,25 +74,44 @@ class robotVision(Thread):
             # #FLAG 1 REPRESENTS DETECTING COOKIES
             # #FLAG 2 REPRESENTS SIMPLY DETECING A MOVING OBJECT
             if (self.FLAG == 1):
-                d = sensorDistance()
-                self.distance = d
-                print(d)
-                if (d > 10):
-                    # Z forward movement
-                    angle = self.detectObject(self.lower_blue, self.upper_blue)
+                self.distance = sensorDistance()
+                
+                if (self.i == 0):
+                    while (self.i < 5):
+                        freq = str(self.distance).split(".")
+                        self.absoluteDistance.append(freq[0])
+                        self.i += 1
+                else:
+                    freq = str(self.distance).split(".")
+                    distanceConfirmed = calibrate_distance(self.absoluteDistance, len(self.absoluteDistance))
                     
-                    #X movement based on angle
-                    #if distance is 10 cm, we should call the method to use the gripper. pass the angle to the method
-                elif (d <= 10):
+                    self.i = 0
+                    self.absoluteDistance = []
+                    
+                    if ((int(freq[0]) + 1) != int(distanceConfirmed) and (int(freq[0]) - 1) != int(distanceConfirmed) and (int(freq[0])) != int(distanceConfirmed)):
+                        continue
+                    
+                    if (self.distance > 10):
+                        angle = self.detectObject(self.lower_blue, self.upper_blue)
+                        #X movement based on angle
+                        # Z forward movement -> provide the distance and...
+                        ## internally wietze and chris will handle the speed
+                        if (angle == 0):
+                            #ONLY Z FORWARD -> provide the distance and...
+                            ## internally wietze and chris will handle the speed
+                    elif (self.distance <= 10):
                         armAngle = self.detectObject(self.lower_blue, self.upper_blue, True)
-                        #print("Arm", armAngle)
-                        ##gripperMethod(armAngle)
-                        #to change the gripper and bring it up and down. Due to knowing the angle, we can rotate the negative to positive
-                        #and vice versa
-                        #example : 10 degrees angle, so after finish we do -10 passed to the gripper
-                        # -10 degrees angle, so after finish we do 10 passed to the gripper
+                        if (armAngle == 0):
+                            #ARM SHOULD GO STRAIGHT DOWN
+                            ##gripperMethod(armAngle)
+                            #to change the gripper and bring it up and down. Due to knowing the angle, we can rotate the negative to positive
+                            #and vice versa
+                            #example : 10 degrees angle, so after finish we do -10 passed to the gripper
+                            # -10 degrees angle, so after finish we do 10 passed to the gripper
             elif (self.FLAG == 2):
                 angle = self.detectObject(self.lower_blue, self.upper_blue, forcedDistance=200)
+                #PASS ANGLE TO wietze AND chris, they handle the speed Y
+                #ONLY Y FORWARD BACKWARD BASED ON ANGLE
 
             self.imshow()
 
@@ -99,10 +120,10 @@ class robotVision(Thread):
                 GPIO.cleanup()
                 break
 
-    def detectObject(self, lower, upper, gripper=False, forcedDistance = False):
+    def detectObject(self, lower, upper, gripper = False, forcedDistance = False):
         # Threshold the HSV image to get only blue colors
         mask = cv.inRange(self.hsv, lower, upper)
-
+        print(gripper)
         cnts = self.findContours(mask)
         if (len(cnts) > 0):
             # return the biggest contourArea and determine centroid
@@ -112,7 +133,6 @@ class robotVision(Thread):
             cv.rectangle(self.frame, (xg, yg), (xg + wg, yg + hg), (0, 255, 0), 2)
 
             # WE ARE NOT ACTUALLY CALCULATING WIDTH OF THE OBJECT, BUT RATHER POINT 0 TO POINT CENTROID X
-
             rCM = 0
             if (forcedDistance):
                 if (forcedDistance != 0):
@@ -128,14 +148,12 @@ class robotVision(Thread):
             # either no object was detected to determine width or the threshold has been hit and therefore...
             # no position has to change
             if (rCM != 0):
-                if (not gripper):
+                if (gripper is False):
                     if (rCM > 0.5 or rCM < -0.5):
                         atan = self.angle_atan(self.distance, rCM)
-                        #print("Gripper active ", atan)
                         return atan
                 else:
                     atan = self.angle_atan(self.distance, rCM)
-                    #print(atan)
                     return atan
             return 0
 
