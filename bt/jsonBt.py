@@ -5,23 +5,17 @@ import re
 import RPi.GPIO as GPIO          
 from time import sleep
 import json
+import logging
 
-#{1234,7621}
+sock=BluetoothSocket(RFCOMM)
 
+class btServer():
+    def __init__(self, motor):
+        self.motor = motor
 
-#print("\n")
-#print("The default speed & direction of motor is LOW & Forward.....")
-#print("r-run s-stop f-forward b-backward l-low m-medium h-high e-exit")
-#print("\n")
-
-
-
-
-
-def main():
     #versturen
-    def input_and_send():
-        print("\nType something\n")
+    def input_and_send(self):
+        #print("\nType something\n")
         while True:
             #data = input()
             #if len(data) == 0: break
@@ -30,34 +24,9 @@ def main():
             sock.send("ahoi")
             sock.send("\n")
     #ontvangen        
-    def rx_and_echo():
-        in1 = 6
-        in2 = 5
-        in3 = 13
-        in4 = 26
-        ena = 25
-        enb = 12
-        temp1=1
-        GPIO.setwarnings(False)
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setup(in1,GPIO.OUT)
-        GPIO.setup(in2,GPIO.OUT)
-        GPIO.setup(in3,GPIO.OUT)
-        GPIO.setup(in4,GPIO.OUT)
-        GPIO.setup(ena,GPIO.OUT)
-        GPIO.setup(enb,GPIO.OUT)
-        GPIO.output(in1,GPIO.LOW)
-        GPIO.output(in2,GPIO.LOW)
-        GPIO.output(in3,GPIO.LOW)
-        GPIO.output(in4,GPIO.LOW)
-        pa=GPIO.PWM(ena,1000)
-        pb=GPIO.PWM(enb,1000)
-        pa.start(25)
-        pb.start(25)
-        
-        GPIO.output(in1,GPIO.HIGH)
-        GPIO.output(in2,GPIO.LOW)
-        sock.send("\nsend anything\n")
+    def rx_and_echo(self):
+#        
+#         sock.send("\nsend anything\n")
                 
         ly = 0
         lx = 0
@@ -65,7 +34,7 @@ def main():
         rx = 0
     
         while True:
-            data = sock.recv(buf_size)
+            data = sock.recv(self.buf_size)
 
             if not data: break
             
@@ -85,84 +54,83 @@ def main():
             ry = int(parsedData["RY"])
             rx = int(parsedData["RX"])
             
-            #print(lx)
-        
-            print("New values are %s %s %s %s" % (ly, lx, ry, rx))
+             #vooruit                   
+#             if ry < 2500 and ry > 2000 and ly < 2500 and ly > 2000 :
+#                  #print("rx < 1000")
+#                  #changeMotorSpeed(50)
+#                  self.motor.forward(25)
+                #achteruit
+            if ry < 500 and ly < 500:
+                 self.motor.backwards()    
+                 #stop
+            elif ry <1880 and ry < 1950 and ry>1700 and ly > 1700:
+                 self.motor.stop()
+#                  Ssnel
+            elif ry>4000 and ly > 4000:
+                
+                self.motor.forward(100)
+                
+               #rechts
+            elif ry > 3000 and ly < 1000:
+                 self.motor.right()
+                 
+                 #links
+            elif ry < 1000 and ly > 3000:
+                 self.motor.left()
             
-            #pa.ChangeDutyCycle(50)
-            #time.sleep(3)
+            #elif ry > 3500:
+                 #self.motor.rightmotor()
             
-            if rx < 1500 and rx > 1000:
-                print("rx < 1000")
-                #changeMotorSpeed(50)
-                pa.ChangeDutyCycle(25)
-            elif rx < 1000 and rx > 500:
-                pa.ChangeDutyCycle(50)
-            elif rx < 500:
-                pa.ChangeDutyCycle(100)
-            elif rx >= 1000:
-                print("rx >= 1000")
-                #changeMotorSpeed(25)
-                pa.ChangeDutyCycle(0)
-            
-    #MAC address of ESP32
-    addr = "84:CC:A8:69:97:D2"
-    #uuid = "94f39d29-7d6d-437d-973b-fba39e49d4ee"
-    #service_matches = find_service( uuid = uuid, address = addr )
-    service_matches = find_service( address = addr )
-
-    buf_size = 64;
-
-    if len(service_matches) == 0:
-        logging.error("Something went wrong with the bluetooth connection")
-        sys.exit(0)
-
-    for s in range(len(service_matches)):
-        print("\nservice_matches: [" + str(s) + "]:")
-        print(service_matches[s])
-        
-    first_match = service_matches[0]
-    port = first_match["port"]
-    name = first_match["name"]
-    host = first_match["host"]
-
-    port=1
-    print("connecting to \"%s\" on %s, port %s" % (name, host, port))
-
-    # Create the client socket
-    sock=BluetoothSocket(RFCOMM)
-    sock.connect((host, port))
-
-    print("connected")
+            #elif ly > 3500:
+#                  self.motor.leftmotor()
     
-    #time.sleep(2)
-    #pa.ChangeDutyCycle(50)
+#             elif rx >= 1000:
+#                 #print("rx >= 1000")
+#                 #changeMotorSpeed(25)
+#                 pa.ChangeDutyCycle(0)
     
+    def run(self):
+        #MAC address of ESP32
+        addr = "84:CC:A8:69:97:D2"
+        #uuid = "94f39d29-7d6d-437d-973b-fba39e49d4ee"
+        #service_matches = find_service( uuid = uuid, address = addr )
+        service_matches = find_service( address = addr )
 
+        self.buf_size = 64;
+
+        if len(service_matches) == 0:
+            logging.error("Something went wrong with the bluetooth connection")
+            sys.exit(0)
+
+        for s in range(len(service_matches)):
+            print("\nservice_matches: [" + str(s) + "]:")
+            print(service_matches[s])
+            
+        first_match = service_matches[0]
+        port = first_match["port"]
+        name = first_match["name"]
+        host = first_match["host"]
+
+        port=1
+        print("connecting to \"%s\" on %s, port %s" % (name, host, port))
+
+        # Create the client socket
+#         sock=BluetoothSocket(RFCOMM)
+        sock.connect((host, port))
+        
+        proc1 = Process(target=self.input_and_send)
+        proc1.start()
+
+        proc2 = Process(target=self.rx_and_echo)
+        proc2.start()
+
+        print("connected")
     
     def changeMotorSpeed(speed):
         print("Set speed to %s", speed)
         pa.ChangeDutyCycle(speed)
-    
-    #changeMotorSpeed()
-    #pa.ChangeDutyCycle(25)
-    #pa.ChangeDutyCycle(50)
-    #pa.ChangeDutyCycle(15)
-    
-    proc1 = Process(target=input_and_send)
-    proc1.start()
 
-    proc2 = Process(target=rx_and_echo)
-    proc2.start()
-
-    #proc3 = Process(target=changeMotorSpeed, args=(pa))
-    #proc3.start()
     
-    #input_and_send()
-    #rx_and_echo()
-
-    #sock.close()
-    #print("\n--- bye ---\n")
 if __name__ == "__main__":
     try:
         main()
