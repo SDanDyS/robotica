@@ -99,6 +99,7 @@ class robotVision(Thread):
                         if (angle == 0):
                             #ONLY Z FORWARD -> provide the distance and...
                             ## internally wietze and chris will handle the speed
+                            pass
                     elif (self.distance <= 10):
                         armAngle = self.detectObject(self.lower_blue, self.upper_blue, True)
                         if (armAngle == 0):
@@ -108,6 +109,7 @@ class robotVision(Thread):
                             #and vice versa
                             #example : 10 degrees angle, so after finish we do -10 passed to the gripper
                             # -10 degrees angle, so after finish we do 10 passed to the gripper
+                            pass
             elif (self.FLAG == 2):
                 angle = self.detectObject(self.lower_blue, self.upper_blue, forcedDistance=200)
                 #PASS ANGLE TO wietze AND chris, they handle the speed Y
