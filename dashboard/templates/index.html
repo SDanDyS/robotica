@@ -2,20 +2,36 @@
 <head>
 </head>
 <body>
-<p id="rand">Object Rand: 0</p>
+<p id="rand">Retrieving Rand...</p>
+<p id="bluetooth">Retrieving Bluetooth status...</p>
 <script>
-const Http = new XMLHttpRequest();
-const url='http://localhost:5000/rand';
+// const Http = new XMLHttpRequest();
+// const url='http://localhost:5000/api/rand';
 
 function checkRand(){
-   Http.open("GET", url);
-   Http.send();
+  const Http = new XMLHttpRequest();
+  Http.open("GET", 'http://localhost:5000/api/rand');
+  Http.send();
   Http.onreadystatechange = (e) => {
     document.querySelector("#rand").innerHTML = "Object Rand: " + Http.responseText;
   }
 }
 
-setInterval(checkRand, 500);
+function checkBluetooth(){
+  const Http = new XMLHttpRequest();
+  Http.open("GET", 'http://localhost:5000/api/bt');
+  Http.send();
+  Http.onreadystatechange = (e) => {
+    document.querySelector("#bluetooth").innerHTML = "Bluetooth status: " + Http.responseText;
+  }
+}
+
+// setInterval(checkBluetooth, 500);
+
+setInterval(function () {
+  checkBluetooth();
+  checkRand();
+}, 1000);
 </script>
 </body>
 </html

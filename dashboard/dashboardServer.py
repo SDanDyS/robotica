@@ -6,8 +6,12 @@ from random import randrange
 class dashboardServer:
     app = Flask(__name__)
 
-    @app.route('/rand')
+    @app.route('/api/rand')
     def getRand():
+        return str(randrange(10)), 200, {"Access-Control-Allow-Origin": "*"}
+
+    @app.route('/api/bt')
+    def getBt():
         return str(randrange(10)), 200, {"Access-Control-Allow-Origin": "*"}
 
     @app.route('/')
