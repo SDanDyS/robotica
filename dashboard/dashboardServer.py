@@ -1,41 +1,23 @@
-from http.server import BaseHTTPRequestHandler, HTTPServer
-import threading
+import time
 import logging
-from bt.btConnection import *
-
-class view:
-    def show(self):
-        return bytes("<p>Test</p>", "utf-8")
-
-class http_server:
-        def __init__(self, view):
-            requestHandler.view = view
-            server = HTTPServer(('', 8080), requestHandler)
-            
-#             server = HTTPServer(('localhost', 4443), requestHandler)
-#             httpd.socket = ssl.wrap_socket(httpd.socket,
-#                 keyfile=""
-#                 certfile="", server_side=True)
-            
-            server.serve_forever()
-
-class requestHandler(BaseHTTPRequestHandler):
-    t1 = None
-    def do_GET(self):
-            self.send_response(200)
-            self.send_header('Content-type', 'text/html')
-            self.end_headers()
-            self.wfile.write(self.view.show())
-                        
-            return
+from flask import Flask, render_template
+from random import randrange
 
 class dashboardServer:
-    #def __init__(self):
+    app = Flask(__name__)
+
+    @app.route('/rand')
+    def getRand():
+        return str(randrange(10)), 200, {"Access-Control-Allow-Origin": "*"}
+
+    @app.route('/')
+    def hello_world():
+        return render_template("index.html")
+
     def start(self):
         logging.info("Starting webserver...")
 
-        self.view = view()
-        self.server = http_server(self.view)
+        self.app.run(debug=True)
 
 if __name__ == '__main__':
-    m = main()
+    app.run(debug=True)

@@ -29,10 +29,10 @@ if args["camera"] == True:
     vision.FLAG = 2
     vision.start()
 
-motor_left = dcMotorIndu(0)
-motor_right = dcMotorIndu(1)
-
-# Start bluetooth connection
+# motor_left = dcMotorIndu(0)
+# motor_right = dcMotorIndu(1)
+# 
+# # Start bluetooth connection
 if args["bluetooth"] == True:
     bluetooth = btServer(motor_left, motor_right)
     bluetooth.run()

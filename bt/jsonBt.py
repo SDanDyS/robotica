@@ -130,7 +130,12 @@ class btServer():
         print("Set speed to %s", speed)
         pa.ChangeDutyCycle(speed)
 
-    
+    def active(self):
+        if sock.connect((host, port)) == True:
+            return "actief"
+        else:
+            return "non actief"
+        
 if __name__ == "__main__":
     try:
         main()

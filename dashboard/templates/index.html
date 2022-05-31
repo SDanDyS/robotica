@@ -1,0 +1,21 @@
+<html>
+<head>
+</head>
+<body>
+<p id="rand">Object Rand: 0</p>
+<script>
+const Http = new XMLHttpRequest();
+const url='http://localhost:5000/rand';
+
+function checkRand(){
+   Http.open("GET", url);
+   Http.send();
+  Http.onreadystatechange = (e) => {
+    document.querySelector("#rand").innerHTML = "Object Rand: " + Http.responseText;
+  }
+}
+
+setInterval(checkRand, 500);
+</script>
+</body>
+</html

@@ -75,69 +75,69 @@ class dcMotorIndu(threading.Thread):
 #         pa.start(speed)
 #         pb.start(speed)
             
-    def backwards(self):
-             
-#         GPIO.output(self.in1,GPIO.LOW)
-#         GPIO.output(self.in2,GPIO.HIGH)
-#         GPIO.output(self.in3,GPIO.LOW)
-#         GPIO.output(self.in4,GPIO.HIGH)
-#         pa.start(25)
-#         pb.start(25)
-        
-    def right(self):
-        
-#         GPIO.output(self.in1,GPIO.HIGH)
-#         GPIO.output(self.in2,GPIO.LOW)
-#             
-#         GPIO.output(self.in3,GPIO.LOW)
-#         GPIO.output(self.in4,GPIO.HIGH)
-#         pa.ChangeDutyCycle(25)
-#         pb.ChangeDutyCycle(25)
-        
-    def left(self):
-             
-#         GPIO.output(self.in1,GPIO.LOW)
-#         GPIO.output(self.in2,GPIO.HIGH)
-#             
-#         GPIO.output(self.in3,GPIO.HIGH)
-#         GPIO.output(self.in4,GPIO.LOW)
-#         pa.ChangeDutyCycle(25)
-#         pb.ChangeDutyCycle(25)
-        
-    def turbo(self):
-        
-#         GPIO.output(self.in1,GPIO.HIGH)
-#         GPIO.output(self.in2,GPIO.LOW)
-#         GPIO.output(self.in3,GPIO.HIGH)
-#         GPIO.output(self.in4,GPIO.LOW)
-        #pa=GPIO.PWM(self.ena,1000)
-        #pb=GPIO.PWM(self.enb,1000)
-#         pa.ChangeDutyCycle(100)
-#         pb.ChangeDutyCycle(100)
-        
-    def rightmotor(self):
-        
-#         GPIO.output(self.in3,GPIO.HIGH)
-#         GPIO.output(self.in4,GPIO.LOW)
-#         pb.start(100)
-        
-    
-    def leftmotor(self):
-        
-#         GPIO.output(self.in1,GPIO.HIGH)
-#         GPIO.output(self.in2,GPIO.LOW)
-#         pa.start(100)
-    
-    
-    def stop(self):
-        
-#         GPIO.output(self.in1,GPIO.LOW)
-#         GPIO.output(self.in2,GPIO.LOW)
-#             
-#         GPIO.output(self.in3,GPIO.LOW)
-#         GPIO.output(self.in4,GPIO.LOW)
-#         pa.ChangeDutyCycle(0)
-#         pb.ChangeDutyCycle(0)
-        
+#     def backwards(self):
+#              
+# #         GPIO.output(self.in1,GPIO.LOW)
+# #         GPIO.output(self.in2,GPIO.HIGH)
+# #         GPIO.output(self.in3,GPIO.LOW)
+# #         GPIO.output(self.in4,GPIO.HIGH)
+# #         pa.start(25)
+# #         pb.start(25)
+#         
+#     def right(self):
+#         
+# #         GPIO.output(self.in1,GPIO.HIGH)
+# #         GPIO.output(self.in2,GPIO.LOW)
+# #             
+# #         GPIO.output(self.in3,GPIO.LOW)
+# #         GPIO.output(self.in4,GPIO.HIGH)
+# #         pa.ChangeDutyCycle(25)
+# #         pb.ChangeDutyCycle(25)
+#         
+#     def left(self):
+#              
+# #         GPIO.output(self.in1,GPIO.LOW)
+# #         GPIO.output(self.in2,GPIO.HIGH)
+# #             
+# #         GPIO.output(self.in3,GPIO.HIGH)
+# #         GPIO.output(self.in4,GPIO.LOW)
+# #         pa.ChangeDutyCycle(25)
+# #         pb.ChangeDutyCycle(25)
+#         
+#     def turbo(self):
+#         
+# #         GPIO.output(self.in1,GPIO.HIGH)
+# #         GPIO.output(self.in2,GPIO.LOW)
+# #         GPIO.output(self.in3,GPIO.HIGH)
+# #         GPIO.output(self.in4,GPIO.LOW)
+#         #pa=GPIO.PWM(self.ena,1000)
+#         #pb=GPIO.PWM(self.enb,1000)
+# #         pa.ChangeDutyCycle(100)
+# #         pb.ChangeDutyCycle(100)
+#         
+#     def rightmotor(self):
+#         
+# #         GPIO.output(self.in3,GPIO.HIGH)
+# #         GPIO.output(self.in4,GPIO.LOW)
+# #         pb.start(100)
+#         
+#     
+#     def leftmotor(self):
+#         
+# #         GPIO.output(self.in1,GPIO.HIGH)
+# #         GPIO.output(self.in2,GPIO.LOW)
+# #         pa.start(100)
+#     
+#     
+#     def stop(self):
+#         
+# #         GPIO.output(self.in1,GPIO.LOW)
+# #         GPIO.output(self.in2,GPIO.LOW)
+# #             
+# #         GPIO.output(self.in3,GPIO.LOW)
+# #         GPIO.output(self.in4,GPIO.LOW)
+# #         pa.ChangeDutyCycle(0)
+# #         pb.ChangeDutyCycle(0)
+#         
         
         
