@@ -79,6 +79,7 @@ class robotVision(Thread):
             if (self.FLAG == 1):
                 self.distance = sensorDistance()
                 
+                # ENFORCE A CALIBRATED DISTANCE
                 if (self.i == 0):
                     while (self.i < 5):
                         freq = str(self.distance).split(".")
@@ -96,30 +97,37 @@ class robotVision(Thread):
                     
                     if (self.distance > 10):
                         angle = self.detectObject(self.lower_blue, self.upper_blue)
-                        #X movement based on angle
+
+                        if (angle > 0):
+                            motor_left.left()
+                            motor_right.right()
+                        elif (angle < 0):
+                            motor_left.right()
+                            motor_right.left()
                         
-                        #bigger is left smaller is right
-                        # Z forward movement -> provide the distance and...
-                        ## internally wietze and chris will handle the speed
-                        if (angle == 0):
-                            #ONLY Z FORWARD -> provide the distance and...
-                            ## internally wietze and chris will handle the speed
-                            pass
+                       motor_left.forward(100)
+                       motor_right.forward(100)
                     elif (self.distance <= 10):
                         armAngle = self.detectObject(self.lower_blue, self.upper_blue, True)
                         if (armAngle == 0):
                             #ARM SHOULD GO STRAIGHT DOWN
                             ##gripperMethod(armAngle)
-                            #to change the gripper and bring it up and down. Due to knowing the angle, we can rotate the negative to positive
-                            #and vice versa
-                            #example : 10 degrees angle, so after finish we do -10 passed to the gripper
-                            # -10 degrees angle, so after finish we do 10 passed to the gripper
+                            pass
+                        elif (armAngle > 0):
+                            #rotate to left with armAngle
+                            pass
+                        elif (armAngle < 0):
+                            #rotate to right with armAngle
                             pass
             elif (self.FLAG == 2):
                 angle = self.detectObject(self.lower_blue, self.upper_blue, forcedDistance=200)
-                #PASS ANGLE TO wietze AND chris, they handle the speed Y
-                #ONLY Y FORWARD BACKWARD BASED ON ANGLE
-
+                if (angle < 0):
+                   motor_left.forward(100)
+                   motor_right.forward(100)
+                elif (angle > 0):
+                   motor_left.backward(100)
+                   motor_right.backward(100)
+                   
             self.imshow()
 
             if cv.waitKey(1) == ord('q'):
@@ -130,7 +138,6 @@ class robotVision(Thread):
     def detectObject(self, lower, upper, gripper = False, forcedDistance = False):
         # Threshold the HSV image to get only blue colors
         mask = cv.inRange(self.hsv, lower, upper)
-        print(gripper)
         cnts = self.findContours(mask)
         if (len(cnts) > 0):
             # return the biggest contourArea and determine centroid
@@ -139,7 +146,6 @@ class robotVision(Thread):
             (xg, yg, wg, hg) = cv.boundingRect(area)
             cv.rectangle(self.frame, (xg, yg), (xg + wg, yg + hg), (0, 255, 0), 2)
 
-<<<<<<< HEAD
             # WE ARE NOT ACTUALLY CALCULATING WIDTH OF THE OBJECT, BUT RATHER POINT 0 TO POINT CENTROID X
             rCM = 0
             if (forcedDistance):
