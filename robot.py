@@ -1,7 +1,7 @@
 import argparse
 from vision.robotVision import *
 from threading import *
-from weight.example import *
+from weight.scale import *
 
 # Grab arguments from Python command
 # 'pi' grabs PiCamera, 0-9 grabs regular webcam camera. Defaults to 'pi'.
