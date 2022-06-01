@@ -6,12 +6,13 @@ import cv2 as cv
 from threading import *
 import os
 import time
+import logging
 
 try:
     from imutils.video.pivideostream import PiVideoStream
     import imutils
 except ImportError:
-    print("Couldn't import PiCamera, continuing wihout...")
+    logging.warning("Couldn't import PiCamera, continuing wihout...")
 
 
 class robotVision(Thread):
@@ -22,13 +23,14 @@ class robotVision(Thread):
         self.upper_white = np.array([0,0,255], dtype=np.uint8)
         self.absoluteDistance = []
         self.i = 0
-        self.left_motor = 
+        motor_left = dcMotorIndu(0)
+        motor_right = dcMotorIndu(1)
 
         self.camIsPi = False
 
         # Check whether cam arg is Pi camera
         if self.camSelector == "pi":
-            print("Selecting PiCamera")
+            logging.info("Selecting PiCamera")
             self.camIsPi = True
 
             resW = 320
@@ -42,12 +44,12 @@ class robotVision(Thread):
             time.sleep(1)
         # Otherwise select USB camera
         elif self.camSelector.isnumeric():
-            print("Selecting regular USB camera")
+            logging.info("Selecting regular USB camera")
             self.camIsPi = False
             self.cap = cv.VideoCapture(int(self.camSelector))
 
             if not self.cap.isOpened():
-                print("Cannot open camera")
+                logging.error("Cannot open camera")
                 exit()
             self.screenWidth = self.cap.get(cv.CAP_PROP_FRAME_WIDTH)   # float `width`
             self.screenHeight = self.cap.get(cv.CAP_PROP_FRAME_HEIGHT)  # float `height`
@@ -62,7 +64,7 @@ class robotVision(Thread):
 
                 # if frame is read correctly ret is True
                 if not self.ret:
-                    print("Can't receive frame (stream end?). Exiting ...")
+                    logging.error("Can't receive frame (stream end?). Exiting ...")
                     break
 
             cv.circle(self.frame, (int(self.screenWidth / 2), int(self.screenHeight / 2)), 5, (255, 255, 255), -1)
@@ -137,6 +139,7 @@ class robotVision(Thread):
             (xg, yg, wg, hg) = cv.boundingRect(area)
             cv.rectangle(self.frame, (xg, yg), (xg + wg, yg + hg), (0, 255, 0), 2)
 
+<<<<<<< HEAD
             # WE ARE NOT ACTUALLY CALCULATING WIDTH OF THE OBJECT, BUT RATHER POINT 0 TO POINT CENTROID X
             rCM = 0
             if (forcedDistance):

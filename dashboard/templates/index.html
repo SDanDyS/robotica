@@ -1,0 +1,55 @@
+<html>
+<head>
+  <title>Robot Dashboard</title>
+</head>
+<body>
+  <p id="bluetooth">Retrieving Bluetooth status...</p>
+  <p id="weight">Retrieving weight...</p>
+<script>
+
+// Gather all data from API
+function checkApi(){
+  const Http = new XMLHttpRequest();
+  Http.open("GET", 'http://localhost:8080/api');
+  Http.send();
+  Http.onreadystatechange = (e) => {
+    json = JSON.parse(Http.responseText)
+    document.querySelector("#bluetooth").innerHTML = "Bluetooth status: " + json.bluetooth.connection;
+    document.querySelector("#weight").innerHTML = "Weight status: " + json.weight;
+  }
+}
+
+// Individual APIs
+function checkRand(){
+  const Http = new XMLHttpRequest();
+  Http.open("GET", 'http://localhost:5000/api/rand');
+  Http.send();
+  Http.onreadystatechange = (e) => {
+    document.querySelector("#rand").innerHTML = "Object Rand: " + Http.responseText;
+  }
+}
+
+function checkBluetooth(){
+  const Http = new XMLHttpRequest();
+  Http.open("GET", 'http://localhost:5000/api/bt');
+  Http.send();
+  Http.onreadystatechange = (e) => {
+    document.querySelector("#bluetooth").innerHTML = "Bluetooth status: " + Http.responseText;
+  }
+}
+
+function checkWeight(){
+  const Http = new XMLHttpRequest();
+  Http.open("GET", 'http://localhost:5000/api/weight');
+  Http.send();
+  Http.onreadystatechange = (e) => {
+    document.querySelector("#weight").innerHTML = "Weight: " + Http.responseText;
+  }
+}
+
+setInterval(function () {
+  checkApi();
+}, 1000);
+</script>
+</body>
+</html
