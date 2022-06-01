@@ -31,11 +31,12 @@ if args["camera"] == True:
 
 # motor_left = dcMotorIndu(0)
 # motor_right = dcMotorIndu(1)
+# dcMotorIndu.run(1)
 # 
 # # Start bluetooth connection
 if args["bluetooth"] == True:
     bluetooth = btServer(motor_left, motor_right)
-    bluetooth.run()
+    bluetooth.forward(25)
 
 # if vision ziet == true
 # motor1.forward

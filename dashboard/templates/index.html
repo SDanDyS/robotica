@@ -1,13 +1,25 @@
 <html>
 <head>
+  <title>Robot Dashboard</title>
 </head>
 <body>
-<p id="rand">Retrieving Rand...</p>
-<p id="bluetooth">Retrieving Bluetooth status...</p>
+  <p id="bluetooth">Retrieving Bluetooth status...</p>
+  <p id="weight">Retrieving weight...</p>
 <script>
-// const Http = new XMLHttpRequest();
-// const url='http://localhost:5000/api/rand';
 
+// Gather all data from API
+function checkApi(){
+  const Http = new XMLHttpRequest();
+  Http.open("GET", 'http://localhost:8080/api');
+  Http.send();
+  Http.onreadystatechange = (e) => {
+    json = JSON.parse(Http.responseText)
+    document.querySelector("#bluetooth").innerHTML = "Bluetooth status: " + json.bluetooth.connection;
+    document.querySelector("#weight").innerHTML = "Weight status: " + json.weight;
+  }
+}
+
+// Individual APIs
 function checkRand(){
   const Http = new XMLHttpRequest();
   Http.open("GET", 'http://localhost:5000/api/rand');
@@ -26,11 +38,17 @@ function checkBluetooth(){
   }
 }
 
-// setInterval(checkBluetooth, 500);
+function checkWeight(){
+  const Http = new XMLHttpRequest();
+  Http.open("GET", 'http://localhost:5000/api/weight');
+  Http.send();
+  Http.onreadystatechange = (e) => {
+    document.querySelector("#weight").innerHTML = "Weight: " + Http.responseText;
+  }
+}
 
 setInterval(function () {
-  checkBluetooth();
-  checkRand();
+  checkApi();
 }, 1000);
 </script>
 </body>
