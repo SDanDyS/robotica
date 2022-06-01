@@ -1,14 +1,12 @@
-from controller import Robot, Motor, Keyboard
+from controller import Robot, Keyboard
 from arm_controller import Arm
+from Motor import Motor
 
 TIME_STEP = 64
 
 MAX_SPEED = 2
 CRUISING_SPEED = 0.3
 TURN_SPEED = CRUISING_SPEED / 2.0
-
-ARM_Motors = ["foot motor", "first rod motor"]
-ARM_SENSORS = ["foot sensor", "first rod sensor"]
 
 # create the Robot instance.
 robot = Robot()
@@ -26,13 +24,16 @@ leftMotor.setVelocity(0.0)
 # rightMotor.setVelocity(0.0 * MAX_SPEED)
 
 # Setup the robot arm
-arm = Arm(robot)
-arm.addMotors(ARM_Motors)
-arm.addSensors(ARM_SENSORS, TIME_STEP)
-arm.rotationSpeed = 5
-arm.firstRodSpeed = 1.5
-arm.setFirstRodBoundaries(0, 120)
+rotationMotor = Motor(robot, TIME_STEP, "foot motor", "foot sensor")
+firstRodMotor = Motor(robot, TIME_STEP, "first rod motor", "first rod sensor")
 
+arm = Arm(robot, TIME_STEP, rotationMotor, firstRodMotor)
+arm.rotationMotor.maxSpeed = 5
+
+arm.firstRodMotor.maxSpeed = 1.5
+arm.firstRodMotor.setMotorBoundaries(0, 120)
+
+# Setup the keyboard
 keyboard = Keyboard()
 keyboard.enable(TIME_STEP)
 
@@ -51,19 +52,34 @@ def command_motors(cmd):
     rightMotor.setVelocity(cmd[1])
 
 
+def armJoystickMovement(motor, value, maxSpeed, degrees):
+    if value > 1:
+        value = 1
+    elif value < -1:
+        value = -1
+
+    rotationSpeed = maxSpeed * value
+
+    if value >= 0:
+        motor.rotateDegrees(degrees, rotationSpeed)
+    elif value < 0:
+        motor.rotateDegrees(-degrees, rotationSpeed)
+
+
 while robot.step(TIME_STEP) != -1:
     key = keyboard.getKey()
     if key in motor_cmd.keys():
         command_motors((motor_cmd[key]))
 
+    # Move the arm based on the input
     if key == ord('J'):
-        arm.rotateArm("foot motor", 10)
+        arm.rotationMotor.rotateDegrees(10)
     elif key == ord('L'):
-        arm.rotateArm("foot motor", -10)
+        arm.rotationMotor.rotateDegrees(-10)
     elif key == ord('K'):
-        arm.moveFirstRod("first rod motor", 5)
+        arm.firstRodMotor.rotateDegrees(5)
     elif key == ord('I'):
-        arm.moveFirstRod("first rod motor", -5)
+        arm.firstRodMotor.rotateDegrees(-5)
 pass
 
 # if(afstand < 20):
