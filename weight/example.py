@@ -25,6 +25,7 @@ class Weight(Thread):
                 time.sleep(0.1)
             except (KeyboardInterrupt, SystemExit):
                 cleanAndExit()
-            
-
-
+        
+    def cleanAndExit():
+        GPIO.cleanup()
+        sys.exit()
