@@ -1,6 +1,7 @@
 import math
 from cv2 import findContours
 from distance.afstandsensor import *
+from drive.dcMotorIndu import *
 import numpy as np
 import cv2 as cv
 from threading import *
@@ -15,12 +16,10 @@ except ImportError:
     logging.warning("Couldn't import PiCamera, continuing wihout...")
 
 
-class robotVision(Thread):
+class RobotVision(Thread):
     def run(self):
         self.lower_blue = np.array([90, 50, 70])
         self.upper_blue = np.array([128, 255, 255])
-        self.lower_white = np.array([0,0,0], dtype=np.uint8)
-        self.upper_white = np.array([0,0,255], dtype=np.uint8)
         self.absoluteDistance = []
         self.i = 0
         motor_left = dcMotorIndu(0)
@@ -97,16 +96,22 @@ class robotVision(Thread):
                     
                     if (self.distance > 10):
                         angle = self.detectObject(self.lower_blue, self.upper_blue)
-
+                        print(str(angle))
+                        # NO CONTOUR FOUND AND THEREFORE NO OBJECT FOUND
+                        if (angle is None):
+                            #DO SOME RNG FORWARD, LEFT/RIGHT, BACKWARD MOVEMENT
+                            #AS IF IT'S SCANNING FOR SOMETHING
+                            continue
                         if (angle > 0):
-                            motor_left.left()
-                            motor_right.right()
+#                             motor_left.left()
+#                             motor_right.right()
+                            pass
                         elif (angle < 0):
-                            motor_left.right()
-                            motor_right.left()
-                        
-                       motor_left.forward(100)
-                       motor_right.forward(100)
+#                             motor_left.right()
+#                             motor_right.left()
+                            pass
+#                         motor_left.forward(100)
+#                         motor_right.forward(100)
                     elif (self.distance <= 10):
                         armAngle = self.detectObject(self.lower_blue, self.upper_blue, True)
                         if (armAngle == 0):
@@ -139,6 +144,8 @@ class robotVision(Thread):
         # Threshold the HSV image to get only blue colors
         mask = cv.inRange(self.hsv, lower, upper)
         cnts = self.findContours(mask)
+        
+        #contours were found and therefore object was found
         if (len(cnts) > 0):
             # return the biggest contourArea and determine centroid
             area = max(cnts, key=cv.contourArea)
@@ -170,6 +177,7 @@ class robotVision(Thread):
                     atan = self.angle_atan(self.distance, rCM)
                     return atan
             return 0
+        return None
 
     def centroid(self, momentsToCalculate, draw=True):
         m = cv.moments(momentsToCalculate)
