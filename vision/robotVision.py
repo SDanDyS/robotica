@@ -22,6 +22,7 @@ class robotVision(Thread):
         self.upper_white = np.array([0,0,255], dtype=np.uint8)
         self.absoluteDistance = []
         self.i = 0
+        self.left_motor = 
 
         self.camIsPi = False
 
@@ -94,6 +95,8 @@ class robotVision(Thread):
                     if (self.distance > 10):
                         angle = self.detectObject(self.lower_blue, self.upper_blue)
                         #X movement based on angle
+                        
+                        #bigger is left smaller is right
                         # Z forward movement -> provide the distance and...
                         ## internally wietze and chris will handle the speed
                         if (angle == 0):
