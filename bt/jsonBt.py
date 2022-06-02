@@ -10,8 +10,12 @@ import logging
 sock=BluetoothSocket(RFCOMM)
 
 class btServer():
-    def __init__(self, motor):
-        self.motor = motor
+    def __init__(self, sharedRobot):
+        # self.shared = sharedRobot
+        print(sharedRobot.motor_left)
+        self.motor_left = sharedRobot.motor_left
+        print(self.motor_left)
+        self.motor_right = sharedRobot.motor_right
 
     #versturen
     def input_and_send(self):
@@ -53,45 +57,63 @@ class btServer():
             lx = int(parsedData["LX"])
             ry = int(parsedData["RY"])
             rx = int(parsedData["RX"])
+
+            self.shared.ly = ly
+            self.shared.lx = lx
+            self.shared.ry = ry
+            self.shared.rx = rx
             
              #vooruit                   
-#             if ry < 2500 and ry > 2000 and ly < 2500 and ly > 2000 :
-#                  #print("rx < 1000")
-#                  #changeMotorSpeed(50)
-#                  self.motor.forward(25)
+#             if ry < 3000 and ry > 2500 and ly > 2500 and ly < 3000 :
+#                 print("self.motor_left.forward(25)")
+#                 #changeMotorSpeed(50)
+#                 self.motor_left.forward(25)
                 #achteruit
             if ry < 500 and ly < 500:
-                 self.motor.backwards()    
-                 #stop
-            elif ry <1880 and ry < 1950 and ry>1700 and ly > 1700:
-                 self.motor.stop()
+                print("self.motor_left.backwards()")
+                self.motor_left.backwards()
+                self.motor_right.backwards() 
+                #stop
+            if ry > 1920 and ry < 1990 and ly>1900 and ly < 1980:
+                print("self.motor_left.stop()")
+                self.motor_right.stop()
+                self.motor_left.stop()
 #                  Ssnel
-            elif ry>4000 and ly > 4000:
-                
-                self.motor.forward(100)
+            if ry>4000 and ly > 4000:
+                print("beide motoren")
+                self.motor_left.forward(100)
                 
                #rechts
-            elif ry > 3000 and ly < 1000:
-                 self.motor.right()
+            if ry > 4000 and ly < 1:
+                print("self.motor_left.right()")
+                self.motor_left.achter1()
+                self.motor_right.rightmotor() 
                  
                  #links
-            elif ry < 1000 and ly > 3000:
-                 self.motor.left()
+            if ry < 1 and ly > 4000:
+                print("links")
+                self.motor_left.leftmotor()
+                self.motor_right.achter2()
+            if ly==4095 and 1900 < ry <1900:
+               
+                print("linkermotor")
+                self.motor_left.leftmotor()
+#                 self.motor_left.stop()
             
-            #elif ry > 3500:
-                 #self.motor.rightmotor()
+            if ry==4095 and 1900 < ly <1900:
+                print("rechtemotor")
+                self.motor_right.rightmotor()
+            else:
+                self.motor_right.stop()
+                self.motor_left.stop()
+                
+                
             
-            #elif ly > 3500:
-#                  self.motor.leftmotor()
-    
-#             elif rx >= 1000:
-#                 #print("rx >= 1000")
-#                 #changeMotorSpeed(25)
-#                 pa.ChangeDutyCycle(0)
+           
     
     def run(self):
         #MAC address of ESP32
-        addr = "84:CC:A8:69:97:D2"
+        addr = "C8:C9:A3:C5:7A:E2"
         #uuid = "94f39d29-7d6d-437d-973b-fba39e49d4ee"
         #service_matches = find_service( uuid = uuid, address = addr )
         service_matches = find_service( address = addr )

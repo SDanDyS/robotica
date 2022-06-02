@@ -1,3 +1,5 @@
+##test bestand voor motoren om ze te laten draaien
+
 import RPi.GPIO as GPIO          
 from time import sleep
 import threading
@@ -55,12 +57,16 @@ while(1):
         print("stop")
         GPIO.output(in1,GPIO.LOW)
         GPIO.output(in2,GPIO.LOW)
+        GPIO.output(in3,GPIO.LOW)
+        GPIO.output(in4,GPIO.LOW)
         x='z'
 
     elif x=='f':
         print("forward")
         GPIO.output(in1,GPIO.HIGH)
         GPIO.output(in2,GPIO.LOW)
+        GPIO.output(in3,GPIO.HIGH)
+        GPIO.output(in4,GPIO.LOW)
         temp1=1
         x='z'
 
