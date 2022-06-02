@@ -32,16 +32,6 @@ class btServer():
             sock.send("\n")
     #ontvangen        
     def rx_and_echo(self):
-        print("--------=-=-=-=-=-=-=-=-=-=-=-=")
-        print(self.motor_left)
-        print(self.motor_right)
-        # self.motor_left.forward(100)
-        # self.motor_right.forward(100)
-
-
-#        
-#         sock.send("\nsend anything\n")
-                
         ly = 0
         lx = 0
         ry = 0
@@ -96,8 +86,6 @@ class btServer():
                 print("self.motor_left.stop()")
                 self.motor_right.stop()
                 self.motor_left.stop()
-                # self.motor_left.forward(100)
-                # self.motor_right.forward(100)
                 print(self.motor_left)
                 print(self.motor_right)
 
@@ -127,11 +115,6 @@ class btServer():
             if ry==4095 and 1900 < ly <1990:
                 print("rechtemotor")
                 self.motor_right.rightmotor()
-
-                
-                
-            
-           
     
     def run(self):
 
@@ -157,10 +140,6 @@ class btServer():
         host = first_match["host"]
 
         port=1
-        print("connecting to \"%s\" on %s, port %s" % (name, host, port))
-        print("--------=-=-=-=-=-=-=-=-=-=-=-=")
-        print(self.motor_left)
-        print(self.motor_right)
         self.motor_left.forward(100)
         self.motor_right.forward(100)
 
