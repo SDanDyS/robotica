@@ -11,6 +11,8 @@ class dashboardServer:
     @app.route('/api')
     def getData():
         data = {}
+        
+        # Bluetooth info
         bluetoothData = {}
         stdoutdata = sp.getoutput("hcitool con")
         if "84:CC:A8:69:97:D2" in stdoutdata.split():
@@ -27,7 +29,11 @@ class dashboardServer:
             bluetoothData['ry'] = "-"
             bluetoothData['rx'] = "-"
         data['bluetooth'] = bluetoothData
+
+        # Distance sensor
         data['distance'] = randrange(100)
+
+        # Weight sensor
         data['weight'] = randrange(100)
 
         json_data = json.dumps(data)
