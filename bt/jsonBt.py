@@ -86,9 +86,6 @@ class btServer():
                 print("self.motor_left.stop()")
                 self.motor_right.stop()
                 self.motor_left.stop()
-                print(self.motor_left)
-                print(self.motor_right)
-
 
 #                  Ssnel
             if ry>4000 and ly > 4000:
