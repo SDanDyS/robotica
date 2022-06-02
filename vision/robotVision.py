@@ -71,7 +71,7 @@ class RobotVision(Thread):
             blur = cv.GaussianBlur(self.frame, (37, 37), 0)
             self.hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)
             #distance and width
-            self.getFocalLength(self.screenWidth, 20, 21)
+            self.getFocalLength(self.screenWidth, 20, 15)
 
             # #FLAG 1 REPRESENTS DETECTING COOKIES
             # #FLAG 2 REPRESENTS SIMPLY DETECING A MOVING OBJECT
@@ -114,6 +114,11 @@ class RobotVision(Thread):
 #                         motor_right.forward(100)
                     elif (self.distance <= 10):
                         armAngle = self.detectObject(self.lower_blue, self.upper_blue, True)
+                        
+                        if (armAngle is None):
+                            #DO SOME RNG FORWARD, LEFT/RIGHT, BACKWARD MOVEMENT
+                            #AS IF IT'S SCANNING FOR SOMETHING
+                            continue
                         if (armAngle == 0):
                             #ARM SHOULD GO STRAIGHT DOWN
                             ##gripperMethod(armAngle)
