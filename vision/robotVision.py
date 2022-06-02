@@ -96,22 +96,20 @@ class RobotVision(Thread):
                     
                     if (self.distance > 10):
                         angle = self.detectObject(self.lower_blue, self.upper_blue)
-                        print(str(angle))
                         # NO CONTOUR FOUND AND THEREFORE NO OBJECT FOUND
                         if (angle is None):
                             #DO SOME RNG FORWARD, LEFT/RIGHT, BACKWARD MOVEMENT
                             #AS IF IT'S SCANNING FOR SOMETHING
                             continue
                         if (angle > 0):
-#                             motor_left.left()
-#                             motor_right.right()
-                            pass
+                            motor_left.left()
+                            motor_right.right()
                         elif (angle < 0):
-#                             motor_left.right()
-#                             motor_right.left()
-                            pass
-#                         motor_left.forward(100)
-#                         motor_right.forward(100)
+                            motor_left.right()
+                            motor_right.left()
+
+                        motor_left.forward(100)
+                        motor_right.forward(100)
                     elif (self.distance <= 10):
                         armAngle = self.detectObject(self.lower_blue, self.upper_blue, True)
                         
@@ -140,6 +138,8 @@ class RobotVision(Thread):
                    
             self.imshow()
 
+            #SET IN METHOD AND CALL WITHIN BLUETOOTH ONCE VISION IS DESTROYED
+            #ALSO MAKE SURE THE WHILE TRUE CHANGES TO WHILE VAR(WHICH WOULD BE TRUE), SO WE CAN SET IT TO FALSE
             if cv.waitKey(1) == ord('q'):
                 self.releaseStream()
                 GPIO.cleanup()
