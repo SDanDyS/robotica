@@ -10,15 +10,18 @@ import logging
 sock=BluetoothSocket(RFCOMM)
 
 class btServer():
-    def __init__(self, sharedRobot):
+    def __init__(self, motor_left, motor_right):
         # self.shared = sharedRobot
-        print(sharedRobot.motor_left)
-        self.motor_left = sharedRobot.motor_left
+        # print(sharedRobot.motor_left)
+        self.motor_left = motor_left
         print(self.motor_left)
-        self.motor_right = sharedRobot.motor_right
+        # print(self.motor_left)
+        self.motor_right = motor_right
+        print(self.motor_right)
 
     #versturen
     def input_and_send(self):
+
         #print("\nType something\n")
         while True:
             #data = input()
@@ -29,6 +32,13 @@ class btServer():
             sock.send("\n")
     #ontvangen        
     def rx_and_echo(self):
+        print("--------=-=-=-=-=-=-=-=-=-=-=-=")
+        print(self.motor_left)
+        print(self.motor_right)
+        # self.motor_left.forward(100)
+        # self.motor_right.forward(100)
+
+
 #        
 #         sock.send("\nsend anything\n")
                 
@@ -58,10 +68,18 @@ class btServer():
             ry = int(parsedData["RY"])
             rx = int(parsedData["RX"])
 
-            self.shared.ly = ly
-            self.shared.lx = lx
-            self.shared.ry = ry
-            self.shared.rx = rx
+#             # self.shared.ly = ly
+#             # self.shared.lx = lx
+#             # self.shared.ry = ry
+#             # self.shared.rx = rx
+
+            # if ly > 4000:
+            #     self.motor_left.forward(100)
+            #     self.motor_right.forward(100)
+            # else:
+            #     self.motor_right.stop()
+            #     self.motor_left.stop()
+
             
              #vooruit                   
 #             if ry < 3000 and ry > 2500 and ly > 2500 and ly < 3000 :
@@ -78,11 +96,17 @@ class btServer():
                 print("self.motor_left.stop()")
                 self.motor_right.stop()
                 self.motor_left.stop()
+                # self.motor_left.forward(100)
+                # self.motor_right.forward(100)
+                print(self.motor_left)
+                print(self.motor_right)
+
+
 #                  Ssnel
             if ry>4000 and ly > 4000:
                 print("beide motoren")
                 self.motor_left.forward(100)
-                
+                self.motor_right.forward(100)
                #rechts
             if ry > 4000 and ly < 1:
                 print("self.motor_left.right()")
@@ -94,24 +118,23 @@ class btServer():
                 print("links")
                 self.motor_left.leftmotor()
                 self.motor_right.achter2()
-            if ly==4095 and 1900 < ry <1900:
+            if ly==4095 and 1900 < ry <1990:
                
                 print("linkermotor")
                 self.motor_left.leftmotor()
 #                 self.motor_left.stop()
             
-            if ry==4095 and 1900 < ly <1900:
+            if ry==4095 and 1900 < ly <1990:
                 print("rechtemotor")
                 self.motor_right.rightmotor()
-            else:
-                self.motor_right.stop()
-                self.motor_left.stop()
+
                 
                 
             
            
     
     def run(self):
+
         #MAC address of ESP32
         addr = "C8:C9:A3:C5:7A:E2"
         #uuid = "94f39d29-7d6d-437d-973b-fba39e49d4ee"
@@ -135,18 +158,26 @@ class btServer():
 
         port=1
         print("connecting to \"%s\" on %s, port %s" % (name, host, port))
+        print("--------=-=-=-=-=-=-=-=-=-=-=-=")
+        print(self.motor_left)
+        print(self.motor_right)
+        self.motor_left.forward(100)
+        self.motor_right.forward(100)
+
 
         # Create the client socket
 #         sock=BluetoothSocket(RFCOMM)
         sock.connect((host, port))
-        
-        proc1 = Process(target=self.input_and_send)
-        proc1.start()
 
-        proc2 = Process(target=self.rx_and_echo)
-        proc2.start()
+        # proc1 = Process(target=self.input_and_send)
+        # proc1.start()
+
+        # proc2 = Process(target=self.rx_and_echo)
+        # proc2.start()
+        self.rx_and_echo()
 
         print("connected")
+
     
     def changeMotorSpeed(speed):
         print("Set speed to %s", speed)
