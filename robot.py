@@ -9,7 +9,16 @@ import logging
 import RPi.GPIO as GPIO
 import time
 
+import asyncio
+
 class Robot():
+    ly = 0
+
+    def get_ly(self):
+        return self.ly
+    def set_ly(self, value):
+        Robot.ly = value
+
     def __init__(self):
         # Set logging level (debug, info, warning, error, critical)
         logging.basicConfig(level=logging.DEBUG)
@@ -32,25 +41,36 @@ class Robot():
         # self.rx = 0
 
         # Start camera
-        print(args["camera"])
         if args["camera"] == 'pi':
             print("test")
             vision = RobotVision()
             vision.camSelector = args["camera"]
             vision.FLAG = 2
             vision.start()
+            time.sleep(32)
+            vision.releaseRobot()
             
         # dcMotorIndu.forward(1)
         # 
         # # Start bluetooth connection
         if args["bluetooth"] == True:
-            motor_left = dcMotorIndu(0)
-            motor_right = dcMotorIndu(1)
+            self.motor_left = dcMotorIndu(0)
+            self.motor_right = dcMotorIndu(1)
 
-            bluetooth = btServer(motor_left, motor_right)
+            bluetooth = btServer(self)
 
             # bluetooth = btServer(motor_left, motor_right)
             bluetooth.run()
+
+            # temp check self.ly
+            async def read_val():
+                while True:
+                    await asyncio.sleep(1)
+                    print("------------------------------")
+                    print(self.get_ly())
+            loop = asyncio.get_event_loop()
+            cors = asyncio.wait([read_val()])
+            loop.run_until_complete(cors)
         #     bluetooth.forward(25)
 
 
