@@ -4,7 +4,7 @@ from dashboard.dashboardServer import *
 from bt.jsonBt import *
 from drive.dcMotorIndu import *
 from threading import *
-from weight.scale import *
+#from weight.scale import *
 import logging
 import RPi.GPIO as GPIO
 import time
@@ -26,10 +26,10 @@ class Robot():
         args = vars(ap.parse_args())
 
         # Robot vars
-        self.ly = 0
-        self.lx = 0
-        self.ly = 0
-        self.rx = 0
+        # self.ly = 0
+        # self.lx = 0
+        # self.ly = 0
+        # self.rx = 0
 
         # Start camera
         if args["camera"] == True:
@@ -42,13 +42,13 @@ class Robot():
         # 
         # # Start bluetooth connection
         if args["bluetooth"] == True:
-            self.motor_left = dcMotorIndu(0)
-            self.motor_right = dcMotorIndu(1)
+            motor_left = dcMotorIndu(0)
+            motor_right = dcMotorIndu(1)
 
-            self.bluetooth = btServer(self)
+            bluetooth = btServer(motor_left, motor_right)
 
             # bluetooth = btServer(motor_left, motor_right)
-            self.bluetooth.run()
+            bluetooth.run()
         #     bluetooth.forward(25)
 
 
@@ -56,8 +56,8 @@ class Robot():
         # if args["enabledrive"] == True:
 
         # Start dashboard webserver
-        dashboard = dashboardServer()
-        dashboard.start()
+        # dashboard = dashboardServer()
+        # dashboard.start()
 
 if __name__ == "__main__":
     Robot()
