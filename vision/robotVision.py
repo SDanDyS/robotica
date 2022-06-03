@@ -1,6 +1,6 @@
 import math
 from cv2 import findContours
-from distance.afstandsensor import *
+from distance.HCSRO4Component import *
 from drive.dcMotorIndu import *
 import numpy as np
 import cv2 as cv
@@ -93,9 +93,8 @@ class RobotVision(Thread):
                     self.absoluteDistance = []
                     
                     if ((int(freq[0]) + 1) != int(distanceConfirmed) and (int(freq[0]) - 1) != int(distanceConfirmed) and (int(freq[0])) != int(distanceConfirmed)):
-                        continue
-                    
-                    if (self.distance > 10):
+                        pass
+                    elif (self.distance > 10):
                         angle = self.detectObject(self.lower_blue, self.upper_blue)
                         # NO CONTOUR FOUND AND THEREFORE NO OBJECT FOUND
                         if (angle is None):
@@ -111,28 +110,26 @@ class RobotVision(Thread):
 
                         motor_left.forward(100)
                         motor_right.forward(100)
+                        #SOMETHING WAS MEASURED, BUT NO VISION ON TARGET
                     elif (self.distance <= 10):
                         armAngle = self.detectObject(self.lower_blue, self.upper_blue, True)
-                        
                         if (armAngle is None):
-                            #DO SOME RNG FORWARD, LEFT/RIGHT, BACKWARD MOVEMENT
-                            #AS IF IT'S SCANNING FOR SOMETHING
                             continue
-                        if (armAngle == 0):
+                        elif (armAngle == 0):
                             #ARM SHOULD GO STRAIGHT DOWN
                             ##gripperMethod(armAngle)
                             pass
             elif (self.FLAG == 2):
                 angle = self.detectObject(self.lower_blue, self.upper_blue, forcedDistance=200)
-                if (angle is None):
+                if (angle is None or (angle > 1 or angle < -1)):
                     motor_left.stop()
                     motor_right.stop()
                 elif (angle < 0):
+                    motor_left.backwards()
+                    motor_right.backwards()
+                elif (angle > 0):
                    motor_left.forward(100)
                    motor_right.forward(100)
-                elif (angle > 0):
-                   motor_left.backwards()
-                   motor_right.backwards()
                    
             self.imshow()
 
@@ -179,7 +176,7 @@ class RobotVision(Thread):
                         return atan
                 else:
                     #ROTATION IS NO LONGER REQUIRED.
-                    #THIS ELSE STATEMENT CAN BE REMOVED
+                    #INSTEAD DO AN IMMEDIATE GRAB TO BRING IT UP
                     atan = self.angle_atan(self.distance, rCM)
                     return atan
             return 0
