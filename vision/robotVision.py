@@ -52,8 +52,9 @@ class RobotVision(Thread):
                 exit()
             self.screenWidth = self.cap.get(cv.CAP_PROP_FRAME_WIDTH)   # float `width`
             self.screenHeight = self.cap.get(cv.CAP_PROP_FRAME_HEIGHT)  # float `height`
-
-        while True:
+        
+        cycleOn = True
+        while (cycleOn == True):
             # Capture frame-by-frame
             if self.camIsPi == True:
                 self.frame = vs.read()
@@ -121,12 +122,6 @@ class RobotVision(Thread):
                             #ARM SHOULD GO STRAIGHT DOWN
                             ##gripperMethod(armAngle)
                             pass
-                        elif (armAngle > 0):
-                            #rotate to left with armAngle
-                            pass
-                        elif (armAngle < 0):
-                            #rotate to right with armAngle
-                            pass
             elif (self.FLAG == 2):
                 angle = self.detectObject(self.lower_blue, self.upper_blue, forcedDistance=200)
                 if (angle < 0):
@@ -143,7 +138,7 @@ class RobotVision(Thread):
             if cv.waitKey(1) == ord('q'):
                 self.releaseStream()
                 GPIO.cleanup()
-                break
+                cycleOn = False
 
     def detectObject(self, lower, upper, gripper = False, forcedDistance = False):
         # Threshold the HSV image to get only blue colors
@@ -179,6 +174,8 @@ class RobotVision(Thread):
                         atan = self.angle_atan(self.distance, rCM)
                         return atan
                 else:
+                    #ROTATION IS NO LONGER REQUIRED.
+                    #THIS ELSE STATEMENT CAN BE REMOVED
                     atan = self.angle_atan(self.distance, rCM)
                     return atan
             return 0
