@@ -101,8 +101,8 @@ class RobotVision(Thread):
                         if (angle is None):
                             #DO SOME RNG FORWARD, LEFT/RIGHT, BACKWARD MOVEMENT
                             #AS IF IT'S SCANNING FOR SOMETHING
-                            continue
-                        if (angle > 0):
+                            pass
+                        elif (angle > 0):
                             motor_left.left()
                             motor_right.right()
                         elif (angle < 0):
@@ -125,15 +125,14 @@ class RobotVision(Thread):
             elif (self.FLAG == 2):
                 angle = self.detectObject(self.lower_blue, self.upper_blue, forcedDistance=200)
                 if (angle is None):
-                    #DO SOME RNG FORWARD, LEFT/RIGHT, BACKWARD MOVEMENT
-                    #AS IF IT'S SCANNING FOR SOMETHING
-                    continue
-                if (angle < 0):
+                    motor_left.stop()
+                    motor_right.stop()
+                elif (angle < 0):
                    motor_left.forward(100)
                    motor_right.forward(100)
                 elif (angle > 0):
-                   motor_left.backward(100)
-                   motor_right.backward(100)
+                   motor_left.backwards()
+                   motor_right.backwards()
                    
             self.imshow()
 
@@ -160,6 +159,7 @@ class RobotVision(Thread):
             # WE ARE NOT ACTUALLY CALCULATING WIDTH OF THE OBJECT, BUT RATHER POINT 0 TO POINT CENTROID X
             rCM = 0
             if (forcedDistance):
+                self.distance = forcedDistance
                 if (forcedDistance != 0):
                     objW = self.pointZeroToObjectCentroid(self.cx(area), forcedDistance, self.focalLength)
                     screenW = self.pointZeroToObjectCentroid(int(self.screenWidth / 2), forcedDistance, self.focalLength)
