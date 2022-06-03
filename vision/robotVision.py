@@ -122,15 +122,18 @@ class RobotVision(Thread):
             elif (self.FLAG == 2):
                 angle = self.detectObject(self.lower_blue, self.upper_blue, forcedDistance=200)
                 ##or (-1 > angle < 1)
-                if (angle is None or (-1 > angle < 1)):
+                if (angle is None):
                     motor_left.stop()
                     motor_right.stop()
-                elif (angle < 0):
+                elif (angle < -1):
                     motor_left.backwards()
                     motor_right.backwards()
-                elif (angle > 0):
+                elif (angle > 1):
                    motor_left.forward(100)
                    motor_right.forward(100)
+                else:
+                    motor_left.stop()
+                    motor_right.stop()                    
                    
             self.imshow()
 
