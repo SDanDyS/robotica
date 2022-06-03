@@ -121,7 +121,8 @@ class RobotVision(Thread):
                             pass
             elif (self.FLAG == 2):
                 angle = self.detectObject(self.lower_blue, self.upper_blue, forcedDistance=200)
-                if (angle is None or (angle > 1 or angle < -1)):
+                ##or (-1 > angle < 1)
+                if (angle is None or (-1 > angle < 1)):
                     motor_left.stop()
                     motor_right.stop()
                 elif (angle < 0):
