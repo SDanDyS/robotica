@@ -32,8 +32,10 @@ class Robot():
         # self.rx = 0
 
         # Start camera
-        if args["camera"] == True:
-            vision = robotVision()
+        print(args["camera"])
+        if args["camera"] == 'pi':
+            print("test")
+            vision = RobotVision()
             vision.camSelector = args["camera"]
             vision.FLAG = 2
             vision.start()

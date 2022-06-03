@@ -40,7 +40,9 @@ class btServer():
         while True:
             data = sock.recv(self.buf_size)
 
-            if not data: break
+            if not data:
+                print("Didn't receive data, check connection")
+                break
             
             utfData = data.decode("utf-8")
 
@@ -63,56 +65,47 @@ class btServer():
 #             # self.shared.ry = ry
 #             # self.shared.rx = rx
 
-            # if ly > 4000:
-            #     self.motor_left.forward(100)
-            #     self.motor_right.forward(100)
-            # else:
-            #     self.motor_right.stop()
-            #     self.motor_left.stop()
-
             
-             #vooruit                   
-#             if ry < 3000 and ry > 2500 and ly > 2500 and ly < 3000 :
-#                 print("self.motor_left.forward(25)")
-#                 #changeMotorSpeed(50)
-#                 self.motor_left.forward(25)
-                #achteruit
-            if ry < 500 and ly < 500:
-                print("self.motor_left.backwards()")
-                self.motor_left.backwards()
-                self.motor_right.backwards() 
-                #stop
-            if ry > 1920 and ry < 1990 and ly>1900 and ly < 1980:
-                print("self.motor_left.stop()")
+                
+            #right motor stop
+            if ry > 1920 and ry < 1990:
                 self.motor_right.stop()
+            #left motor stop
+            if ly>1900 and ly < 1980:
                 self.motor_left.stop()
-
-#                  Ssnel
+#                  forward
             if ry>4000 and ly > 4000:
                 print("beide motoren")
                 self.motor_left.forward(100)
                 self.motor_right.forward(100)
-               #rechts
+               #right
             if ry > 4000 and ly < 1:
                 print("self.motor_left.right()")
                 self.motor_left.achter1()
                 self.motor_right.rightmotor() 
                  
-                 #links
+                 #left
             if ry < 1 and ly > 4000:
                 print("links")
                 self.motor_left.leftmotor()
                 self.motor_right.achter2()
+                
+            #left motor forward
             if ly==4095 and 1900 < ry <1990:
                
                 print("linkermotor")
                 self.motor_left.leftmotor()
 #                 self.motor_left.stop()
-            
+            #right motor forward
             if ry==4095 and 1900 < ly <1990:
                 print("rechtemotor")
                 self.motor_right.rightmotor()
-    
+            #right motor backwards
+            if ry < 1:
+                self.motor_right.achter2()
+            #left motor backwards
+            if ly < 1:
+                self.motor_right.achter1()
     def run(self):
 
         #MAC address of ESP32

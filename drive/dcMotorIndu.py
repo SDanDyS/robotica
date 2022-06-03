@@ -59,15 +59,7 @@ class dcMotorIndu(threading.Thread):
             GPIO.output(self.in3,GPIO.HIGH)
             GPIO.output(self.in4,GPIO.LOW)
         
-        self.pwm.start(speed)
-#         GPIO.output(self.in1,GPIO.HIGH)
-#         GPIO.output(self.in2,GPIO.LOW)
-#         GPIO.output(self.in3,GPIO.HIGH)
-#         GPIO.output(self.in4,GPIO.LOW)
-#         pa=GPIO.PWM(self.ena,1000)
-#         pb=GPIO.PWM(self.enb,1000)
-#         pa.start(speed)
-#         pb.start(speed)
+        self.pwm.start(speed)         
             
     def backwards(self):
          if self.selectedMotor == 0:  
@@ -109,8 +101,7 @@ class dcMotorIndu(threading.Thread):
         if self.selectedMotor == 1:
              GPIO.output(self.in3,GPIO.HIGH)
              GPIO.output(self.in4,GPIO.LOW)
-        #pa=GPIO.PWM(self.ena,1000)
-        #pb=GPIO.PWM(self.enb,1000)
+        
              self.pwm.ChangeDutyCycle(100)
              self.pwm.ChangeDutyCycle(100)
         
@@ -145,8 +136,6 @@ class dcMotorIndu(threading.Thread):
         if self.selectedMotor == 1:
              GPIO.output(self.in3,GPIO.LOW)
              GPIO.output(self.in4,GPIO.LOW)
-#              pa.ChangeDutyCycle(0)
-#              pb.ChangeDutyCycle(0)
         
         
         
