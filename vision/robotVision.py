@@ -124,6 +124,10 @@ class RobotVision(Thread):
                             pass
             elif (self.FLAG == 2):
                 angle = self.detectObject(self.lower_blue, self.upper_blue, forcedDistance=200)
+                if (angle is None):
+                    #DO SOME RNG FORWARD, LEFT/RIGHT, BACKWARD MOVEMENT
+                    #AS IF IT'S SCANNING FOR SOMETHING
+                    continue
                 if (angle < 0):
                    motor_left.forward(100)
                    motor_right.forward(100)
