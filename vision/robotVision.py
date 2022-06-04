@@ -22,8 +22,12 @@ class RobotVision(Thread):
         self.upper_blue = np.array([128, 255, 255])
         self.absoluteDistance = []
         self.i = 0
+        self.cycleOn = True
+
         motor_left = dcMotorIndu(0)
         motor_right = dcMotorIndu(1)
+        firstFrame = True
+        previousAngle = None
 
         self.camIsPi = False
 
@@ -53,8 +57,7 @@ class RobotVision(Thread):
             self.screenWidth = self.cap.get(cv.CAP_PROP_FRAME_WIDTH)   # float `width`
             self.screenHeight = self.cap.get(cv.CAP_PROP_FRAME_HEIGHT)  # float `height`
         
-        cycleOn = True
-        while (cycleOn == True):
+        while (self.cycleOn == True):
             # Capture frame-by-frame
             if self.camIsPi == True:
                 self.frame = vs.read()
@@ -121,28 +124,36 @@ class RobotVision(Thread):
                             pass
             elif (self.FLAG == 2):
                 angle = self.detectObject(self.lower_blue, self.upper_blue, forcedDistance=200)
-                ##or (-1 > angle < 1)
-                if (angle is None):
-                    motor_left.stop()
-                    motor_right.stop()
-                elif (angle < -1):
-                    motor_left.backwards()
-                    motor_right.backwards()
-                elif (angle > 1):
-                   motor_left.forward(100)
-                   motor_right.forward(100)
+                if (firstFrame == True):
+                    if (angle is None):
+                        motor_left.stop()
+                        motor_right.stop()
+                    firstFrame = False
                 else:
-                    motor_left.stop()
-                    motor_right.stop()                    
+                    if (angle is not None and angle < -1):
+                        motor_left.backwards()
+                        motor_right.backwards()
+                        previousAngle = angle
+                    elif (angle is not None and angle > 1):
+                        motor_left.forward(100)
+                        motor_right.forward(100)
+                        previousAngle = angle
+                    else:
+                        if (previousAngle > 1 and previousAngle is not None):
+                            motor_left.forward(100)
+                            motor_right.forward(100)    
+                        elif (previousAngle < -1 and previousAngle is not None):
+                            motor_left.backwards()
+                            motor_right.backwards()
+                        # motor_left.stop()
+                        # motor_right.stop()                    
                    
             self.imshow()
-
-            #SET IN METHOD AND CALL WITHIN BLUETOOTH ONCE VISION IS DESTROYED
-            #ALSO MAKE SURE THE WHILE TRUE CHANGES TO WHILE VAR(WHICH WOULD BE TRUE), SO WE CAN SET IT TO FALSE
-            if cv.waitKey(1) == ord('q'):
-                self.releaseStream()
-                GPIO.cleanup()
-                cycleOn = False
+    
+    def releaseRobot(self):
+        self.releaseStream()
+        GPIO.cleanup()
+        self.cycleOn = False
 
     def detectObject(self, lower, upper, gripper = False, forcedDistance = False):
         # Threshold the HSV image to get only blue colors
@@ -215,7 +226,7 @@ class RobotVision(Thread):
 
     def releaseStream(self):
         # When everything done, release the capture
-        self.cap.release()
+        #self.cap.release()
         cv.destroyAllWindows()
 
     def imshow(self):
