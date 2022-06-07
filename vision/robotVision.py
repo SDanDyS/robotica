@@ -1,4 +1,5 @@
 import math
+from queue import Empty
 from cv2 import findContours
 from distance.HCSRO4Component import *
 from drive.dcMotorIndu import *
@@ -22,8 +23,12 @@ class RobotVision(Thread):
         self.upper_blue = np.array([128, 255, 255])
         self.absoluteDistance = []
         self.i = 0
+        self.cycleOn = True
+
         motor_left = dcMotorIndu(0)
         motor_right = dcMotorIndu(1)
+        firstFrame = True
+        previousAngle = None
 
         self.camIsPi = False
 
@@ -53,8 +58,7 @@ class RobotVision(Thread):
             self.screenWidth = self.cap.get(cv.CAP_PROP_FRAME_WIDTH)   # float `width`
             self.screenHeight = self.cap.get(cv.CAP_PROP_FRAME_HEIGHT)  # float `height`
         
-        cycleOn = True
-        while (cycleOn == True):
+        while (self.cycleOn == True):
             # Capture frame-by-frame
             if self.camIsPi == True:
                 self.frame = vs.read()
@@ -68,9 +72,6 @@ class RobotVision(Thread):
                     break
 
             cv.circle(self.frame, (int(self.screenWidth / 2), int(self.screenHeight / 2)), 5, (255, 255, 255), -1)
-
-            blur = cv.GaussianBlur(self.frame, (37, 37), 0)
-            self.hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)
             #distance and width
             self.getFocalLength(self.screenWidth, 20, 15)
 
@@ -78,7 +79,10 @@ class RobotVision(Thread):
             # #FLAG 2 REPRESENTS SIMPLY DETECING A MOVING OBJECT
             if (self.FLAG == 1):
                 self.distance = sensorDistance()
-                
+
+                blur = cv.GaussianBlur(self.frame, (37, 37), 0)
+                self.hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)
+
                 # ENFORCE A CALIBRATED DISTANCE
                 if (self.i == 0):
                     while (self.i < 5):
@@ -95,7 +99,9 @@ class RobotVision(Thread):
                     if ((int(freq[0]) + 1) != int(distanceConfirmed) and (int(freq[0]) - 1) != int(distanceConfirmed) and (int(freq[0])) != int(distanceConfirmed)):
                         pass
                     elif (self.distance > 10):
-                        angle = self.detectObject(self.lower_blue, self.upper_blue)
+                        area = self.detectObject(self.lower_blue, self.upper_blue)
+                        self.drawDetectedObject(area)
+                        angle = self.angleToRotate(area)
                         # NO CONTOUR FOUND AND THEREFORE NO OBJECT FOUND
                         if (angle is None):
                             #DO SOME RNG FORWARD, LEFT/RIGHT, BACKWARD MOVEMENT
@@ -110,53 +116,53 @@ class RobotVision(Thread):
 
                         motor_left.forward(100)
                         motor_right.forward(100)
+                        time.sleep(1)
+                        motor_left.stop()
+                        motor_right.stop()
                         #SOMETHING WAS MEASURED, BUT NO VISION ON TARGET
                     elif (self.distance <= 10):
-                        armAngle = self.detectObject(self.lower_blue, self.upper_blue, True)
-                        if (armAngle is None):
-                            continue
-                        elif (armAngle == 0):
-                            #ARM SHOULD GO STRAIGHT DOWN
-                            ##gripperMethod(armAngle)
+                        area = self.detectObject(self.lower_blue, self.upper_blue)
+                        self.drawDetectedObject(area)
+                        angle = self.angleToRotate(area)
+                        if (angle is None):
+                            pass
+                        else:
+                            ##gripperMethod()
                             pass
             elif (self.FLAG == 2):
-                angle = self.detectObject(self.lower_blue, self.upper_blue, forcedDistance=200)
-                ##or (-1 > angle < 1)
-                if (angle is None):
-                    motor_left.stop()
-                    motor_right.stop()
-                elif (angle < -1):
-                    motor_left.backwards()
-                    motor_right.backwards()
-                elif (angle > 1):
-                   motor_left.forward(100)
-                   motor_right.forward(100)
+                blur = cv.GaussianBlur(self.frame, (9, 9), 0)
+                self.hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)
+
+                area = self.detectObject(self.lower_blue, self.upper_blue, int(self.screenHeight / 2 - 100), int(self.screenHeight / 2 + 100))
+                (xg, yg, wg, hg) = cv.boundingRect(area)
+                #SHOULD BE A NEGATE, FIND OUT HOW
+                if (yg > int(self.screenHeight / 2 + 100) or yg > int(self.screenHeight / 2 - 100)):
+                    print("yg value is: ", str(yg))
+                    print("Compared to screenheight of: ", str(self.screenHeight / 2))
+                    pass
                 else:
-                    motor_left.stop()
-                    motor_right.stop()                    
+                    self.drawDetectedObject(area)
+                    angle = self.angleToRotate(area, 200)
+                    if (angle is not None and angle < -1):
+                        motor_left.backwards()
+                        motor_right.backwards()
+                    elif (angle is not None and angle > 1):
+                        motor_left.forward(100)
+                        motor_right.forward(100)
                    
             self.imshow()
+    
+    def releaseRobot(self):
+        self.releaseStream()
+        GPIO.cleanup()
+        self.cycleOn = False
 
-            #SET IN METHOD AND CALL WITHIN BLUETOOTH ONCE VISION IS DESTROYED
-            #ALSO MAKE SURE THE WHILE TRUE CHANGES TO WHILE VAR(WHICH WOULD BE TRUE), SO WE CAN SET IT TO FALSE
-            if cv.waitKey(1) == ord('q'):
-                self.releaseStream()
-                GPIO.cleanup()
-                cycleOn = False
+    def drawDetectedObject(self, area):
+        self.centroid(area)
+        (xg, yg, wg, hg) = cv.boundingRect(area)
+        cv.rectangle(self.frame, (xg, yg), (xg + wg, yg + hg), (0, 255, 0), 2)
 
-    def detectObject(self, lower, upper, gripper = False, forcedDistance = False):
-        # Threshold the HSV image to get only blue colors
-        mask = cv.inRange(self.hsv, lower, upper)
-        cnts = self.findContours(mask)
-        
-        #contours were found and therefore object was found
-        if (len(cnts) > 0):
-            # return the biggest contourArea and determine centroid
-            area = max(cnts, key=cv.contourArea)
-            self.centroid(area)
-            (xg, yg, wg, hg) = cv.boundingRect(area)
-            cv.rectangle(self.frame, (xg, yg), (xg + wg, yg + hg), (0, 255, 0), 2)
-
+    def angleToRotate(self, area, forcedDistance = False):
             # WE ARE NOT ACTUALLY CALCULATING WIDTH OF THE OBJECT, BUT RATHER POINT 0 TO POINT CENTROID X
             rCM = 0
             if (forcedDistance):
@@ -174,17 +180,42 @@ class RobotVision(Thread):
             # either no object was detected to determine width or the threshold has been hit and therefore...
             # no position has to change
             if (rCM != 0):
-                if (gripper is False):
-                    if (rCM > 0.5 or rCM < -0.5):
-                        atan = self.angle_atan(self.distance, rCM)
-                        return atan
-                else:
-                    #ROTATION IS NO LONGER REQUIRED.
-                    #INSTEAD DO AN IMMEDIATE GRAB TO BRING IT UP
+                if (rCM > 0.5 or rCM < -0.5):
                     atan = self.angle_atan(self.distance, rCM)
                     return atan
+            #NO ROTATION REQUIRED
             return 0
+
+    def is_bad_contour(self, c):
+        # approximate the contour
+        peri = cv.arcLength(c, True)
+        approx = cv.approxPolyDP(c, 0.02 * peri, True)
+        # the contour is 'bad' if it is not a rectangle
+        return not len(approx) == 4
+
+    def detectObject(self, lower, upper, topVal = False, botVal = False):
+        # Threshold the HSV image to get only blue colors
+        mask = cv.inRange(self.hsv, lower, upper)
+        cnts = self.findContours(mask)
+        filtercnts = []
+        #contours were found
+        if (len(cnts) > 0):
+            if (botVal is not False and topVal is not False):
+                for cnt in cnts:
+                    if (self.is_bad_contour(cnt) == False):
+                        area = cv.contourArea(cnt)
+                        centroidY = self.cy(area)
+                        if (centroidY > topVal and centroidY < botVal):
+                            filtercnts.append(area)
+                area = max(filtercnts)
+            else:
+                area = max(cnts, key=cv.contourArea)
+
+            # return the biggest contourArea
+            return area
+
         return None
+
 
     def centroid(self, momentsToCalculate, draw=True):
         m = cv.moments(momentsToCalculate)
@@ -215,7 +246,7 @@ class RobotVision(Thread):
 
     def releaseStream(self):
         # When everything done, release the capture
-        self.cap.release()
+        #self.cap.release()
         cv.destroyAllWindows()
 
     def imshow(self):

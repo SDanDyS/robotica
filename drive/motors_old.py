@@ -53,7 +53,7 @@ while(1):
          x='z'
 
 
-    elif x=='s':
+    elif x=='x':
         print("stop")
         GPIO.output(in1,GPIO.LOW)
         GPIO.output(in2,GPIO.LOW)
@@ -61,7 +61,7 @@ while(1):
         GPIO.output(in4,GPIO.LOW)
         x='z'
 
-    elif x=='f':
+    elif x=='w':
         print("forward")
         GPIO.output(in1,GPIO.HIGH)
         GPIO.output(in2,GPIO.LOW)
@@ -70,7 +70,7 @@ while(1):
         temp1=1
         x='z'
 
-    elif x=='b':
+    elif x=='s':
         print("backward")
         GPIO.output(in1,GPIO.LOW)
         GPIO.output(in2,GPIO.HIGH)
@@ -79,11 +79,31 @@ while(1):
 
         temp1=0
         x='z'
+    
+    elif x=='a':
+        print("left")
+        GPIO.output(in1,GPIO.HIGH)
+        GPIO.output(in2,GPIO.LOW)
+        GPIO.output(in3,GPIO.LOW)
+        GPIO.output(in4,GPIO.HIGH)   
+        pb.ChangeDutyCycle(100)
+        p.ChangeDutyCycle(100)
+    
+    elif x=='d':
+        print("right")
+        GPIO.output(in1,GPIO.LOW)
+        GPIO.output(in2,GPIO.HIGH)
+        GPIO.output(in3,GPIO.HIGH)
+        GPIO.output(in4,GPIO.LOW)   
+        pb.ChangeDutyCycle(100)
+        p.ChangeDutyCycle(100)
 
-    elif x=='l':
-        print("low")
-        p.ChangeDutyCycle(25)
-        x='z'
+
+
+    # elif x=='l':
+    #     print("low")
+    #     p.ChangeDutyCycle(25)
+    #     x='z'
 
     elif x=='m':
         print("medium")

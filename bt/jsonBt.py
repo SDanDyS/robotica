@@ -10,14 +10,17 @@ import logging
 sock=BluetoothSocket(RFCOMM)
 
 class btServer():
-    def __init__(self, motor_left, motor_right):
-        # self.shared = sharedRobot
-        # print(sharedRobot.motor_left)
-        self.motor_left = motor_left
-        print(self.motor_left)
-        # print(self.motor_left)
-        self.motor_right = motor_right
-        print(self.motor_right)
+    shared = None
+    def __init__(self, shared):
+        self.motor_left = shared.motor_left
+        self.motor_right = shared.motor_right
+
+        btServer.shared = shared
+        # self.shared.ly = 50
+        # self.set_ly = shared.set_ly(50)
+        # def set_ly(value):
+        #     shared.set_ly(value)
+        # shared.set_ly(50)
 
     #versturen
     def input_and_send(self):
@@ -60,12 +63,16 @@ class btServer():
             ry = int(parsedData["RY"])
             rx = int(parsedData["RX"])
 
-#             # self.shared.ly = ly
-#             # self.shared.lx = lx
-#             # self.shared.ry = ry
-#             # self.shared.rx = rx
-
-            
+            # self.shared.ly = ly
+            # self.shared.lx = lx
+            # self.shared.ry = ry
+            # self.shared.rx = rx
+            # print(self.shared.ly)
+            # print(ly)
+            # self.shared.ly = 50
+            # self.shared.set_ly(50)
+            # self.set_ly(50)
+            btServer.shared.ly = 50
                 
             #right motor stop
             if ry > 1920 and ry < 1990:
@@ -130,20 +137,16 @@ class btServer():
         host = first_match["host"]
 
         port=1
-        self.motor_left.forward(100)
-        self.motor_right.forward(100)
-
 
         # Create the client socket
-#         sock=BluetoothSocket(RFCOMM)
         sock.connect((host, port))
 
         # proc1 = Process(target=self.input_and_send)
         # proc1.start()
 
-        # proc2 = Process(target=self.rx_and_echo)
-        # proc2.start()
-        self.rx_and_echo()
+        proc2 = Process(target=self.rx_and_echo)
+        proc2.start()
+        # self.rx_and_echo()
 
         print("connected")
 
