@@ -16,8 +16,15 @@ try:
 except ImportError:
     logging.warning("Couldn't import PiCamera, continuing wihout...")
 
-
+"""
+    RobotVision class holds all the vision related data
+"""
 class RobotVision(Thread):
+    """
+        Entry point of the start method
+        Initializes all the required data
+        Serves as a controller for the rest of the class
+    """
     def run(self):
         self.lower_blue = np.array([90, 50, 70])
         self.upper_blue = np.array([128, 255, 255])
@@ -137,11 +144,18 @@ class RobotVision(Thread):
                 cv.destroyAllWindows()
                 break
 
+    """
+        Draws a rectangle based on  provided area and prints centroid
+    """
     def drawDetectedObject(self, area):
         self.centroid(area)
         (xg, yg, wg, hg) = cv.boundingRect(area)
         cv.rectangle(self.frame, (xg, yg), (xg + wg, yg + hg), (0, 255, 0), 2)
 
+    """
+        Provide area and optionally a forcedDistance
+        Based on distance and camera it determines how many degrees the object has to turn
+    """
     def angleToRotate(self, area, forcedDistance = False):
             # WE ARE NOT ACTUALLY CALCULATING WIDTH OF THE OBJECT, BUT RATHER POINT 0 TO POINT CENTROID X
             rCM = 0
@@ -166,13 +180,20 @@ class RobotVision(Thread):
             #NO ROTATION REQUIRED
             return 0
 
-    def is_bad_contour(self, c):
+    """
+        Accept a contour and determine whether it's a rectangle or not
+    """
+    def isBadContour(self, c):
         # approximate the contour
         peri = cv.arcLength(c, True)
         approx = cv.approxPolyDP(c, 0.02 * peri, True)
         # the contour is 'bad' if it is not a rectangle
         return not len(approx) == 4
 
+    """
+        Detect objects based on a mask (HSV) value
+        Optionally a top value of pixels and bottom value of pixels can be provided to narrow the search scope
+    """
     def detectObject(self, lower, upper, topVal = False, botVal = False):
         # Threshold the HSV image to get only blue colors
         mask = cv.inRange(self.hsv, lower, upper)
@@ -186,7 +207,7 @@ class RobotVision(Thread):
             cv.drawContours(self.frame, cnts, -1, (0,255,0), 3)
             if (botVal is not False and topVal is not False):
                 for cnt in cnts:
-                    if (self.is_bad_contour(cnt) == False):
+                    if (self.isBadContour(cnt) == False):
                         cntArea = cv.contourArea(cnt)
                         if (cntArea is None):
                             print("Contour Area is none")
@@ -206,6 +227,10 @@ class RobotVision(Thread):
         return cntArea
 
 
+    """
+        Determine centroid and draw per default
+        Return moments for further usage
+    """
     def centroid(self, momentsToCalculate, draw=True):
         m = cv.moments(momentsToCalculate)
         if ((m['m10'] and m['m00']) and (m['m01'] and m['m00'])):
@@ -217,6 +242,9 @@ class RobotVision(Thread):
         # return for external use
         return m
 
+    """
+        Calculates moments on the X axis and returns it
+    """
     def cx(self, momentsToCalculate):
         m = cv.moments(momentsToCalculate)
         cx = 0
@@ -225,6 +253,9 @@ class RobotVision(Thread):
             cx = int(m['m10']/m['m00'])
         return cx
 
+    """
+        Calculates moments on the Y axis and returns it
+    """
     def cy(self, momentsToCalculate):
         m = cv.moments(momentsToCalculate)
         cy = 0
@@ -233,26 +264,46 @@ class RobotVision(Thread):
             cy = int(m['m01']/m['m00'])
         return cy
 
+    """
+        Shows the generated frame from the RobotVision class
+    """
     def imshow(self):
         cv.imshow("Video capture (Final result)", self.frame)
 
+    """
+        Find the contours based on a provided mask
+        Returns ONLY the contours! Not the hierarchy!
+    """
     def findContours(self, mask):
         return cv.findContours(mask.copy(), cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[-2]
 
-    # Calculate the focal length of the camera
+    """
+        Calculate the focal length of the camera based on a pixelWidth, distance and width
+    """
     def getFocalLength(self, pixelWidth, distance, width):
         self.focalLength = (pixelWidth * distance) / width
 
+    """
+        Determine what the distance is from point A to centroid point
+        Returns the distance
+    """
     def pointZeroToObjectCentroid(self, pixel, distance, focal):
         w = (pixel * distance) / focal
         return w
 
-    # Get the distance from the camera to the object from the distance from the sensor to the object and the hight of the camera
+    """
+        Provide distance to object and height to the camera
+        Calculates and returns the square root of C^2 = A^2 + B^2
+        NOTICE: PROVIDE AN ANGLE OF 90 DEGREES! THIS IS A REQUIREMENT TO IMPLEMENT THE PYTHAGOREAN THEOREM!
+    """
     def getCameraDistance(self, distanceToObject, heightToCamera):
         cameraDistance = distanceToObject**2 + heightToCamera**2
         return math.sqrt(cameraDistance)
 
-    #this returns the value in degrees! INVERSES THE TAN !
+    """
+        Returns the value in degrees
+        Inverses the TAN
+    """
     def angleAtan(self, adjacentSide, oppositeSide):
         value = oppositeSide / adjacentSide
         return math.degrees(math.atan(value))

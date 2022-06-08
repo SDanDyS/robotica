@@ -11,21 +11,36 @@ sock=BluetoothSocket(RFCOMM)
 
 class btServer():
     def __init__(self, shared):
+        '''
+        Constructs the btServer class.
+
+                Parameters:
+                        shared (object): Shared objects from robot.py, containing left and right DC motors.
+        '''
+
         self.motor_left = shared.motor_left
         self.motor_right = shared.motor_right
 
-    # Send data to controller
-    def sender(self):
+    def sender(self, input):
+        '''
+        Sends data (input) to the Bluetooth controller.
+
+                Parameters:
+                        input (string): String to be sent to controller
+        '''
+
         while True:
             #data = input()
             #if len(data) == 0: break
             data = 1
-            # time.sleep(40)
-            sock.send("ahoi")
+            # time.sleep(4)
+            sock.send(input)
             sock.send("\n")
 
-    # Receive data from controller        
     def receiver(self):
+        '''
+        Processes the data received by the Bluetooth controller and controls DC motors.
+        '''
         ly = 0
         lx = 0
         ry = 0
@@ -89,6 +104,10 @@ class btServer():
                 self.motor_right.achter2()
 
     def run(self):
+        '''
+        Sets up the Bluetooth connection & execute new thread to process incoming data.
+        '''
+
         # MAC address of ESP32
         addr = "C8:C9:A3:C5:7A:E2"
 
@@ -122,10 +141,16 @@ class btServer():
         receiver.start()
     
     def active(self):
+        '''
+        Returns state of Bluetooth connection.
+
+                Returns:
+                        boolean: Connected True/False
+        '''
         if sock.connect((host, port)) == True:
-            return "actief"
+            return True
         else:
-            return "non actief"
+            return False
         
 if __name__ == "__main__":
     try:

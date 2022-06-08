@@ -8,9 +8,17 @@ import json
 class dashboardServer:
     app = Flask(__name__)
 
-    # Expose the API endpoint
     @app.route('/api')
     def getData():
+        '''
+        Exposes the robot API endpoint.
+
+                Returns:
+                        json_data (str): JSON content of robot,
+                        status (int): 200 OK
+                        headers (array): Set CORS, content-type application/json
+        '''
+
         data = {}
 
         # General robot status
@@ -40,12 +48,21 @@ class dashboardServer:
         # Weight sensor
         data['weight'] = randrange(100)
 
+        # Convert to JSON string
         json_data = json.dumps(data)
+
+        # Return in JSON format
         return json_data, 200, {"Access-Control-Allow-Origin": "*", 'Content-Type': 'application/json'}
 
-    # Show the HTML dashboard
     @app.route('/')
     def index():
+        '''
+        Shows the Dashboard page.
+
+                Returns:
+                        render_template (str): HTML content of index.html
+        '''
+
         return render_template("index.html")
 
     # @app.route('/api/rand')
@@ -68,7 +85,6 @@ class dashboardServer:
         logging.info("Starting webserver...")
         from waitress import serve
         serve(self.app, host="0.0.0.0", port=8080)
-        # self.app.run(host='0.0.0.0', port=8080)
 
 if __name__ == '__main__':
     app.run(debug=True)
