@@ -73,7 +73,7 @@ class dcMotorIndu(threading.Thread):
         elif self.selectedMotor == 1:
             GPIO.output(self.in3,GPIO.HIGH)
             GPIO.output(self.in4,GPIO.LOW)
-        
+
         self.pwm.start(speed)         
             
     def backwards(self):
@@ -83,125 +83,125 @@ class dcMotorIndu(threading.Thread):
         none
         """
         if self.selectedMotor == 0:
-           GPIO.output(self.in1,GPIO.LOW)
-           GPIO.output(self.in2,GPIO.HIGH)
-           self.pwm.start(100)
-           self.pwm.start(100)
+            GPIO.output(self.in1,GPIO.LOW)
+            GPIO.output(self.in2,GPIO.HIGH)
+            self.pwm.start(100)
+            self.pwm.start(100)
         if self.selectedMotor == 1:
-           GPIO.output(self.in3,GPIO.LOW)
-           GPIO.output(self.in4,GPIO.HIGH)
-           self.pwm.start(100)
-           self.pwm.start(100)
+            GPIO.output(self.in3,GPIO.LOW)
+            GPIO.output(self.in4,GPIO.HIGH)
+            self.pwm.start(100)
+            self.pwm.start(100)
 
-   def right(self):
-       """
+    def right(self):
+        """
         when the robot needs to go right
-       :param self:
-       :return:
-       none
-       """
-       if self.selectedMotor == 0:
-          GPIO.output(self.in1,GPIO.HIGH)
-          GPIO.output(self.in2,GPIO.LOW)
-       if self.selectedMotor == 1:
-          GPIO.output(self.in3,GPIO.LOW)
-          GPIO.output(self.in4,GPIO.HIGH)
-          self.pwm.ChangeDutyCycle(25)
-          self.pwm.ChangeDutyCycle(25)
+        :param self:
+        :return:
+        none
+        """
+        if self.selectedMotor == 0:
+            GPIO.output(self.in1,GPIO.HIGH)
+            GPIO.output(self.in2,GPIO.LOW)
+        if self.selectedMotor == 1:
+            GPIO.output(self.in3,GPIO.LOW)
+            GPIO.output(self.in4,GPIO.HIGH)
+            self.pwm.ChangeDutyCycle(25)
+            self.pwm.ChangeDutyCycle(25)
 
-  def left(self):
-      """
+    def left(self):
+        """
         when the robot needs to go left
-      :param self:
-      :return:
-      none
-      """
-      if self.selectedMotor == 0:
-          GPIO.output(self.in1,GPIO.HIGH)
-          GPIO.output(self.in2,GPIO.LOW)
-      if self.selectedMotor == 1:
-          GPIO.output(self.in3,GPIO.LOW)
-          GPIO.output(self.in4,GPIO.HIGH)
-          self.pwm.ChangeDutyCycle(25)
-          self.pwm.ChangeDutyCycle(25)
+        :param self:
+        :return:
+        none
+        """
+        if self.selectedMotor == 0:
+            GPIO.output(self.in1,GPIO.HIGH)
+            GPIO.output(self.in2,GPIO.LOW)
+        if self.selectedMotor == 1:
+            GPIO.output(self.in3,GPIO.LOW)
+            GPIO.output(self.in4,GPIO.HIGH)
+            self.pwm.ChangeDutyCycle(25)
+            self.pwm.ChangeDutyCycle(25)
 
-  def turbo(self):
-      """
+    def turbo(self):
+        """
         when the robot needs to go extra fast
-      :param self:
-      :return:
-      none
-      """
-      if self.selectedMotor == 0:
-           GPIO.output(self.in1,GPIO.HIGH)
-           GPIO.output(self.in2,GPIO.LOW)
-      if self.selectedMotor == 1:
-           GPIO.output(self.in3,GPIO.HIGH)
-           GPIO.output(self.in4,GPIO.LOW)
+        :param self:
+        :return:
+        none
+        """
+        if self.selectedMotor == 0:
+            GPIO.output(self.in1,GPIO.HIGH)
+            GPIO.output(self.in2,GPIO.LOW)
+        if self.selectedMotor == 1:
+            GPIO.output(self.in3,GPIO.HIGH)
+            GPIO.output(self.in4,GPIO.LOW)
 
-           self.pwm.ChangeDutyCycle(100)
-           self.pwm.ChangeDutyCycle(100)
+            self.pwm.ChangeDutyCycle(100)
+            self.pwm.ChangeDutyCycle(100)
 
-  def rightmotor(self):
-      """
+    def rightmotor(self):
+        """
         when the right motor needs to go forward
-      :param self:
-      :return:
-      none
-      """
+        :param self:
+        :return:
+        none
+        """
 
-      GPIO.output(self.in3,GPIO.HIGH)
-      GPIO.output(self.in4,GPIO.LOW)
-      self.pwm.start(100)
+        GPIO.output(self.in3,GPIO.HIGH)
+        GPIO.output(self.in4,GPIO.LOW)
+        self.pwm.start(100)
 
-
-  def leftmotor(self):
-      """
+ 
+    def leftmotor(self):
+        """
         when the left motor needs to go forward
-      :param self:
-      :return:
-      none
-      """
-      GPIO.output(self.in1,GPIO.HIGH)
-      GPIO.output(self.in2,GPIO.LOW)
-      self.pwm.start(100)
+        :param self:
+        :return:
+        none
+        """
+        GPIO.output(self.in1,GPIO.HIGH)
+        GPIO.output(self.in2,GPIO.LOW)
+        self.pwm.start(100)
 
-def backward(self):
-    """
+    def backward(self):
+        """
         when the left motor needs to go backwards
-      :param self:
-      :return:
-      none
-      """
-      GPIO.output(self.in1,GPIO.LOW)
-      GPIO.output(self.in2,GPIO.HIGH)
-      self.pwm.start(100)
+        :param self:
+        :return:
+        none
+        """
+        GPIO.output(self.in1,GPIO.LOW)
+        GPIO.output(self.in2,GPIO.HIGH)
+        self.pwm.start(100)
 
-  def backward2(self):
-      """
+    def backward2(self):
+        """
         when the right motor needs to go backwards
-      :param self:
-      :return:
-      none
-      """
-      GPIO.output(self.in3,GPIO.LOW)
-      GPIO.output(self.in4,GPIO.HIGH)
-      self.pwm.start(100)
+        :param self:
+        :return:
+        none
+        """
+        GPIO.output(self.in3,GPIO.LOW)
+        GPIO.output(self.in4,GPIO.HIGH)
+        self.pwm.start(100)
 
 
-  def stop(self):
-      """
+    def stop(self):
+        """
         gets called when the robots needs to stop
-      :param self:
-      :return:
-      none
-      """
-      if self.selectedMotor == 0:
-           GPIO.output(self.in1,GPIO.LOW)
-           GPIO.output(self.in2,GPIO.LOW)
-      if self.selectedMotor == 1:
-           GPIO.output(self.in3,GPIO.LOW)
-           GPIO.output(self.in4,GPIO.LOW)
+        :param self:
+        :return:
+        none
+        """
+        if self.selectedMotor == 0:
+            GPIO.output(self.in1,GPIO.LOW)
+            GPIO.output(self.in2,GPIO.LOW)
+        if self.selectedMotor == 1:
+            GPIO.output(self.in3,GPIO.LOW)
+            GPIO.output(self.in4,GPIO.LOW)
 
 
 

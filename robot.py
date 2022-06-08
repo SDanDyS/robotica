@@ -8,6 +8,9 @@ from threading import *
 import logging
 import RPi.GPIO as GPIO
 import time
+import cv2 as cv
+
+print(cv.__version__)
 
 class Robot():
     """
@@ -39,7 +42,7 @@ class Robot():
             print(args["camera"])
             vision = RobotVision()
             vision.camSelector = args["camera"]
-            vision.FLAG = 2
+            vision.FLAG = 1
             vision.start()
             # time.sleep(10)
             # vision.releaseRobot()
@@ -53,8 +56,6 @@ class Robot():
 
             # bluetooth = btServer(motor_left, motor_right)
             bluetooth.run()
-
-
 
         # Start dashboard webserver
         dashboard = dashboardServer()
