@@ -68,12 +68,12 @@ class btServer():
                 self.motor_right.forward(100)
             # Right
             if ry > 4000 and ly < 1:
-                self.motor_left.achter1()
+                self.motor_left.backward()
                 self.motor_right.rightmotor()  
             # Left
             if ry < 1 and ly > 4000:
                 self.motor_left.leftmotor()
-                self.motor_right.achter2() 
+                self.motor_right.backward2()
 
             # Left motor forward
             if ly==4095 and 1900 < ry <1990:

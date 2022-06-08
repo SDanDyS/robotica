@@ -10,7 +10,16 @@ import RPi.GPIO as GPIO
 import time
 
 class Robot():
+    """
+    main function of the project
+
+    """
     def __init__(self):
+        """
+        initializes the program with the set arguments to run the program
+        different arguments call different ways to handle the robot
+
+        """
         # Set logging level (debug, info, warning, error, critical)
         logging.basicConfig(level=logging.DEBUG)
 
@@ -45,8 +54,7 @@ class Robot():
             # bluetooth = btServer(motor_left, motor_right)
             bluetooth.run()
 
-        # Start motor drive
-        # if args["enabledrive"] == True:
+
 
         # Start dashboard webserver
         dashboard = dashboardServer()

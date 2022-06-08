@@ -1,7 +1,10 @@
 import RPi.GPIO as GPIO          
 from time import sleep
 import threading
+"""
+manual controls to handle the robot only used for test purposes
 
+"""
 # Define pins
 in1 = 6
 in2 = 5
@@ -31,8 +34,16 @@ print("Use WASD to control, X to stop")
 # print("r-run s-stop f-forward b-backward l-low m-medium h-high e-exit")
 print("\n")    
 temp1=1
+"""
+when the program is running different keystrokes start different actions to handle the robot
+"""
 
 while(1):
+    """
+        :param x : string 
+            reads the keystroke input
+        
+    """
 
     x=input()
     
