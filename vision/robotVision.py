@@ -27,8 +27,6 @@ class RobotVision(Thread):
 
         motor_left = dcMotorIndu(0)
         motor_right = dcMotorIndu(1)
-        firstFrame = True
-        previousAngle = None
 
         self.camIsPi = False
 
@@ -46,32 +44,16 @@ class RobotVision(Thread):
             rotation = 90
             vs = PiVideoStream(resolution=resolution, rotation=rotation).start()
             time.sleep(1)
-        # Otherwise select USB camera
-        elif self.camSelector.isnumeric():
-            logging.info("Selecting regular USB camera")
-            self.camIsPi = False
-            self.cap = cv.VideoCapture(int(self.camSelector))
-
-            if not self.cap.isOpened():
-                logging.error("Cannot open camera")
-                exit()
-            self.screenWidth = self.cap.get(cv.CAP_PROP_FRAME_WIDTH)   # float `width`
-            self.screenHeight = self.cap.get(cv.CAP_PROP_FRAME_HEIGHT)  # float `height`
         
         while (self.cycleOn == True):
             # Capture frame-by-frame
             if self.camIsPi == True:
                 self.frame = vs.read()
                 #frame = imutils.resize(frame, width=400)
-            else:
-                self.ret, self.frame = self.cap.read()
-
-                # if frame is read correctly ret is True
-                if not self.ret:
-                    logging.error("Can't receive frame (stream end?). Exiting ...")
-                    break
 
             cv.circle(self.frame, (int(self.screenWidth / 2), int(self.screenHeight / 2)), 5, (255, 255, 255), -1)
+            cv.circle(self.frame, (int(self.screenWidth / 2), int(self.screenHeight / 2 - 75)), 5, (255, 255, 255), -1)
+            cv.circle(self.frame, (int(self.screenWidth / 2), int(self.screenHeight / 2 + 75)), 5, (255, 255, 255), -1)
             #distance and width
             self.getFocalLength(self.screenWidth, 20, 15)
 
@@ -132,6 +114,7 @@ class RobotVision(Thread):
             elif (self.FLAG == 2):
                 blur = cv.GaussianBlur(self.frame, (9, 9), 0)
                 self.hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)
+<<<<<<< HEAD
 
                 area = self.detectObject(self.lower_blue, self.upper_blue, int(self.screenHeight / 2 - 50), int(self.screenHeight / 2 + 50))
                 (xg, yg, wg, hg) = cv.boundingRect(area)
@@ -142,6 +125,14 @@ class RobotVision(Thread):
                     pass
                 else:
                     self.drawDetectedObject(area)
+=======
+                # int(self.screenHeight / 2 - 50), int(self.screenHeight / 2 + 50)
+                area = self.detectObject(self.lower_blue, self.upper_blue, int(self.screenHeight / 2 - 75), int(self.screenHeight / 2 + 75))
+                # print("Area determined is:", str(area))
+                if (area is not None):
+                    # (xg, yg, wg, hg) = cv.boundingRect(area)
+                    #self.drawDetectedObject(area)
+>>>>>>> f3786fba5cd6c33055772ce8175a8a3d1cad4c1b
                     angle = self.angleToRotate(area, 200)
                     if (angle is not None and angle < -1):
                         motor_left.backwards()
@@ -149,13 +140,15 @@ class RobotVision(Thread):
                     elif (angle is not None and angle > 1):
                         motor_left.forward(100)
                         motor_right.forward(100)
-                   
+
             self.imshow()
-    
-    def releaseRobot(self):
-        self.releaseStream()
-        GPIO.cleanup()
-        self.cycleOn = False
+            if cv.waitKey(1) == ord('q'):
+                # When everything done, release the capture
+                self.cycleOn = False
+                GPIO.cleanup()
+                cap.release()
+                cv.destroyAllWindows()
+                break
 
     def drawDetectedObject(self, area):
         self.centroid(area)
@@ -198,23 +191,32 @@ class RobotVision(Thread):
         mask = cv.inRange(self.hsv, lower, upper)
         cnts = self.findContours(mask)
         filtercnts = []
+        cntArea = None
         #contours were found
         if (len(cnts) > 0):
+            ##topval is min, botval is pos
+            # print(cnts)
+            cv.drawContours(self.frame, cnts, -1, (0,255,0), 3)
             if (botVal is not False and topVal is not False):
                 for cnt in cnts:
                     if (self.is_bad_contour(cnt) == False):
-                        area = cv.contourArea(cnt)
-                        centroidY = self.cy(area)
-                        if (centroidY > topVal and centroidY < botVal):
-                            filtercnts.append(area)
-                area = max(filtercnts)
+                        cntArea = cv.contourArea(cnt)
+                        if (cntArea is None):
+                            print("Contour Area is none")
+                        else:
+                            print(cntArea)
+                            (xg, yg, wg, hg) = cv.boundingRect(cntArea)
+                        # if (yg > topVal and yg < botVal):
+                        filtercnts.append(cntArea)
+                
+                if (len(filtercnts) > 0):
+                    np_arr = np.array(filtercnts)
+                    cntArea = max(np_arr)
             else:
-                area = max(cnts, key=cv.contourArea)
+                cntArea = max(cnts, key=cv.contourArea)
 
-            # return the biggest contourArea
-            return area
-
-        return None
+        # return the biggest contourArea
+        return cntArea
 
 
     def centroid(self, momentsToCalculate, draw=True):
@@ -243,11 +245,6 @@ class RobotVision(Thread):
             # calculate centroid of mass and draw it
             cy = int(m['m01']/m['m00'])
         return cy
-
-    def releaseStream(self):
-        # When everything done, release the capture
-        #self.cap.release()
-        cv.destroyAllWindows()
 
     def imshow(self):
         cv.imshow("Video capture (Final result)", self.frame)

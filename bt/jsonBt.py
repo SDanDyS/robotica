@@ -10,22 +10,12 @@ import logging
 sock=BluetoothSocket(RFCOMM)
 
 class btServer():
-    shared = None
     def __init__(self, shared):
         self.motor_left = shared.motor_left
         self.motor_right = shared.motor_right
 
-        btServer.shared = shared
-        # self.shared.ly = 50
-        # self.set_ly = shared.set_ly(50)
-        # def set_ly(value):
-        #     shared.set_ly(value)
-        # shared.set_ly(50)
-
-    #versturen
-    def input_and_send(self):
-
-        #print("\nType something\n")
+    # Send data to controller
+    def sender(self):
         while True:
             #data = input()
             #if len(data) == 0: break
@@ -33,8 +23,9 @@ class btServer():
             # time.sleep(40)
             sock.send("ahoi")
             sock.send("\n")
-    #ontvangen        
-    def rx_and_echo(self):
+
+    # Receive data from controller        
+    def receiver(self):
         ly = 0
         lx = 0
         ry = 0
@@ -43,82 +34,65 @@ class btServer():
         while True:
             data = sock.recv(self.buf_size)
 
+            # Check whether data was received
             if not data:
-                print("Didn't receive data, check connection")
+                logging.error("Didn't receive data, check connection")
                 break
             
+            # Check whether received data is valid JSON, skip if invalid
             utfData = data.decode("utf-8")
-
             try:
                 if not utfData: break
                 parsedData = json.loads(utfData)
-                #print("parsedData:")
-                print(parsedData)
+                logging.info(parsedData)
             except ValueError:
-                print("Received invalid JSON, skipping...")
+                logging.error("Received invalid JSON, skipping...")
                 continue
             
+            # Parse and store joystick coordinates
             ly = int(parsedData["LY"])
             lx = int(parsedData["LX"])
             ry = int(parsedData["RY"])
             rx = int(parsedData["RX"])
-
-            # self.shared.ly = ly
-            # self.shared.lx = lx
-            # self.shared.ry = ry
-            # self.shared.rx = rx
-            # print(self.shared.ly)
-            # print(ly)
-            # self.shared.ly = 50
-            # self.shared.set_ly(50)
-            # self.set_ly(50)
-            btServer.shared.ly = 50
                 
-            #right motor stop
+            # Stop right motor
             if ry > 1920 and ry < 1990:
                 self.motor_right.stop()
-            #left motor stop
+            # Stop left motor
             if ly>1900 and ly < 1980:
                 self.motor_left.stop()
-#                  forward
+
+            # Forward
             if ry>4000 and ly > 4000:
-                print("beide motoren")
                 self.motor_left.forward(100)
                 self.motor_right.forward(100)
-               #right
+            # Right
             if ry > 4000 and ly < 1:
-                print("self.motor_left.right()")
                 self.motor_left.achter1()
-                self.motor_right.rightmotor() 
-                 
-                 #left
+                self.motor_right.rightmotor()  
+            # Left
             if ry < 1 and ly > 4000:
-                print("links")
                 self.motor_left.leftmotor()
-                self.motor_right.achter2()
-                
-            #left motor forward
+                self.motor_right.achter2() 
+
+            # Left motor forward
             if ly==4095 and 1900 < ry <1990:
-               
-                print("linkermotor")
                 self.motor_left.leftmotor()
-#                 self.motor_left.stop()
-            #right motor forward
+            # Right motor forward
             if ry==4095 and 1900 < ly <1990:
-                print("rechtemotor")
                 self.motor_right.rightmotor()
-            #right motor backwards
-            if ry < 1:
-                self.motor_right.achter2()
-            #left motor backwards
+            # Left motor backwards
             if ly < 1:
                 self.motor_right.achter1()
-    def run(self):
+            # Right motor backwards
+            if ry < 1:
+                self.motor_right.achter2()
 
-        #MAC address of ESP32
+    def run(self):
+        # MAC address of ESP32
         addr = "C8:C9:A3:C5:7A:E2"
-        #uuid = "94f39d29-7d6d-437d-973b-fba39e49d4ee"
-        #service_matches = find_service( uuid = uuid, address = addr )
+
+        # Find controller
         service_matches = find_service( address = addr )
 
         self.buf_size = 64;
@@ -128,8 +102,8 @@ class btServer():
             sys.exit(0)
 
         for s in range(len(service_matches)):
-            print("\nservice_matches: [" + str(s) + "]:")
-            print(service_matches[s])
+            logging.debug("\nservice_matches: [" + str(s) + "]:")
+            logging.debug(service_matches[s])
             
         first_match = service_matches[0]
         port = first_match["port"]
@@ -141,20 +115,12 @@ class btServer():
         # Create the client socket
         sock.connect((host, port))
 
-        # proc1 = Process(target=self.input_and_send)
-        # proc1.start()
+        # sender = Process(target=self.sender)
+        # sender.start()
 
-        proc2 = Process(target=self.rx_and_echo)
-        proc2.start()
-        # self.rx_and_echo()
-
-        print("connected")
-
+        receiver = Process(target=self.receiver)
+        receiver.start()
     
-    def changeMotorSpeed(speed):
-        print("Set speed to %s", speed)
-        pa.ChangeDutyCycle(speed)
-
     def active(self):
         if sock.connect((host, port)) == True:
             return "actief"
