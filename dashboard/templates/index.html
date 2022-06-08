@@ -1,55 +1,212 @@
-<html>
-<head>
-  <title>Robot Dashboard</title>
-</head>
-<body>
-  <p id="bluetooth">Retrieving Bluetooth status...</p>
-  <p id="weight">Retrieving weight...</p>
-<script>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
 
-// Gather all data from API
-function checkApi(){
-  const Http = new XMLHttpRequest();
-  Http.open("GET", 'http://localhost:8080/api');
-  Http.send();
-  Http.onreadystatechange = (e) => {
-    json = JSON.parse(Http.responseText)
-    document.querySelector("#bluetooth").innerHTML = "Bluetooth status: " + json.bluetooth.connection;
-    document.querySelector("#weight").innerHTML = "Weight status: " + json.weight;
-  }
-}
+    <meta name="description" content="cookjesmonster.nl">
+    <meta property="og:description" content="cookjesmonster.nl" />
 
-// Individual APIs
-function checkRand(){
-  const Http = new XMLHttpRequest();
-  Http.open("GET", 'http://localhost:5000/api/rand');
-  Http.send();
-  Http.onreadystatechange = (e) => {
-    document.querySelector("#rand").innerHTML = "Object Rand: " + Http.responseText;
-  }
-}
+    <meta name="author" content="Robotica Groep 6" />
 
-function checkBluetooth(){
-  const Http = new XMLHttpRequest();
-  Http.open("GET", 'http://localhost:5000/api/bt');
-  Http.send();
-  Http.onreadystatechange = (e) => {
-    document.querySelector("#bluetooth").innerHTML = "Bluetooth status: " + Http.responseText;
-  }
-}
+    <meta property="og:title" content="Dashboard" />
+    <meta property="twitter:title" content="Dashboard" />
 
-function checkWeight(){
-  const Http = new XMLHttpRequest();
-  Http.open("GET", 'http://localhost:5000/api/weight');
-  Http.send();
-  Http.onreadystatechange = (e) => {
-    document.querySelector("#weight").innerHTML = "Weight: " + Http.responseText;
-  }
-}
+    <title>Dashboard – Robotica Groep 6 – cookjesmonster.nl</title>
 
-setInterval(function () {
-  checkApi();
-}, 1000);
-</script>
-</body>
-</html
+    <link rel="stylesheet" type="text/css" href="https://cookjesmonster.nl/style.css"/>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/ress/dist/ress.min.css"/>
+    <link rel="apple-touch-icon" sizes="57x57" href="/static/favicon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/static/favicon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/static/favicon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/static/favicon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/static/favicon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/static/favicon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/static/favicon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/static/favicon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/favicon-180x180.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/static/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/static/favicon-192x192.png">
+    <link rel="shortcut icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/static/favicon-144x144.png">
+    <meta name="msapplication-config" content="/static/browserconfig.xml">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="alternate" type="application/rss+xml" title="Robotica Groep 6 - cookjesmonster.nl" href="https://cookjesmonster.nl/feed.xml"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.2.0/css/fork-awesome.min.css" integrity="sha256-XoaMnoYC5TH6/+ihMEnospgm0J1PM/nioxbOUdnM8HY=" crossorigin="anonymous" media="print" onload="this.media='all'"/>
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.6.5/plyr.css" media="print" onload="this.media='all'"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css" media="print" onload="this.media='all'"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.13.18/dist/katex.min.css" integrity="sha384-zTROYFVGOfTw7JV7KUu8udsvW2fx4lWOsCEDqhBreBwlHI4ioVRtmIvEThzJHGET" crossorigin="anonymous" media="print" onload="this.media='all'"/>
+
+    <style>
+      td, th {
+        padding: 5px 15px !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper-masthead">
+      <div class="container">
+        <header class="masthead clearfix">
+          <a href="https://cookjesmonster.nl/" class="site-avatar"><img src="static/logo.png" width="70" height="70" /></a>
+          <div class="site-info">
+            <h1 class="site-name"><a href="https://cookjesmonster.nl/">Robotica Groep 6</a></h1>
+            <p class="site-description">cookjesmonster.nl</p>
+          </div>
+          <nav class="nav-menu">
+            <a class="nav-menu-item" href="https://cookjesmonster.nl">Blog</a>
+            <a class="nav-menu-item active" href="https://cookjesmonster.nl/dashboard">Dashboard</a>
+          </nav>
+        </header>
+      </div>
+    </div>
+
+    <div id="main" role="main" class="container">
+      <article class="page">
+        <div class="entry" style="margin-top:20px;">
+          <i>Last updated <span id="updated">-</span></i>
+          <h2>Robot</h2>
+          <p>Status: <span id="status">loading...</span></p>
+          <hr>
+          <h2>Controller</h2>
+          <p>Bluetooth connection: <span id="bluetooth">loading...</span></p>
+          <h3>Inputs</h3>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Input</th>
+                <th>Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>LY</td>
+                <td><span id="ly">loading...</span></td>
+              </tr>
+              <tr>
+                <td>LX</td>
+                <td><span id="lx">loading...</span></td>
+              </tr>
+              <tr>
+                <td>RY</td>
+                <td><span id="ry">loading...</span></td>
+              </tr>
+              <tr>
+                <td>RX</td>
+                <td><span id="rx">loading...</span></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p>Weight: <span id="weight">loading...</span></p>
+        </div>
+      </article>
+
+    </div>
+
+    <div class="wrapper-footer">
+      <div class="container">
+        <footer class="footer"><div class="copyright">
+            
+            <!-- <p>&copy; 2022 Robotica Groep 6. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://github.com/forever-jekyll/forever-jekyll" rel="nofollow">Forever Jekyll</a>.</p> -->
+            <p>&copy; 2022 Robotica Groep 6.</p>
+            
+          </div>
+        </footer>
+      </div>
+    </div>
+
+    <script>
+      // Gather all data from API
+      function checkApi(){
+        const Http = new XMLHttpRequest();
+        Http.open("GET", 'http://dashboard.cookjesmonster.nl/api');
+        Http.send();
+        Http.onreadystatechange = (e) => {
+          json = JSON.parse(Http.responseText)
+
+          // Robot online status
+          if (json.online == true) {
+            document.querySelector("#status").innerHTML = "<b style=\"color:green;\">Online</b>";
+          } else {
+            document.querySelector("#status").innerHTML = "<b style=\"color:red;\">Offline</b>";
+          }
+
+          // Controller status
+          if (json.controller.connected == true) {
+            document.querySelector("#bluetooth").innerHTML = "<span style=\"color:green;\">Online</span>";
+            document.querySelector("#ly").innerHTML = json.controller.ly;
+            document.querySelector("#lx").innerHTML = json.controller.lx;
+            document.querySelector("#ry").innerHTML = json.controller.ry;
+            document.querySelector("#rx").innerHTML = json.controller.rx;
+          } else {
+            document.querySelector("#bluetooth").innerHTML = "<span style=\"color:red;\">Offline</span>";
+            document.querySelector("#ly").innerHTML = "-";
+            document.querySelector("#lx").innerHTML = "-";
+            document.querySelector("#ry").innerHTML = "-";
+            document.querySelector("#rx").innerHTML = "-";
+          }
+
+          document.querySelector("#weight").innerHTML = json.weight;
+
+          let today = new Date();
+          let time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+          document.querySelector("#updated").innerHTML = time;
+        }
+      }
+
+      setInterval(function () {
+        checkApi();
+      }, 1000);
+    </script>
+
+    <script defer src="https://cdn.plyr.io/3.6.5/plyr.js"></script>
+    <script>
+      const player = new Plyr("#player", { noCookie: true, rel: 0, showinfo: 0, iv_load_policy: 3, modestbranding: 1, playsinline: 1 , enablejsapi: 1, autoplay: 0, focused: true, global: false });
+      window.player = player;
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/gh/mcstudios/glightbox/dist/js/glightbox.min.js"></script>
+    <script type="text/javascript">
+      const lightbox = GLightbox({
+          touchNavigation: true,
+          loop: true,
+          autoplayVideos: true
+      });
+    </script>
+
+    <script defer src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>mermaid.initialize({startOnLoad:true});</script>
+
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.13.18/dist/katex.min.js" integrity="sha384-GxNFqL3r9uRJQhR+47eDxuPoNE7yLftQM8LcxzgS4HT73tp970WS/wV5p8UzCOmb" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@latest/dist/contrib/auto-render.min.js"
+            onload="renderMathInElement(document.body,{
+                    delimiters: [
+                    { left: '$$',  right: '$$',  display: true  },
+                    { left: '$',   right: '$',   display: false },
+                    { left: '\\[', right: '\\]', display: true  },
+                    { left: '\\(', right: '\\)', display: false }
+                    ]});">
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
+    <script>
+      function addDarkmodeWidget() {
+        new Darkmode().showWidget();
+        window.addEventListener('load', addDarkmodeWidget);
+      }
+      const options = {
+        label: '🌓',
+      }
+      const darkmode = new Darkmode(options);
+            darkmode.showWidget();
+    </script>
+
+  </body>
+</html>

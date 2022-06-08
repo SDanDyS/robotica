@@ -1,9 +1,8 @@
-##test bestand voor motoren om ze te laten draaien
-
 import RPi.GPIO as GPIO          
 from time import sleep
 import threading
 
+# Define pins
 in1 = 6
 in2 = 5
 in3 = 13
@@ -28,10 +27,10 @@ pb=GPIO.PWM(enb,1000)
 pb.start(25)
 print("\n")
 print("The default speed & direction of motor is LOW & Forward.....")
-print("r-run s-stop f-forward b-backward l-low m-medium h-high e-exit")
+print("Use WASD to control, X to stop")
+# print("r-run s-stop f-forward b-backward l-low m-medium h-high e-exit")
 print("\n")    
 temp1=1
-
 
 while(1):
 
@@ -67,6 +66,9 @@ while(1):
         GPIO.output(in2,GPIO.LOW)
         GPIO.output(in3,GPIO.HIGH)
         GPIO.output(in4,GPIO.LOW)
+        p.ChangeDutyCycle(100)
+        pb.ChangeDutyCycle(100)
+
         temp1=1
         x='z'
 
@@ -76,6 +78,8 @@ while(1):
         GPIO.output(in2,GPIO.HIGH)
         GPIO.output(in3,GPIO.LOW)
         GPIO.output(in4,GPIO.HIGH)
+        p.ChangeDutyCycle(100)
+        pb.ChangeDutyCycle(100)
 
         temp1=0
         x='z'
@@ -96,14 +100,7 @@ while(1):
         GPIO.output(in3,GPIO.HIGH)
         GPIO.output(in4,GPIO.LOW)   
         pb.ChangeDutyCycle(100)
-        p.ChangeDutyCycle(100)
-
-
-
-    # elif x=='l':
-    #     print("low")
-    #     p.ChangeDutyCycle(25)
-    #     x='z'
+        p.ChangeDutyCycle(85)
 
     elif x=='m':
         print("medium")
