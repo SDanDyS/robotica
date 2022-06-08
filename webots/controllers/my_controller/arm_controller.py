@@ -1,11 +1,22 @@
 class Arm:
     robot = None
     timeStep = 64
-    rotationMotor = None
-    firstRodMotor = None
+    leftMotor = None
+    rightMotor = None
+    grabberMotor = None
 
-    def __init__(self, robot, timeStep, rotationMotor, firstRodMotor):
+    def __init__(self, robot, timeStep, leftMotor, rightMotor, grabberMotor):
+        '''
+            Initialize the arm and sets the arm components
+                Parameters:
+                    robot(Robot): sets the robot
+                    timeStep(int): sets the time step where the arm works on
+                    leftMotor(Motor): sets the left motor
+                    rightMotor(Motor): sets the right motor
+                    rightMotor(Motor): sets the grabber motor
+        '''
         self.robot = robot
         self.timeStep = timeStep
-        self.rotationMotor = rotationMotor
-        self.firstRodMotor = firstRodMotor
+        self.leftMotor = leftMotor
+        self.rightMotor = rightMotor
+        self.grabberMotor = grabberMotor
