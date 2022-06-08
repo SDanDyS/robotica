@@ -98,10 +98,10 @@ class btServer():
                 self.motor_right.rightmotor()
             # Left motor backwards
             if ly < 1:
-                self.motor_right.achter1()
+                self.motor_right.backward2()
             # Right motor backwards
             if ry < 1:
-                self.motor_right.achter2()
+                self.motor_right.backward()
 
     def run(self):
         '''
@@ -114,7 +114,7 @@ class btServer():
         # Find controller
         service_matches = find_service( address = addr )
 
-        self.buf_size = 64;
+        self.buf_size = 128
 
         if len(service_matches) == 0:
             logging.error("Something went wrong with the bluetooth connection")

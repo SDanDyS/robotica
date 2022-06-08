@@ -22,6 +22,12 @@ class dcMotorIndu(threading.Thread):
         ena/enb : int
             pint for the remote controller
     """
+    in1 = 6
+    in2 = 5
+    in3 = 13
+    in4 = 26
+    ena = 25
+    enb = 12
     selectedMotor = 0
     
     GPIO.setwarnings(False)

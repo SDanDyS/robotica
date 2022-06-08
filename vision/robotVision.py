@@ -123,10 +123,8 @@ class RobotVision(Thread):
                 self.hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)
                 # int(self.screenHeight / 2 - 50), int(self.screenHeight / 2 + 50)
                 area = self.detectObject(self.lower_blue, self.upper_blue, int(self.screenHeight / 2 - 75), int(self.screenHeight / 2 + 75))
-                # print("Area determined is:", str(area))
                 if (area is not None):
-                    # (xg, yg, wg, hg) = cv.boundingRect(area)
-                    #self.drawDetectedObject(area)
+                    self.drawDetectedObject(area)
                     angle = self.angleToRotate(area, 200)
                     if (angle is not None and angle < -1):
                         motor_left.backwards()
@@ -203,23 +201,14 @@ class RobotVision(Thread):
         #contours were found
         if (len(cnts) > 0):
             ##topval is min, botval is pos
-            # print(cnts)
-            cv.drawContours(self.frame, cnts, -1, (0,255,0), 3)
             if (botVal is not False and topVal is not False):
                 for cnt in cnts:
                     if (self.isBadContour(cnt) == False):
-                        cntArea = cv.contourArea(cnt)
-                        if (cntArea is None):
-                            print("Contour Area is none")
-                        else:
-                            print(cntArea)
-                            (xg, yg, wg, hg) = cv.boundingRect(cntArea)
-                        # if (yg > topVal and yg < botVal):
-                        filtercnts.append(cntArea)
-                
+                        cy = self.cy(cnt)
+                        if (cy > topVal and cy < botVal):
+                            filtercnts.append(cnt)
                 if (len(filtercnts) > 0):
-                    np_arr = np.array(filtercnts)
-                    cntArea = max(np_arr)
+                    cntArea = max(filtercnts, key=cv.contourArea)
             else:
                 cntArea = max(cnts, key=cv.contourArea)
 
