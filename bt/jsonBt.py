@@ -15,13 +15,23 @@ class btServer():
         self.motor_right = shared.motor_right
 
     # Send data to controller
-    def sender(self):
+    def sender(self, input):
+        '''
+        Processes the data received by the Bluetooth controller.
+
+                Parameters:
+                        a (int): A decimal integer
+                        b (int): Another decimal integer
+
+                Returns:
+                        binary_sum (str): Binary string of the sum of a and b
+        '''
         while True:
             #data = input()
             #if len(data) == 0: break
             data = 1
             # time.sleep(40)
-            sock.send("ahoi")
+            sock.send(input)
             sock.send("\n")
 
     # Receive data from controller        
