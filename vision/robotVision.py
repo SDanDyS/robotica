@@ -114,25 +114,12 @@ class RobotVision(Thread):
             elif (self.FLAG == 2):
                 blur = cv.GaussianBlur(self.frame, (9, 9), 0)
                 self.hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)
-<<<<<<< HEAD
-
-                area = self.detectObject(self.lower_blue, self.upper_blue, int(self.screenHeight / 2 - 50), int(self.screenHeight / 2 + 50))
-                (xg, yg, wg, hg) = cv.boundingRect(area)
-                #SHOULD BE A NEGATE, FIND OUT HOW
-                if (yg > int(self.screenHeight / 2 + 50) or yg > int(self.screenHeight / 2 - 50)):
-                    print("yg value is: ", str(yg))
-                    print("Compared to screenheight of: ", str(self.screenHeight / 2))
-                    pass
-                else:
-                    self.drawDetectedObject(area)
-=======
                 # int(self.screenHeight / 2 - 50), int(self.screenHeight / 2 + 50)
                 area = self.detectObject(self.lower_blue, self.upper_blue, int(self.screenHeight / 2 - 75), int(self.screenHeight / 2 + 75))
                 # print("Area determined is:", str(area))
                 if (area is not None):
                     # (xg, yg, wg, hg) = cv.boundingRect(area)
                     #self.drawDetectedObject(area)
->>>>>>> f3786fba5cd6c33055772ce8175a8a3d1cad4c1b
                     angle = self.angleToRotate(area, 200)
                     if (angle is not None and angle < -1):
                         motor_left.backwards()
