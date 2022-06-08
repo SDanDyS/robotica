@@ -133,10 +133,10 @@ class RobotVision(Thread):
                 blur = cv.GaussianBlur(self.frame, (9, 9), 0)
                 self.hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)
 
-                area = self.detectObject(self.lower_blue, self.upper_blue, int(self.screenHeight / 2 - 100), int(self.screenHeight / 2 + 100))
+                area = self.detectObject(self.lower_blue, self.upper_blue, int(self.screenHeight / 2 - 50), int(self.screenHeight / 2 + 50))
                 (xg, yg, wg, hg) = cv.boundingRect(area)
                 #SHOULD BE A NEGATE, FIND OUT HOW
-                if (yg > int(self.screenHeight / 2 + 100) or yg > int(self.screenHeight / 2 - 100)):
+                if (yg > int(self.screenHeight / 2 + 50) or yg > int(self.screenHeight / 2 - 50)):
                     print("yg value is: ", str(yg))
                     print("Compared to screenheight of: ", str(self.screenHeight / 2))
                     pass
@@ -181,7 +181,7 @@ class RobotVision(Thread):
             # no position has to change
             if (rCM != 0):
                 if (rCM > 0.5 or rCM < -0.5):
-                    atan = self.angle_atan(self.distance, rCM)
+                    atan = self.angleAtan(self.distance, rCM)
                     return atan
             #NO ROTATION REQUIRED
             return 0
@@ -269,6 +269,6 @@ class RobotVision(Thread):
         return math.sqrt(cameraDistance)
 
     #this returns the value in degrees! INVERSES THE TAN !
-    def angle_atan(self, adjacentSide, oppositeSide):
+    def angleAtan(self, adjacentSide, oppositeSide):
         value = oppositeSide / adjacentSide
         return math.degrees(math.atan(value))
