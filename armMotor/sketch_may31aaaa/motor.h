@@ -1,3 +1,8 @@
+#ifndef MOTOR_H
+#define MOTOR_H
+
+#include <Arduino.h>
+
 #include <AX12A.h>
 //#include <DynamixelSerial.h>
 //#include <DynamixelShield.h>
@@ -13,16 +18,9 @@
 #define rightMotor      (13u)
 #define grabberMotor    (16u)
 
-void setup()
-{
-//  Dynamixel.setSerial(&Serial1)
-  ax12a.begin(BaudRate, DirectionPin, &Serial);
-//  Serial.begin(9600);
-//  SetPosition(leftMotor, 0) // position: 0 - 1023, 512 = middel
-}
+void turnMotor(unsigned int id, bool toRight, int speed)
+void moveMotor(unsigned int id, int position)
+int getPosition(unsigned int id)
+int square(int i)
 
-void loop()
-{
-  turnMotor(leftMotor, 1, 300)
-  
-}
+#endif

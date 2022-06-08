@@ -24,14 +24,15 @@ leftMotor.setVelocity(0.0)
 # rightMotor.setVelocity(0.0 * MAX_SPEED)
 
 # Setup the robot arm
-rotationMotor = Motor(robot, TIME_STEP, "foot motor", "foot sensor")
-firstRodMotor = Motor(robot, TIME_STEP, "first rod motor", "first rod sensor")
+leftMotor = Motor(robot, TIME_STEP, "foot motor", "foot sensor")
+rightMotor = Motor(robot, TIME_STEP, "first rod motor", "first rod sensor")
+grabberMotor = Motor(robot, TIME_STEP, "first rod motor", "first rod sensor")
 
-arm = Arm(robot, TIME_STEP, rotationMotor, firstRodMotor)
-arm.rotationMotor.maxSpeed = 5
+arm = Arm(robot, TIME_STEP, leftMotor, rightMotor, grabberMotor)
+# arm.leftMotor.maxSpeed = 5
 
-arm.firstRodMotor.maxSpeed = 1.5
-arm.firstRodMotor.setMotorBoundaries(0, 120)
+# arm.rightMotor.maxSpeed = 1.5
+# arm.rightMotor.setMotorBoundaries(0, 120)
 
 # Setup the keyboard
 keyboard = Keyboard()

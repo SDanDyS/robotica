@@ -1,4 +1,4 @@
-#include <AX12A.h>
+#include "AX12A.h"
 #include <Wire.h>
 
 #define DirectionPin   (2u)

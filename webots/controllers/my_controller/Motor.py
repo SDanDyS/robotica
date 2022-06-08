@@ -11,7 +11,17 @@ class Motor:
     motorMax = None
     motorRadian = 0
 
+    # id = 1
+
     def __init__(self, robot, timeStep, motorName, sensorName):
+        '''
+            Initialize the motor
+                Parameters:
+                    robot(Robot): sets the robot
+                    timeStep(int): sets the time step where the motor works on
+                    motorName(string): the name to get the motor device
+                    sensorName(string): the name to get the sensor device
+        '''
         self.robot = robot
         self.timeStep = timeStep
 
@@ -24,17 +34,33 @@ class Motor:
         self.sensor = self.robot.getDevice(sensorName)
         self.sensor.enable(self.timeStep)
 
-    # Get the name of the motor
+    # def __init__(self, id):
+    #     self.id = id
+
+    def test():
+        print()
+
     def getName(self):
+        '''Returns the name of the motor'''
         return self.motor.getName()
 
-    # Set the boundaries of how much the first rod can move
     def setMotorBoundaries(self, minDegree, maxDegree):
+        '''
+        Sets the boundaries of how much the motor can move.
+            Parameters:
+                minDegree(float): The minimum degree the motor can move
+                maxDegree(float): the maximum degree the motor can move
+        '''
         self.motorMin = np.round(self.degreesToRadians(minDegree), 10)
         self.motorMax = np.round(self.degreesToRadians(maxDegree), 10)
 
-    # Rotate the rod
     def rotateDegrees(self, degrees=float('inf'), speed=0):
+        '''
+        Rotates the motor.
+            Parameters:
+                degrees(float): the amount de motor needs to rotate
+                speed(int): the speed the motor moves at
+        '''
         # Check if boundary is set
         if self.motorMin != None and self.motorMax != None:
             radians = self.motorRadian + \
@@ -50,7 +76,7 @@ class Motor:
         self.motor.setVelocity(speed)
         self.motor.setPosition(self.motorRadian)
 
-    # Convert from degrees to radian
     @ staticmethod
     def degreesToRadians(degrees):
+        '''Converts from degrees to radian'''
         return degrees / 180 * pi
