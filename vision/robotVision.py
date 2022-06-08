@@ -119,8 +119,8 @@ class RobotVision(Thread):
                             ##gripperMethod()
                             pass
             elif (self.FLAG == 2):
-                blur = cv.GaussianBlur(self.frame, (9, 9), 0)
-                self.hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)
+                blur = cv.GaussianBlur(self.frame, (9, 9), 0)#self.frame
+                self.hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)#blur
                 # int(self.screenHeight / 2 - 50), int(self.screenHeight / 2 + 50)
                 area = self.detectObject(self.lower_blue, self.upper_blue, int(self.screenHeight / 2 - 75), int(self.screenHeight / 2 + 75))
                 if (area is not None):
