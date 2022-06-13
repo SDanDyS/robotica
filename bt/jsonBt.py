@@ -45,15 +45,12 @@ class btServer(threading.Thread):
     ry = 0
     rx = 0
     connected = False
+    json = {}
 
     def receiver(self):
         '''
         Processes the data received by the Bluetooth controller and controls DC motors.
         '''
-        # ly = 0
-        # lx = 0
-        # ry = 0
-        # rx = 0
         flag = 0
         driveorGrip = 0
 
@@ -87,27 +84,31 @@ class btServer(threading.Thread):
             flag = int(parsedData["flag"])
             driveorGrip = int(parsedData["driveOrGrip"])
 
-            # Set for robot.py
+            # Expose to robot.py
             self.ly = ly
             self.lx = lx
             self.ry = ry
             self.rx = rx
+            self.json = parsedData
             
             if (flag == 1):
                  stop_dance_thread = True
                  stop_vision_thread = False
                  if (lock == False):
-                    r = RobotVision()
-                    r.FLAG = flag
-                    r.start()
+                    #r = RobotVision()
+                    #r.FLAG = flag
+                    #r.start()
                     lock = True
             elif (flag == 2):
-                r.FLAG = flag
+                #r.FLAG = flag
+                number = 1
+                number = 1 + 1
             elif (flag == 3):
                 stop_dance_thread = False
                 stop_vision_thread = True
                 ## TODO: create dance object
             elif (flag == 4):
+                pass
                 #TODO create an object which would
                 # listen to music and dance on it 
             elif (driveorGrip == 1 or driveorGrip == 2):
@@ -152,7 +153,7 @@ class btServer(threading.Thread):
                     if ry == 4095 and 1900 < ly < 1990:
                         self.motor_right.forward(100)
 
-                print(CatchMe)
+                
             if driveorGrip == 2:
                 print("armfunctie")
                 
@@ -208,6 +209,7 @@ class btServer(threading.Thread):
         if sock.connect((host, port)) == True:
             return True
         else:
+            
             return False
         
 if __name__ == "__main__":

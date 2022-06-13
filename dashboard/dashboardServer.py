@@ -4,19 +4,17 @@ from flask import Flask, render_template
 from random import randrange
 import subprocess as sp
 import json
+from threading import *
+import os.path
 
-class dashboardServer():
-    # def __init__(self):
-    #     print("__________________________________")
-    #     print(self.ly)
-    # def __init__(self):
-    #     super().__init__()
-    #     print("__________________________________________________")
-    #     print("ly", self.ly)
+class dashboardServer(Thread):
     app = Flask(__name__)
 
     @app.route('/api')
     def getData():
+        # print("--------------------------")
+        # super(dashboardServer, self).get_weight()
+        # super().get_weight()
         '''
         Exposes the robot API endpoint.
 
@@ -34,26 +32,40 @@ class dashboardServer():
         # Bluetooth info
         bluetoothData = {}
         stdoutdata = sp.getoutput("hcitool con")
-        if "84:CC:A8:69:97:D2" in stdoutdata.split():
-            bluetoothData['connected'] = True
-            temp = randrange(2000)
-            bluetoothData['ly'] = str(temp)
-            bluetoothData['lx'] = str(temp)
-            bluetoothData['ry'] = str(temp)
-            bluetoothData['rx'] = str(temp)
-        else:
-            bluetoothData['connected'] = False
-            bluetoothData['ly'] = None
-            bluetoothData['lx'] = None
-            bluetoothData['ry'] = None
-            bluetoothData['rx'] = None
+        # if "84:CC:A8:69:97:D2" in stdoutdata.split():
+        #     bluetoothData['connected'] = True
+        #     temp = randrange(2000)
+        #     bluetoothData['ly'] = str(temp)
+        #     bluetoothData['lx'] = str(temp)
+        #     bluetoothData['ry'] = str(temp)
+        #     bluetoothData['rx'] = str(temp)
+        # else:
+        #     bluetoothData['connected'] = False
+        #     bluetoothData['ly'] = None
+        #     bluetoothData['lx'] = None
+        #     bluetoothData['ry'] = None
+        #     bluetoothData['rx'] = None
+        btFile = open(os.path.dirname(__file__) + '/../btData')
+        btRead = btFile.read()
+        btRead = btRead.replace("\'", "\"")
+        parsedData = json.loads(btRead)
+
+        bluetoothData['connected'] = True
+        bluetoothData['ly'] = int(parsedData["LY"])
+        bluetoothData['lx'] = int(parsedData["LX"])
+        bluetoothData['ry'] = int(parsedData["RY"])
+        bluetoothData['rx'] = int(parsedData["RX"])
+        bluetoothData['flag'] = int(parsedData["flag"])
+        bluetoothData['driveorGrip'] = int(parsedData["driveOrGrip"])
+
         data['controller'] = bluetoothData
 
-        # Distance sensor
-        data['distance'] = randrange(100)
-
         # Weight sensor
-        data['weight'] = randrange(100)
+        weightFile = open(os.path.dirname(__file__) + '/../weightData')
+        data['weight'] = int(weightFile.read())
+
+        # TODO: Distance sensor
+        data['distance'] = 0
 
         # Convert to JSON string
         json_data = json.dumps(data)
@@ -88,7 +100,7 @@ class dashboardServer():
     # def getWeight():
     #     return str(randrange(1000)), 200, {"Access-Control-Allow-Origin": "*"}
 
-    def start(self):
+    def run(self):
         logging.info("Starting webserver...")
         from waitress import serve
         serve(self.app, host="0.0.0.0", port=8080)

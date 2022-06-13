@@ -8,19 +8,18 @@ from threading import *
 import logging
 import RPi.GPIO as GPIO
 import time
+from weight.scale import *
 
 import asyncio
 
 class Robot():
     """
-    main function of the project
-
+    Main function of the project
     """
-    ly = 0
 
     def __init__(self):
         """
-        initializes the program with the set arguments to run the program
+        Initializes the program with the set arguments to run the program
         different arguments call different ways to handle the robot
 
         """
@@ -57,31 +56,29 @@ class Robot():
 
             # bluetooth = btServer(motor_left, motor_right)
             bluetooth.start()
-
-            #temp test
-            async def read_val():
-                while True:
-                    await asyncio.sleep(1)
-                    print("-=-=-=-=-=-=-=-=-=-=-=-")
-                    print("[robot.py] Bluetooth values:")
-                    print(bluetooth.ly)
-                    print(bluetooth.lx)
-                    print(bluetooth.ry)
-                    print(bluetooth.rx)
-                    print("Connected:")
-                    print(bluetooth.connected)
-                    print(("-=-=-=-=-=-=-=-=-=-=-=-"))
-                    # self.ly = bluetooth.ly
-                    # my_list.append(random.random())
-                    # notify()
-
-            loop = asyncio.get_event_loop()
-            cors = asyncio.wait([read_val()])
-            loop.run_until_complete(cors)
-
+        
+        scale = Weight()
+        scale.start()
+        
         # Start dashboard webserver
         dashboard = dashboardServer()
         dashboard.start()
+
+        # Write sensor data to file for Dashboard
+        async def write_data():
+            while True:
+                await asyncio.sleep(1)
+                weightFile = open("weightData", "w")
+                weightFile.write(str(scale.weight))
+                weightFile.close()
+
+                btFile = open("btData", "w")
+                btFile.write(str(bluetooth.json))
+                btFile.close()
+
+        loop = asyncio.get_event_loop()
+        cors = asyncio.wait([write_data()])
+        loop.run_until_complete(cors)
 
 if __name__ == "__main__":
     Robot()
