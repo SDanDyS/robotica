@@ -167,6 +167,7 @@ class btServer(threading.Thread):
         addr = "C8:C9:A3:C5:7A:E2"
 
         # Find controller
+        # def connect_bt() 
         service_matches = find_service( address = addr )
 
         self.buf_size = 256

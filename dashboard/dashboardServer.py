@@ -50,13 +50,22 @@ class dashboardServer(Thread):
         btRead = btRead.replace("\'", "\"")
         parsedData = json.loads(btRead)
 
-        bluetoothData['connected'] = True
-        bluetoothData['ly'] = int(parsedData["LY"])
-        bluetoothData['lx'] = int(parsedData["LX"])
-        bluetoothData['ry'] = int(parsedData["RY"])
-        bluetoothData['rx'] = int(parsedData["RX"])
-        bluetoothData['flag'] = int(parsedData["flag"])
-        bluetoothData['driveorGrip'] = int(parsedData["driveOrGrip"])
+        if not 'ly' in parsedData or len(obj['ly']) == 0:
+            bluetoothData['connected'] = False
+            bluetoothData['ly'] = 0
+            bluetoothData['lx'] = 0
+            bluetoothData['ry'] = 0
+            bluetoothData['rx'] = 0
+            bluetoothData['flag'] = 0
+            bluetoothData['driveorGrip'] = 0
+        else:
+            bluetoothData['connected'] = True
+            bluetoothData['ly'] = int(parsedData["LY"])
+            bluetoothData['lx'] = int(parsedData["LX"])
+            bluetoothData['ry'] = int(parsedData["RY"])
+            bluetoothData['rx'] = int(parsedData["RX"])
+            bluetoothData['flag'] = int(parsedData["flag"])
+            bluetoothData['driveorGrip'] = int(parsedData["driveOrGrip"])
 
         data['controller'] = bluetoothData
 
