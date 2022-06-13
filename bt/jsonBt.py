@@ -57,6 +57,7 @@ class btServer(threading.Thread):
         stop_vision_thread = False
         stop_dance_thread = False
         lock = False
+        r = RobotVision()
         
         while True:
             data = sock.recv(self.buf_size)
@@ -91,18 +92,20 @@ class btServer(threading.Thread):
             self.rx = rx
             self.json = parsedData
             
-            if (flag == 1):
+            if (flag == 0):
+                stop_vision_thread = True
+                stop_dance_thread = True
+                lock = False
+            elif (flag == 1):
                  stop_dance_thread = True
                  stop_vision_thread = False
+                 r.FLAG = flag
                  if (lock == False):
-                    #r = RobotVision()
-                    #r.FLAG = flag
-                    #r.start()
+                    r.FLAG = flag
+                    r.start()
                     lock = True
             elif (flag == 2):
-                #r.FLAG = flag
-                number = 1
-                number = 1 + 1
+                r.FLAG = flag
             elif (flag == 3):
                 stop_dance_thread = False
                 stop_vision_thread = True
@@ -111,9 +114,9 @@ class btServer(threading.Thread):
                 pass
                 #TODO create an object which would
                 # listen to music and dance on it 
-            elif (driveorGrip == 1 or driveorGrip == 2):
-                stop_vision_thread = False
-                stop_dance_thread = False
+            if (driveorGrip == 1 or driveorGrip == 2):
+                stop_vision_thread = True
+                stop_dance_thread = True
 
                 if (driveorGrip == 1):
                     # Stop right motor
@@ -152,10 +155,8 @@ class btServer(threading.Thread):
                     # Right motor forward
                     if ry == 4095 and 1900 < ly < 1990:
                         self.motor_right.forward(100)
-
-                
-            if driveorGrip == 2:
-                print("armfunctie")
+                elif (driveorGrip == 2):
+                    #TODO: IMPLEMENT GRIPPER METHODS
                 
 
     def run(self):
