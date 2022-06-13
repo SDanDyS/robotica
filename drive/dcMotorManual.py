@@ -7,9 +7,9 @@ manual controls to handle the robot only used for test purposes
 """
 # Define pins
 in1 = 6
-in2 = 5
+in2 = 26
 in3 = 13
-in4 = 26
+in4 = 5
 ena = 25
 enb = 12
 

@@ -6,10 +6,12 @@ import RPi.GPIO as GPIO
 from time import sleep
 import json
 import logging
+import threading
+
 
 sock=BluetoothSocket(RFCOMM)
 
-class btServer():
+class btServer(threading.Thread):
     def __init__(self, shared):
         '''
         Constructs the btServer class.
@@ -17,6 +19,7 @@ class btServer():
                 Parameters:
                         shared (object): Shared objects from robot.py, containing left and right DC motors.
         '''
+        super(btServer, self).__init__()
 
         self.motor_left = shared.motor_left
         self.motor_right = shared.motor_right
@@ -37,15 +40,27 @@ class btServer():
             sock.send(input)
             sock.send("\n")
 
+    ly = 0
+    lx = 0
+    ry = 0
+    rx = 0
+    connected = False
+
     def receiver(self):
         '''
         Processes the data received by the Bluetooth controller and controls DC motors.
         '''
-        ly = 0
-        lx = 0
-        ry = 0
-        rx = 0
-    
+        # ly = 0
+        # lx = 0
+        # ry = 0
+        # rx = 0
+        flag = 0
+        driveorGrip = 0
+
+        stop_vision_thread = False
+        stop_dance_thread = False
+        lock = False
+        
         while True:
             data = sock.recv(self.buf_size)
 
@@ -69,39 +84,78 @@ class btServer():
             lx = int(parsedData["LX"])
             ry = int(parsedData["RY"])
             rx = int(parsedData["RX"])
+            flag = int(parsedData["flag"])
+            driveorGrip = int(parsedData["driveOrGrip"])
+
+            # Set for robot.py
+            self.ly = ly
+            self.lx = lx
+            self.ry = ry
+            self.rx = rx
+            
+            if (flag == 1):
+                 stop_dance_thread = True
+                 stop_vision_thread = False
+                 if (lock == False):
+                    r = RobotVision()
+                    r.FLAG = flag
+                    r.start()
+                    lock = True
+            elif (flag == 2):
+                r.FLAG = flag
+            elif (flag == 3):
+                stop_dance_thread = False
+                stop_vision_thread = True
+                ## TODO: create dance object
+            elif (flag == 4):
+                #TODO create an object which would
+                # listen to music and dance on it 
+            elif (driveorGrip == 1 or driveorGrip == 2):
+                stop_vision_thread = False
+                stop_dance_thread = False
+
+                if (driveorGrip == 1):
+                    # Stop right motor
+                    if ry > 1920 and ry < 1990:
+                        self.motor_right.stop()
+                    # Stop left motor
+                    if ly > 1900 and ly < 1980:
+                        self.motor_left.stop()
+                    # Forward
+                    if ry > 4000 and ly > 4000:
+                        self.motor_left.forward(100)
+                        self.motor_right.forward(100)
+                    # Motors both backwards
+                    if (ly < 1 and ry < 1):
+                        self.motor_left.backwards()
+                        self.motor_right.backwards()
+                    # Left motor backwards
+                    if ly < 1:
+                        self.motor_left.backwards()
+                    # Right motor backwards
+                    if ry < 1:
+                        self.motor_right.backwards()
+                    # Right
+                    if ry == 4095 and ly == 0:
+                        self.motor_left.right()
+                        self.motor_right.right()  
+                    #Left
+                    if ry < 1 and ly > 4000:
+                        self.motor_left.left()
+                        self.motor_right.left()
+
+                    # Left motor forward
+                    if ly == 4095 and 1900 < ry < 1990:
+                        self.motor_left.forward(100)
+
+                    # Right motor forward
+                    if ry == 4095 and 1900 < ly < 1990:
+                        self.motor_right.forward(100)
+
+                print(CatchMe)
+            if driveorGrip == 2:
+                print("armfunctie")
                 
-            # Stop right motor
-            if ry > 1920 and ry < 1990:
-                self.motor_right.stop()
-            # Stop left motor
-            if ly>1900 and ly < 1980:
-                self.motor_left.stop()
-
-            # Forward
-            if ry>4000 and ly > 4000:
-                self.motor_left.forward(100)
-                self.motor_right.forward(100)
-            # Right
-            if ry > 4000 and ly < 1:
-                self.motor_left.backward()
-                self.motor_right.rightmotor()  
-            # Left
-            if ry < 1 and ly > 4000:
-                self.motor_left.leftmotor()
-                self.motor_right.backward2()
-
-            # Left motor forward
-            if ly==4095 and 1900 < ry <1990:
-                self.motor_left.leftmotor()
-            # Right motor forward
-            if ry==4095 and 1900 < ly <1990:
-                self.motor_right.rightmotor()
-            # Left motor backwards
-            if ly < 1:
-                self.motor_right.backward2()
-            # Right motor backwards
-            if ry < 1:
-                self.motor_right.backward()
 
     def run(self):
         '''
@@ -114,10 +168,11 @@ class btServer():
         # Find controller
         service_matches = find_service( address = addr )
 
-        self.buf_size = 128
+        self.buf_size = 256
 
         if len(service_matches) == 0:
             logging.error("Something went wrong with the bluetooth connection")
+            self.connected = False
             sys.exit(0)
 
         for s in range(len(service_matches)):
@@ -133,12 +188,15 @@ class btServer():
 
         # Create the client socket
         sock.connect((host, port))
+        self.connected = True
 
         # sender = Process(target=self.sender)
         # sender.start()
 
-        receiver = Process(target=self.receiver)
-        receiver.start()
+        # receiver = Process(target=self.receiver)
+        # receiver.start()
+
+        self.receiver()
     
     def active(self):
         '''

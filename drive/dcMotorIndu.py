@@ -4,9 +4,9 @@ import threading
 import re
 
 in1 = 6
-in2 = 5
+in2 = 26
 in3 = 13
-in4 = 26
+in4 = 5
 ena = 25
 enb = 12
 # pa=GPIO.PWM(ena,1000)
@@ -23,14 +23,14 @@ class dcMotorIndu(threading.Thread):
             pint for the remote controller
     """
     in1 = 6
-    in2 = 5
+    in2 = 26
     in3 = 13
-    in4 = 26
+    in4 = 5
     ena = 25
     enb = 12
     selectedMotor = 0
     
-    GPIO.setwarnings(False)
+    # GPIO.setwarnings(False)
     GPIO.setmode(GPIO.BCM)
         
     def __init__(self, motorId):
@@ -92,11 +92,10 @@ class dcMotorIndu(threading.Thread):
             GPIO.output(self.in1,GPIO.LOW)
             GPIO.output(self.in2,GPIO.HIGH)
             self.pwm.start(100)
-            self.pwm.start(100)
+
         if self.selectedMotor == 1:
             GPIO.output(self.in3,GPIO.LOW)
             GPIO.output(self.in4,GPIO.HIGH)
-            self.pwm.start(100)
             self.pwm.start(100)
 
     def right(self):
@@ -107,13 +106,14 @@ class dcMotorIndu(threading.Thread):
         none
         """
         if self.selectedMotor == 0:
-            GPIO.output(self.in1,GPIO.HIGH)
-            GPIO.output(self.in2,GPIO.LOW)
+            GPIO.output(self.in1,GPIO.LOW)
+            GPIO.output(self.in2,GPIO.HIGH)
+            self.pwm.ChangeDutyCycle(100)
         if self.selectedMotor == 1:
-            GPIO.output(self.in3,GPIO.LOW)
-            GPIO.output(self.in4,GPIO.HIGH)
-            self.pwm.ChangeDutyCycle(25)
-            self.pwm.ChangeDutyCycle(25)
+            GPIO.output(self.in3,GPIO.HIGH)
+            GPIO.output(self.in4,GPIO.LOW)
+            self.pwm.ChangeDutyCycle(100)
+           
 
     def left(self):
         """
@@ -125,11 +125,12 @@ class dcMotorIndu(threading.Thread):
         if self.selectedMotor == 0:
             GPIO.output(self.in1,GPIO.HIGH)
             GPIO.output(self.in2,GPIO.LOW)
+            self.pwm.ChangeDutyCycle(100)
         if self.selectedMotor == 1:
             GPIO.output(self.in3,GPIO.LOW)
             GPIO.output(self.in4,GPIO.HIGH)
-            self.pwm.ChangeDutyCycle(25)
-            self.pwm.ChangeDutyCycle(25)
+            self.pwm.ChangeDutyCycle(100)
+            
 
     def turbo(self):
         """

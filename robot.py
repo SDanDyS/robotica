@@ -9,11 +9,15 @@ import logging
 import RPi.GPIO as GPIO
 import time
 
+import asyncio
+
 class Robot():
     """
     main function of the project
 
     """
+    ly = 0
+
     def __init__(self):
         """
         initializes the program with the set arguments to run the program
@@ -52,7 +56,28 @@ class Robot():
             bluetooth = btServer(self)
 
             # bluetooth = btServer(motor_left, motor_right)
-            bluetooth.run()
+            bluetooth.start()
+
+            #temp test
+            async def read_val():
+                while True:
+                    await asyncio.sleep(1)
+                    print("-=-=-=-=-=-=-=-=-=-=-=-")
+                    print("[robot.py] Bluetooth values:")
+                    print(bluetooth.ly)
+                    print(bluetooth.lx)
+                    print(bluetooth.ry)
+                    print(bluetooth.rx)
+                    print("Connected:")
+                    print(bluetooth.connected)
+                    print(("-=-=-=-=-=-=-=-=-=-=-=-"))
+                    # self.ly = bluetooth.ly
+                    # my_list.append(random.random())
+                    # notify()
+
+            loop = asyncio.get_event_loop()
+            cors = asyncio.wait([read_val()])
+            loop.run_until_complete(cors)
 
         # Start dashboard webserver
         dashboard = dashboardServer()

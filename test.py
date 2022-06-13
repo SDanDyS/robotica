@@ -9,24 +9,36 @@ import os
 import time
 import logging
 
-try:
-    from imutils.video.pivideostream import PiVideoStream
-    import imutils
-except ImportError:
-    logging.warning("Couldn't import PiCamera, continuing wihout...")
-    
+i = 0
+j = 0
+fooStop = False
+testStop = False
 
-camIsPi = True
-# Check whether cam arg is Pi camera
+class Test(Thread):
+    def run(self):
+        while True:
+            print("Request class test")
+            global testStop
+            global fooStop
+            if (testStop == True):
+                fooStop = True
+                break
 
-rotation = 90
-vs = PiVideoStream(rotation=rotation).start()
-time.sleep(1)
+class Foo(Thread):
+    def run(self):
+        while True:
+            print("Request class Foo")
+            global fooStop
+            if (fooStop == True):
+                break
 
-cycleOn = True
-while (cycleOn == True):
-    # Capture frame-by-frame
-    frame = vs.read()
-    print(frame)
-    #frame = imutils.resize(frame, width=400)                
-    cv.imshow("Video capture (Final result)", frame)
+while (j < 5):
+    if (i == 0):
+        t = Test()
+        t.start()
+        i += 1
+    else:
+        testStop = True
+        f = Foo()
+        f.start()
+    j += 1

@@ -5,7 +5,14 @@ from random import randrange
 import subprocess as sp
 import json
 
-class dashboardServer:
+class dashboardServer():
+    # def __init__(self):
+    #     print("__________________________________")
+    #     print(self.ly)
+    # def __init__(self):
+    #     super().__init__()
+    #     print("__________________________________________________")
+    #     print("ly", self.ly)
     app = Flask(__name__)
 
     @app.route('/api')

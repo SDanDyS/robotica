@@ -122,7 +122,8 @@ class RobotVision(Thread):
                 blur = cv.GaussianBlur(self.frame, (9, 9), 0)#self.frame
                 self.hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)#blur
                 # int(self.screenHeight / 2 - 50), int(self.screenHeight / 2 + 50)
-                area = self.detectObject(self.lower_blue, self.upper_blue, int(self.screenHeight / 2 - 75), int(self.screenHeight / 2 + 75))
+                
+                area = self.detectObject(self.lower_blue, self.upper_blue)
                 if (area is not None):
                     self.drawDetectedObject(area)
                     angle = self.angleToRotate(area, 200)
@@ -134,11 +135,11 @@ class RobotVision(Thread):
                         motor_right.forward(100)
 
             self.imshow()
-            if cv.waitKey(1) == ord('q'):
+            global stop_vision_thread
+            if cv.waitKey(1) and stop_vision_thread == True:
                 # When everything done, release the capture
                 self.cycleOn = False
                 GPIO.cleanup()
-                cap.release()
                 cv.destroyAllWindows()
                 break
 
