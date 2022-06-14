@@ -7,9 +7,10 @@ from time import sleep
 import json
 import logging
 import threading
-from vision.robotVision import *
 
-from i2c import i2c as bus
+# import i2c as bus
+# from bt import i2c as bus
+from bt.i2c import *
 from vision.robotVision import *
 
 
@@ -28,6 +29,8 @@ class btServer(threading.Thread):
 
         self.motor_left = shared.motor_left
         self.motor_right = shared.motor_right
+
+        self.bus = i2c()
 
     def sender(self, input):
         '''
@@ -181,20 +184,20 @@ class btServer(threading.Thread):
     # Raise, lower and stop the height of the arm
     def heightArm(self, ly):
         if ly > self.HIGH_VALUE:
-            bus.raiseHeight()
+            self.bus.raiseHeight()
         elif ly <= self.HIGH_VALUE and ly >= self.LOW_VALUE:
-            bus.stopHeight()
+            self.bus.stopHeight()
         elif ly < self.LOW_VALUE:
-            bus.lowerHeight()
+            self.bus.lowerHeight()
 
     # Open, close and stop the grabber
     def grabber(self, ry):
         if ry > self.HIGH_VALUE:
-            bus.openGrabber()
+            self.bus.openGrabber()
         elif ry <= self.HIGH_VALUE and ry >= self.LOW_VALUE:
-            bus.stopGrabber()
+            self.bus.stopGrabber()
         elif ry < self.LOW_VALUE:
-            bus.closeGrabber()
+            self.bus.closeGrabber()
 
     def run(self):
         '''

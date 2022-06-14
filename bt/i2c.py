@@ -6,10 +6,9 @@
 #  https://dronebotworkshop.com
 
 from smbus import SMBus
-from threading import Thread
 
 
-class i2c(Thread):
+class i2c():
     addr = 0x8  # bus address
     bus = SMBus(1)  # indicates /dev/ic2-1
     numb = 1
