@@ -17,8 +17,3 @@ def shutdown(channel):
 
 # Add our function to execute 
 GPIO.add_event_detect(21, GPIO.FALLING, callback=shutdown, bouncetime=2000)
-
-"""
-    sudo crontab -e
-    @reboot                           
-"""

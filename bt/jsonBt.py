@@ -155,9 +155,8 @@ class btServer(threading.Thread):
                     # Right motor forward
                     if ry == 4095 and 1900 < ly < 1990:
                         self.motor_right.forward(100)
-                elif (driveorGrip == 2):
+                # elif (driveorGrip == 2):
                     #TODO: IMPLEMENT GRIPPER METHODS
-                
 
     def run(self):
         '''
