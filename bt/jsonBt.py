@@ -172,19 +172,19 @@ class btServer(threading.Thread):
     def heightArm(self, ly):
         if ly > self.HIGH_VALUE:
             bus.raiseHeight()
-        if ly < self.LOW_VALUE:
-            bus.lowerHeight()
-        if ly <= self.HIGH_VALUE and ly >= self.LOW_VALUE:
+        elif ly <= self.HIGH_VALUE and ly >= self.LOW_VALUE:
             bus.stopHeight()
+        elif ly < self.LOW_VALUE:
+            bus.lowerHeight()
 
     # Open, close and stop the grabber
     def grabber(self, ry):
         if ry > self.HIGH_VALUE:
             bus.openGrabber()
-        if ry < self.LOW_VALUE:
-            bus.closeGrabber()
-        if ry <= self.HIGH_VALUE and ry >= self.LOW_VALUE:
+        elif ry <= self.HIGH_VALUE and ry >= self.LOW_VALUE:
             bus.stopGrabber()
+        elif ry < self.LOW_VALUE:
+            bus.closeGrabber()
 
     def run(self):
         '''
