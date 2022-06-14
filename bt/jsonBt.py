@@ -2,14 +2,16 @@ from bluetooth import *
 from multiprocessing import Process
 import time
 import re
-import RPi.GPIO as GPIO          
+import RPi.GPIO as GPIO
 from time import sleep
 import json
 import logging
 import threading
+import i2c as bus
 
 
-sock=BluetoothSocket(RFCOMM)
+sock = BluetoothSocket(RFCOMM)
+
 
 class btServer(threading.Thread):
     def __init__(self, shared):
@@ -34,7 +36,7 @@ class btServer(threading.Thread):
 
         while True:
             #data = input()
-            #if len(data) == 0: break
+            # if len(data) == 0: break
             data = 1
             # time.sleep(4)
             sock.send(input)
@@ -47,6 +49,10 @@ class btServer(threading.Thread):
     connected = False
     json = {}
 
+    # Default controller values; 4095 - 0
+    HIGH_VALUE = 4000
+    LOW_VALUE = 100
+
     def receiver(self):
         '''
         Processes the data received by the Bluetooth controller and controls DC motors.
@@ -58,7 +64,7 @@ class btServer(threading.Thread):
         stop_dance_thread = False
         lock = False
         r = RobotVision()
-        
+
         while True:
             data = sock.recv(self.buf_size)
 
@@ -66,17 +72,18 @@ class btServer(threading.Thread):
             if not data:
                 logging.error("Didn't receive data, check connection")
                 break
-            
+
             # Check whether received data is valid JSON, skip if invalid
             utfData = data.decode("utf-8")
             try:
-                if not utfData: break
+                if not utfData:
+                    break
                 parsedData = json.loads(utfData)
                 logging.info(parsedData)
             except ValueError:
                 logging.error("Received invalid JSON, skipping...")
                 continue
-            
+
             # Parse and store joystick coordinates
             ly = int(parsedData["LY"])
             lx = int(parsedData["LX"])
@@ -91,16 +98,16 @@ class btServer(threading.Thread):
             self.ry = ry
             self.rx = rx
             self.json = parsedData
-            
+
             if (flag == 0):
                 stop_vision_thread = True
                 stop_dance_thread = True
                 lock = False
             elif (flag == 1):
-                 stop_dance_thread = True
-                 stop_vision_thread = False
-                 r.FLAG = flag
-                 if (lock == False):
+                stop_dance_thread = True
+                stop_vision_thread = False
+                r.FLAG = flag
+                if (lock == False):
                     r.FLAG = flag
                     r.start()
                     lock = True
@@ -109,15 +116,16 @@ class btServer(threading.Thread):
             elif (flag == 3):
                 stop_dance_thread = False
                 stop_vision_thread = True
-                ## TODO: create dance object
+                # TODO: create dance object
             elif (flag == 4):
                 pass
-                #TODO create an object which would
-                # listen to music and dance on it 
+                # TODO create an object which would
+                # listen to music and dance on it
             if (driveorGrip == 1 or driveorGrip == 2):
                 stop_vision_thread = True
                 stop_dance_thread = True
 
+                # Driver mode
                 if (driveorGrip == 1):
                     # Stop right motor
                     if ry > 1920 and ry < 1990:
@@ -142,8 +150,8 @@ class btServer(threading.Thread):
                     # Right
                     if ry == 4095 and ly == 0:
                         self.motor_left.right()
-                        self.motor_right.right()  
-                    #Left
+                        self.motor_right.right()
+                    # Left
                     if ry < 1 and ly > 4000:
                         self.motor_left.left()
                         self.motor_right.left()
@@ -155,8 +163,28 @@ class btServer(threading.Thread):
                     # Right motor forward
                     if ry == 4095 and 1900 < ly < 1990:
                         self.motor_right.forward(100)
-                # elif (driveorGrip == 2):
-                    #TODO: IMPLEMENT GRIPPER METHODS
+                # Grabber Mode
+                elif (driveorGrip == 2):
+                    self.heightArm(ly)
+                    self.grabber(ry)
+
+    # Raise, lower and stop the height of the arm
+    def heightArm(self, ly):
+        if ly > self.HIGH_VALUE:
+            bus.raiseHeight()
+        if ly < self.LOW_VALUE:
+            bus.lowerHeight()
+        if ly <= self.HIGH_VALUE and ly >= self.LOW_VALUE:
+            bus.stopHeight()
+
+    # Open, close and stop the grabber
+    def grabber(self, ry):
+        if ry > self.HIGH_VALUE:
+            bus.openGrabber()
+        if ry < self.LOW_VALUE:
+            bus.closeGrabber()
+        if ry <= self.HIGH_VALUE and ry >= self.LOW_VALUE:
+            bus.stopGrabber()
 
     def run(self):
         '''
@@ -167,8 +195,8 @@ class btServer(threading.Thread):
         addr = "C8:C9:A3:C5:7A:E2"
 
         # Find controller
-        # def connect_bt() 
-        service_matches = find_service( address = addr )
+        # def connect_bt()
+        service_matches = find_service(address=addr)
 
         self.buf_size = 256
 
@@ -180,13 +208,13 @@ class btServer(threading.Thread):
         for s in range(len(service_matches)):
             logging.debug("\nservice_matches: [" + str(s) + "]:")
             logging.debug(service_matches[s])
-            
+
         first_match = service_matches[0]
         port = first_match["port"]
         name = first_match["name"]
         host = first_match["host"]
 
-        port=1
+        port = 1
 
         # Create the client socket
         sock.connect((host, port))
@@ -199,7 +227,7 @@ class btServer(threading.Thread):
         # receiver.start()
 
         self.receiver()
-    
+
     def active(self):
         '''
         Returns state of Bluetooth connection.
@@ -210,9 +238,10 @@ class btServer(threading.Thread):
         if sock.connect((host, port)) == True:
             return True
         else:
-            
+
             return False
-        
+
+
 if __name__ == "__main__":
     try:
         main()
