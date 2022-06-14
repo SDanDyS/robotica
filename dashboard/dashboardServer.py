@@ -13,9 +13,6 @@ class dashboardServer(Thread):
 
     @app.route('/api')
     def getData():
-        # print("--------------------------")
-        # super(dashboardServer, self).get_weight()
-        # super().get_weight()
         '''
         Exposes the robot API endpoint.
 
@@ -83,22 +80,6 @@ class dashboardServer(Thread):
         '''
 
         return render_template("index.html")
-
-    # @app.route('/api/rand')
-    # def getRand():
-    #     return str(randrange(10)), 200, {"Access-Control-Allow-Origin": "*"}
-
-    # @app.route('/api/bt')
-    # def getBt():
-    #     stdoutdata = sp.getoutput("hcitool con")
-    #     if "84:CC:A8:69:97:D2" in stdoutdata.split():
-    #         return "connected", 200, {"Access-Control-Allow-Origin": "*"}
-    #     else:
-    #         return "disconnected", 200, {"Access-Control-Allow-Origin": "*"}
-    
-    # @app.route('/api/weight')
-    # def getWeight():
-    #     return str(randrange(1000)), 200, {"Access-Control-Allow-Origin": "*"}
 
     def run(self):
         logging.info("Starting webserver...")

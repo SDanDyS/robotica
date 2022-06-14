@@ -7,6 +7,7 @@ from time import sleep
 import json
 import logging
 import threading
+from vision.robotVision import *
 
 
 sock=BluetoothSocket(RFCOMM)
@@ -119,20 +120,27 @@ class btServer(threading.Thread):
                 stop_dance_thread = True
 
                 if (driveorGrip == 1):
+
+                    # self.motor_left.forward(100)
+                    # continue
+
                     # Stop right motor
                     if ry > 1920 and ry < 1990:
                         self.motor_right.stop()
                     # Stop left motor
                     if ly > 1900 and ly < 1980:
                         self.motor_left.stop()
-                    # Forward
-                    if ry > 4000 and ly > 4000:
-                        self.motor_left.forward(100)
-                        self.motor_right.forward(100)
+
                     # Motors both backwards
                     if (ly < 1 and ry < 1):
                         self.motor_left.backwards()
                         self.motor_right.backwards()
+
+                    # Forward
+                    if ry > 4000 and ly > 4000:
+                        self.motor_left.forward(100)
+                        self.motor_right.forward(100)
+
                     # Left motor backwards
                     if ly < 1:
                         self.motor_left.backwards()
@@ -141,12 +149,12 @@ class btServer(threading.Thread):
                         self.motor_right.backwards()
                     # Right
                     if ry == 4095 and ly == 0:
-                        self.motor_left.right()
-                        self.motor_right.right()  
+                        self.motor_left.forward(100)
+                        self.motor_right.backwards()  
                     #Left
                     if ry < 1 and ly > 4000:
-                        self.motor_left.left()
-                        self.motor_right.left()
+                        self.motor_left.backwards()
+                        self.motor_right.forward(100)
 
                     # Left motor forward
                     if ly == 4095 and 1900 < ry < 1990:

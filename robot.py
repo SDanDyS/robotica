@@ -54,7 +54,6 @@ class Robot():
 
             bluetooth = btServer(self)
 
-            # bluetooth = btServer(motor_left, motor_right)
             bluetooth.start()
         
         scale = Weight()
