@@ -68,11 +68,11 @@ class Robot():
         async def write_data():
             while True:
                 await asyncio.sleep(1)
-                weightFile = open("weightData", "w")
+                weightFile = open("sensorData/weightData", "w")
                 weightFile.write(str(scale.weight))
                 weightFile.close()
 
-                btFile = open("btData", "w")
+                btFile = open("sensorData/btData", "w")
                 btFile.write(str(bluetooth.json))
                 btFile.close()
 

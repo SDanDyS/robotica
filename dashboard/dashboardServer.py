@@ -6,6 +6,7 @@ import subprocess as sp
 import json
 from threading import *
 import os.path
+from distance.HCSRO4Component import *
 
 class dashboardServer(Thread):
     app = Flask(__name__)
@@ -31,21 +32,8 @@ class dashboardServer(Thread):
         
         # Bluetooth info
         bluetoothData = {}
-        stdoutdata = sp.getoutput("hcitool con")
-        # if "84:CC:A8:69:97:D2" in stdoutdata.split():
-        #     bluetoothData['connected'] = True
-        #     temp = randrange(2000)
-        #     bluetoothData['ly'] = str(temp)
-        #     bluetoothData['lx'] = str(temp)
-        #     bluetoothData['ry'] = str(temp)
-        #     bluetoothData['rx'] = str(temp)
-        # else:
-        #     bluetoothData['connected'] = False
-        #     bluetoothData['ly'] = None
-        #     bluetoothData['lx'] = None
-        #     bluetoothData['ry'] = None
-        #     bluetoothData['rx'] = None
-        btFile = open(os.path.dirname(__file__) + '/../btData')
+
+        btFile = open(os.path.dirname(__file__) + '/../sensorData/btData')
         btRead = btFile.read()
         btRead = btRead.replace("\'", "\"")
         parsedData = json.loads(btRead)
@@ -70,10 +58,13 @@ class dashboardServer(Thread):
         data['controller'] = bluetoothData
 
         # Weight sensor
-        weightFile = open(os.path.dirname(__file__) + '/../weightData')
+        weightFile = open(os.path.dirname(__file__) + '/../sensorData/weightData')
         data['weight'] = int(weightFile.read())
 
         # TODO: Distance sensor
+        # distance = sensorDistance()
+        # print("---------------------------------")
+        # print(distance)
         data['distance'] = 0
 
         # Convert to JSON string

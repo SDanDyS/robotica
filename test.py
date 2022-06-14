@@ -3,7 +3,7 @@
 import smbus
 import time
 bus = smbus.SMBus(1)
-address = 0x2a
+address = 0x8
 
 while True:
     data = ""
