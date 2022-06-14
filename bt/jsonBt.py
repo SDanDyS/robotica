@@ -7,7 +7,9 @@ from time import sleep
 import json
 import logging
 import threading
-import i2c as bus
+
+from i2c import i2c as bus
+from vision.robotVision import *
 
 
 sock = BluetoothSocket(RFCOMM)
