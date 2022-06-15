@@ -203,13 +203,13 @@ class btServer(threading.Thread):
                         self.motor_right.forward(100)
                     
                     if 2070 < ry < 4095:
-                        self.motor_right.forward(50)
+                        self.motor_right.forward(25)
                     if 2070 < ly < 4095:
-                        self.motor_left.forward(50)
+                        self.motor_left.forward(25)
                     if 1 < ry < 1850:
-                        self.motor_right.backwards(50)
+                        self.motor_right.backwards(25)
                     if 1 < ly < 1850:
-                        self.motor_left.backwards(50)
+                        self.motor_left.backwards(25)
                     
                         
                 # Grabber Mode
