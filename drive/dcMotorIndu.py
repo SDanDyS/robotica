@@ -82,7 +82,7 @@ class dcMotorIndu(threading.Thread):
 
         self.pwm.start(speed)         
             
-    def backwards(self):
+    def backwards(self, speed):
         """
         function called when the joysticks go backwards
         :return:
@@ -91,11 +91,11 @@ class dcMotorIndu(threading.Thread):
         if self.selectedMotor == 0:
             GPIO.output(self.in1,GPIO.LOW)
             GPIO.output(self.in2,GPIO.HIGH)
-            self.pwm.start(100)
+            self.pwm.start(speed)
         elif self.selectedMotor == 1:
             GPIO.output(self.in3,GPIO.HIGH)
             GPIO.output(self.in4,GPIO.LOW)
-            self.pwm.start(100)
+            self.pwm.start(speed)
 
     def stop(self):
         """

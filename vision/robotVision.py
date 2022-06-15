@@ -51,6 +51,7 @@ class RobotVision(Thread):
             rotation = 90
             vs = PiVideoStream(resolution=resolution, rotation=rotation).start()
             time.sleep(1)
+
         
         while (self.cycleOn == True):
             # Capture frame-by-frame
@@ -136,7 +137,7 @@ class RobotVision(Thread):
 
             self.imshow()
             global stop_vision_thread
-            if cv.waitKey(1) and stop_vision_thread == True:
+            if cv.waitKey(1) == ord('q'):
                 # When everything done, release the capture
                 self.cycleOn = False
                 GPIO.cleanup()
@@ -258,6 +259,7 @@ class RobotVision(Thread):
         Shows the generated frame from the RobotVision class
     """
     def imshow(self):
+        print("In the imshow")
         cv.imshow("Video capture (Final result)", self.frame)
 
     """

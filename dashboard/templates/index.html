@@ -77,6 +77,7 @@
           <hr>
           <h2>Controller</h2>
           <p>Bluetooth connection: <span id="bluetooth">loading...</span></p>
+          <p>Current mode: <span id="mode">loading...</span></p>
           <h3>Inputs</h3>
 
           <table>
@@ -102,6 +103,14 @@
               <tr>
                 <td>RX</td>
                 <td><span id="rx">loading...</span></td>
+              </tr>
+              <tr>
+                <td>driveorGrip</td>
+                <td><span id="driveorGrip">loading...</span></td>
+              </tr>
+              <tr>
+                <td>flag</td>
+                <td><span id="flag">loading...</span></td>
               </tr>
             </tbody>
           </table>
@@ -145,15 +154,31 @@
             document.querySelector("#lx").innerHTML = json.controller.lx;
             document.querySelector("#ry").innerHTML = json.controller.ry;
             document.querySelector("#rx").innerHTML = json.controller.rx;
+            document.querySelector("#driveorGrip").innerHTML = json.controller.driveorGrip;
+            if (json.controller.driveorGrip == 1) {
+              document.querySelector("#mode").innerHTML = "Drive"
+            } else if (json.controller.driveorGrip == 2) {
+              document.querySelector("#mode").innerHTML = "Gripper"
+            } else if (json.controller.driveorGrip == 0) {
+              document.querySelector("#mode").innerHTML = "Standby"       
+            } else {
+              document.querySelector("#mode").innerHTML = "-"
+            }
+            // 1 is drive, 2 is gripper
+            document.querySelector("#flag").innerHTML = json.controller.flag;
           } else {
             document.querySelector("#bluetooth").innerHTML = "<span style=\"color:red;\">Offline</span>";
             document.querySelector("#ly").innerHTML = "-";
             document.querySelector("#lx").innerHTML = "-";
             document.querySelector("#ry").innerHTML = "-";
             document.querySelector("#rx").innerHTML = "-";
+            document.querySelector("#driveorGrip").innerHTML = "-";
+            document.querySelector("#flag").innerHTML = "-";
+            document.querySelector("#mode").innerHTML = "-";
           }
 
-          document.querySelector("#weight").innerHTML = json.weight;
+          document.querySelector("#weight").innerHTML = json.weight + "g";
+          document.querySelector("#distance").innerHTML = Math.trunc(json.distance) + "cm";
 
           let today = new Date();
           let time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();

@@ -30,12 +30,12 @@ class dashboardServer(Thread):
         # Bluetooth info
         bluetoothData = {}
 
-        btFile = open(os.path.dirname(__file__) + '/../sensorData/btData')
+        btFile = open(os.path.dirname(__file__) + '/../btData')
         btRead = btFile.read()
         btRead = btRead.replace("\'", "\"")
         parsedData = json.loads(btRead)
 
-        if not 'ly' in parsedData or len(obj['ly']) == 0:
+        if not 'LY' in parsedData:
             bluetoothData['connected'] = False
             bluetoothData['ly'] = 0
             bluetoothData['lx'] = 0
@@ -55,14 +55,17 @@ class dashboardServer(Thread):
         data['controller'] = bluetoothData
 
         # Weight sensor
-        weightFile = open(os.path.dirname(__file__) + '/../sensorData/weightData')
+        weightFile = open(os.path.dirname(__file__) + '/../weightData')
         data['weight'] = int(weightFile.read())
 
-        # TODO: Distance sensor
-        # distance = sensorDistance()
-        # print("---------------------------------")
-        # print(distance)
+        # # Distance sensor
         data['distance'] = 0
+        # try:
+        #     distance = sensorDistance()
+        #     data['distance'] = distance
+        # except:
+        #     data['distance'] = 0
+        #     pass
 
         # Convert to JSON string
         json_data = json.dumps(data)

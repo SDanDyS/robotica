@@ -8,7 +8,8 @@ from threading import *
 import logging
 import RPi.GPIO as GPIO
 import time
-from weight.scale import *
+# from weight.scale import *
+from bt.i2c import *
 
 import asyncio
 
@@ -37,6 +38,12 @@ class Robot():
 
         args = vars(ap.parse_args())
 
+        # weight = i2c()
+        # weight.start()
+        
+        self.bus = i2c()
+        self.bus.start()
+
         # Start camera
         if args["camera"] == 'pi':
             print(args["camera"])
@@ -51,13 +58,14 @@ class Robot():
         if args["bluetooth"] == True:
             self.motor_left = dcMotorIndu(0)
             self.motor_right = dcMotorIndu(1)
+            # self.weight = weight
 
             bluetooth = btServer(self)
 
             bluetooth.start()
         
-        scale = Weight()
-        scale.start()
+        # scale = Weight()
+        # scale.start()
         
         # Start dashboard webserver
         dashboard = dashboardServer()
@@ -67,13 +75,10 @@ class Robot():
         async def write_data():
             while True:
                 await asyncio.sleep(1)
-                weightFile = open("sensorData/weightData", "w")
-                weightFile.write(str(scale.weight))
+                actualWeight = str(self.bus.getWeight())
+                weightFile = open("weightData", "w")
+                weightFile.write(actualWeight)
                 weightFile.close()
-
-                btFile = open("sensorData/btData", "w")
-                btFile.write(str(bluetooth.json))
-                btFile.close()
 
         loop = asyncio.get_event_loop()
         cors = asyncio.wait([write_data()])

@@ -6,12 +6,40 @@
 #  https://dronebotworkshop.com
 
 from smbus import SMBus
+from threading import *
+import time
+import sys
+import re
 
 
-class i2c():
-    addr = 0x8  # bus address
-    bus = SMBus(1)  # indicates /dev/ic2-1
-    numb = 1
+WEIGHT_ARM = 185
+
+class i2c(Thread):
+    weight = 0
+
+    def run(self):
+        self.addr = 0x8  # bus address
+        self.bus = SMBus(1)  # indicates /dev/ic2-1
+        self.numb = 1
+        self.receiveData()
+
+    def receiveData(self):
+        while True:
+            data = ""
+            for i in range(0, 5):
+                try:
+                    data += chr(self.bus.read_byte(self.addr))
+                except Exception as e:
+                    print(e)
+
+            data = re.sub('[^0-9]','', data)
+            self.weight = int(data)
+            time.sleep(1)
+
+    def getWeight(self):
+        if self.weight == "":
+            return 0
+        return (self.weight - WEIGHT_ARM)
 
     # Stops the height servos
     def stopHeight(self):
