@@ -38,9 +38,6 @@ class Robot():
 
         args = vars(ap.parse_args())
 
-        # weight = i2c()
-        # weight.start()
-        
         self.bus = i2c()
         self.bus.start()
 
@@ -51,21 +48,15 @@ class Robot():
             vision.camSelector = args["camera"]
             vision.FLAG = 2
             vision.start()
-            # time.sleep(10)
-            # vision.releaseRobot()
             
         # Start bluetooth connection
         if args["bluetooth"] == True:
             self.motor_left = dcMotorIndu(0)
             self.motor_right = dcMotorIndu(1)
-            # self.weight = weight
 
             bluetooth = btServer(self)
 
             bluetooth.start()
-        
-        # scale = Weight()
-        # scale.start()
         
         # Start dashboard webserver
         dashboard = dashboardServer()

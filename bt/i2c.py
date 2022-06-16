@@ -26,20 +26,46 @@ class i2c(Thread):
     def receiveData(self):
         while True:
             data = ""
-            for i in range(0, 5):
+            for i in range(0, 9):
                 try:
                     data += chr(self.bus.read_byte(self.addr))
                 except Exception as e:
                     print(e)
 
-            data = re.sub('[^0-9]','', data)
-            self.weight = int(data)
-            time.sleep(1)
+            # data = re.sub('[^0-9]','', data)
+            print("------debug i2c------")
+            print(data)
+
+            '''
+            i2c not connected: ['\x00\x00\x00\x00\x00\x00\x00\x00\x00']
+            '''
+
+            splitData = data.split("@", 1)
+            print("splitData")
+            print(splitData)
+            weightData = splitData[0]
+            voltageData = splitData[1]
+            print("weightData:")
+            print(weightData)
+            print("voltageData:")
+            print(voltageData)
+
+            # try:
+            #     self.weight = int(data)
+            # except:
+            #     print("Invalid i2c data received")
+            #     self.weight = ""
+            #     continue
+            # print(self.weight)
+            time.sleep(0.3)
 
     def getWeight(self):
         if self.weight == "":
             return 0
         return (self.weight - WEIGHT_ARM)
+    
+    def getVoltage(self):
+        print("-------voltage------")
 
     # Stops the height servos
     def stopHeight(self):

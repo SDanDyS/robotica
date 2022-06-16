@@ -123,6 +123,7 @@ class btServer(threading.Thread):
             #     #     pass
             #     pass
             # elif (flag == 1):
+            #     # start_vision = True
             #     # stop_dance_thread = True
             #     # stop_vision_thread = False
 
@@ -132,6 +133,7 @@ class btServer(threading.Thread):
             #     r.FLAG = flag
 
             # elif (flag == 2):
+            #       start_vision = True
             #     # r.FLAG = flag
             #     print(r.FLAG)
             # elif (flag == 3):

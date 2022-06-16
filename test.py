@@ -8,21 +8,21 @@ weightList = []
 while True:
     data = ""
     weightList = []
-    for i in range(0, 4):
+    for i in range(0, 9):
         # data += chr(bus.read_byte(address))
         data += chr(bus.read_byte(address))
         # print(chr(bus.read_byte(address)))
         # print(chr(bus.read_byte(address)))
         # print(chr(bus.read_byte(address)))
  
-    data = int(data.replace(b'\x00', b''))
+    # data = int(data.replace(b'\x00', b''))
     # data.encode('utf-8')
     # print(data.decode('utf-8'))
 
     print(data)
-    print(type(data))
-    print(data.isnumeric())
-    print(int(data))
+    # print(type(data))
+    # print(data.isnumeric())
+    # print(int(data))
     # data = data.encode("utf-8")
     # data = int.from_bytes(data, sys.byteorder)
     # data = int(data)+191
