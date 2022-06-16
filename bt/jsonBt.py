@@ -186,11 +186,11 @@ class btServer(threading.Thread):
                     if ry < 1:
                         self.motor_right.backwards(100)
                     # Right
-                    if ry == 4095 and ly == 0:
+                    if ly == 4095 and ry == 0:
                         self.motor_left.forward(100)
                         self.motor_right.backwards(100)  
                     #Left
-                    if ry < 1 and ly > 4000:
+                    if ly < 1 and ry > 4000:
                         self.motor_left.backwards(100)
                         self.motor_right.forward(100)
 
