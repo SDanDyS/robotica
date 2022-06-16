@@ -8,7 +8,7 @@ import json
 import logging
 import threading
 # import
-#i2c as bus
+# i2c as bus
 # from bt import i2c as bus
 from bt.i2c import *
 from vision.robotVision import *
@@ -31,9 +31,6 @@ class btServer(threading.Thread):
         self.motor_right = shared.motor_right
 
         self.bus = shared.bus
-        # self.bus =
-        # self.bus = i2c()
-        # self.bus.start()
 
     def sender(self, input):
         '''
@@ -83,7 +80,6 @@ class btServer(threading.Thread):
                 print("exception reached")
                 self.run()
                 break
-            
 
             # Check whether data was received
             if not data:
@@ -188,8 +184,8 @@ class btServer(threading.Thread):
                     # Right
                     if ly == 4095 and ry == 0:
                         self.motor_left.forward(100)
-                        self.motor_right.backwards(100)  
-                    #Left
+                        self.motor_right.backwards(100)
+                    # Left
                     if ly < 1 and ry > 4000:
                         self.motor_left.backwards(100)
                         self.motor_right.forward(100)
@@ -201,7 +197,7 @@ class btServer(threading.Thread):
                     # Right motor forward
                     if ry == 4095 and 1900 < ly < 1990:
                         self.motor_right.forward(100)
-                    
+
                     if 2070 < ry < 4095:
                         self.motor_right.forward(25)
                     if 2070 < ly < 4095:
@@ -210,8 +206,7 @@ class btServer(threading.Thread):
                         self.motor_right.backwards(25)
                     if 1 < ly < 1850:
                         self.motor_left.backwards(25)
-                    
-                        
+
                 # Grabber Mode
                 elif (driveorGrip == 2):
                     # r.join()
@@ -261,7 +256,7 @@ class btServer(threading.Thread):
                     self.run()
                 except:
                     break
-            
+
             # sys.exit(0)
 
         for s in range(len(service_matches)):
@@ -276,11 +271,11 @@ class btServer(threading.Thread):
         except:
             print("except reached service_matches[0]")
             self.run()
-                # break
+            # break
         port = first_match["port"]
         name = first_match["name"]
         host = first_match["host"]
-        
+
         port = 1
 
         # Create the client socket
