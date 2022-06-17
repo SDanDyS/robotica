@@ -8,7 +8,8 @@ from threading import *
 import logging
 import RPi.GPIO as GPIO
 import time
-from weight.scale import *
+# from weight.scale import *
+from bt.i2c import *
 
 import asyncio
 
@@ -29,7 +30,7 @@ class Robot():
         # Grab arguments from Python command
         ap = argparse.ArgumentParser()
         # Select camera module; 'pi' grabs PiCamera, 0-9 grabs regular webcam camera. Defaults to 'pi'.
-        ap.add_argument("-cam", "--camera", type=str, nargs='?', const='pi', help='Enter \'pi\' for Raspberry Pi cam, 0-9 for regular webcam connection. Defaults to Pi')
+        ap.add_argument("-cam", "--flag", type=str, nargs='?',const = 'pi', help='Enter \'pi\' for Raspberry Pi cam, 0-9 for regular webcam connection. Defaults to Pi')
         # Add -bt to set to True
         ap.add_argument("-bt", "--bluetooth", action="store_true", help='Enable the bluetooth receiver/sender')
         # Add -drive to enable manual motors
@@ -37,15 +38,15 @@ class Robot():
 
         args = vars(ap.parse_args())
 
+        self.bus = i2c()
+        self.bus.start()
+
         # Start camera
-        if args["camera"] == 'pi':
-            print(args["camera"])
+        if args["flag"] == '1' or args["flag"] == '2':
+            print(args["flag"])
             vision = RobotVision()
-            vision.camSelector = args["camera"]
-            vision.FLAG = 2
+            vision.camSelector = args["flag"]
             vision.start()
-            # time.sleep(10)
-            # vision.releaseRobot()
             
         # Start bluetooth connection
         if args["bluetooth"] == True:
@@ -54,11 +55,7 @@ class Robot():
 
             bluetooth = btServer(self)
 
-            # bluetooth = btServer(motor_left, motor_right)
             bluetooth.start()
-        
-        scale = Weight()
-        scale.start()
         
         # Start dashboard webserver
         dashboard = dashboardServer()
@@ -68,13 +65,23 @@ class Robot():
         async def write_data():
             while True:
                 await asyncio.sleep(1)
-                weightFile = open("sensorData/weightData", "w")
-                weightFile.write(str(scale.weight))
+
+                # Write Bluetooth
+                if args["bluetooth"] == True:
+                    btFile = open("btData", "w")
+                    btFile.write(str(bluetooth.json))
+                    btFile.close()
+
+                # Write weight sensor data
+                weightFile = open("weightData", "w")
+                weightFile.write(str(self.bus.getWeight()))
                 weightFile.close()
 
-                btFile = open("sensorData/btData", "w")
-                btFile.write(str(bluetooth.json))
-                btFile.close()
+                # Write voltage data
+                voltageFile = open("voltageData", "w")
+                voltageFile.write(str(self.bus.getVoltage()))
+                voltageFile.close()
+
 
         loop = asyncio.get_event_loop()
         cors = asyncio.wait([write_data()])

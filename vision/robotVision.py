@@ -38,19 +38,23 @@ class RobotVision(Thread):
         self.camIsPi = False
 
         # Check whether cam arg is Pi camera
-        if self.camSelector == "pi":
-            logging.info("Selecting PiCamera")
-            self.camIsPi = True
+        if self.camSelector == "1":
+            self.FLAG = 1
+        if self.camSelector == "2":
+            self.FLAG = 2
+        logging.info("Selecting PiCamera")
+        self.camIsPi = True
 
-            resW = 320
-            resH = 320
-            resolution = (resW, resH)
-            self.screenWidth = resW
-            self.screenHeight = resH
+        resW = 320
+        resH = 320
+        resolution = (resW, resH)
+        self.screenWidth = resW
+        self.screenHeight = resH
 
-            rotation = 90
-            vs = PiVideoStream(resolution=resolution, rotation=rotation).start()
-            time.sleep(1)
+        rotation = 90
+        vs = PiVideoStream(resolution=resolution, rotation=rotation).start()
+        time.sleep(1)
+
         
         while (self.cycleOn == True):
             # Capture frame-by-frame
@@ -97,14 +101,15 @@ class RobotVision(Thread):
                             #AS IF IT'S SCANNING FOR SOMETHING
                             pass
                         elif (angle > 0):
-                            motor_left.left()
-                            motor_right.right()
+                            motor_left.forward(25)
+                            motor_right.backwards(25)
                         elif (angle < 0):
-                            motor_left.right()
-                            motor_right.left()
+                            motor_left.backwards(25)
+                            motor_right.forward(25)
 
-                        motor_left.forward(100)
-                        motor_right.forward(100)
+                        time.sleep(0.5)
+                        motor_left.forward(50)
+                        motor_right.forward(50)
                         time.sleep(1)
                         motor_left.stop()
                         motor_right.stop()
@@ -112,7 +117,7 @@ class RobotVision(Thread):
                     elif (self.distance <= 10):
                         area = self.detectObject(self.lower_blue, self.upper_blue)
                         self.drawDetectedObject(area)
-                        angle = self.angleToRotate(area)
+                        angle = self.angleToRotate(area, offset = -6.1)
                         if (angle is None):
                             pass
                         else:
@@ -136,7 +141,7 @@ class RobotVision(Thread):
 
             self.imshow()
             global stop_vision_thread
-            if cv.waitKey(1) and stop_vision_thread == True:
+            if cv.waitKey(1) == ord('q'):
                 # When everything done, release the capture
                 self.cycleOn = False
                 GPIO.cleanup()
@@ -155,7 +160,7 @@ class RobotVision(Thread):
         Provide area and optionally a forcedDistance
         Based on distance and camera it determines how many degrees the object has to turn
     """
-    def angleToRotate(self, area, forcedDistance = False):
+    def angleToRotate(self, area, forcedDistance = False, offset = False):
             # WE ARE NOT ACTUALLY CALCULATING WIDTH OF THE OBJECT, BUT RATHER POINT 0 TO POINT CENTROID X
             rCM = 0
             if (forcedDistance):
@@ -168,7 +173,10 @@ class RobotVision(Thread):
                 distanceToCamera = self.getCameraDistance(self.distance, 12)
                 objW = self.pointZeroToObjectCentroid(self.cx(area), distanceToCamera, self.focalLength)
                 screenCentroid = self.pointZeroToObjectCentroid(int(self.screenWidth / 2), distanceToCamera, self.focalLength)
-                rCM = objW - screenCentroid
+                if (offset is not False):
+                    rCM = objW - (screenCentroid + offset)
+                else:
+                    rCM = objW - screenCentroid
 
             # either no object was detected to determine width or the threshold has been hit and therefore...
             # no position has to change
@@ -258,6 +266,7 @@ class RobotVision(Thread):
         Shows the generated frame from the RobotVision class
     """
     def imshow(self):
+        print("In the imshow")
         cv.imshow("Video capture (Final result)", self.frame)
 
     """
