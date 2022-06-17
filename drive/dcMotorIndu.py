@@ -67,7 +67,7 @@ class dcMotorIndu(threading.Thread):
             GPIO.setup(enb,GPIO.OUT)
             self.pwm=GPIO.PWM(enb,1000)
 
-    def forward(self, speed):
+    def forward(self, speed = 100):
         """
         :param speed:int
             integer to set the speed when calling the function

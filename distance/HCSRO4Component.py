@@ -41,7 +41,7 @@ def sensorDistance():
 
     return distance
 
-def calibrate_distance(arr, n):
+def max_frequency(arr, n):
 
     # Insert all elements in Hash.
     Hash = dict()

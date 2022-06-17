@@ -43,14 +43,14 @@ class Robot():
         self.bus.start()
 
         # Start camera
-        if  (args["camera"] and (args["flag"] == '1' or args["flag"] == '2')):
+        if  (args["camera"] and (args["flag"] == '1' or args["flag"] == '2' or args["flag"] == '3')):
             vision = RobotVision()
             vision.camSelector = args["camera"]
-            vision.FLAG = args["flag"]
+            vision.FLAG = int(args["flag"])
             vision.start()
         elif (args["flag"] == "3" or args["flag"] == "4"):
             print("Requesting something else")
-            
+
         # Start bluetooth connection
         if args["bluetooth"] == True:
             self.motor_left = dcMotorIndu(0)

@@ -73,6 +73,7 @@ class RobotVision(Thread):
             if (self.FLAG == 1):
                 self.distance = sensorDistance()
                 print(self.distance)
+                print("FOUND FOUND FOUND")
 
                 blur = cv.GaussianBlur(self.frame, (37, 37), 0)
                 self.hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)
@@ -85,7 +86,7 @@ class RobotVision(Thread):
                         self.i += 1
                 else:
                     freq = str(self.distance).split(".")
-                    distanceConfirmed = calibrate_distance(self.absoluteDistance, len(self.absoluteDistance))
+                    distanceConfirmed = max_frequency(self.absoluteDistance, len(self.absoluteDistance))
                     
                     self.i = 0
                     self.absoluteDistance = []
@@ -139,9 +140,47 @@ class RobotVision(Thread):
                     elif (angle is not None and angle > 1):
                         motor_left.forward(100)
                         motor_right.forward(100)
+            elif (self.FLAG == 3):
+                hsv = cv.cvtColor(self.frame, cv.COLOR_BGR2HSV)
+                self.frame = hsv
+                # define range of black color in HSV
+
+                lower_val = np.array([0,0,0])
+
+                upper_val = np.array([179,100,130])
+
+
+                # Threshold the HSV image to get only black colors
+
+                # mask = cv.inRange(hsv, (36, 25, 25), (70, 255,255))
+                mask = cv.inRange(hsv, lower_val, upper_val)
+
+                res = cv.bitwise_and(self.frame,self.frame, mask= mask)
+
+                # invert the mask to get black letters on white background
+
+                res2 = cv.bitwise_not(mask)
+
+                # display image
+
+                cv.imshow("img", res)
+
+                cv.imshow("img2", res2)
+                # low_b = np.uint8([5,5,5])
+                # high_b = np.uint8([0,0,0])
+             
+                # gray = cv.cvtColor(self.frame, cv.COLOR_BGR2GRAY)
+                # mask = cv.inRange(gray, low_b, high_b)
+                # cnts = self.findContours(mask)
+                # if (len(cnts) > 0):
+                #     c = max(cnts, key=cv.contourArea)
+                #     if (c is not None):
+                #         self.drawDetectedObject(c)
+                    # angle = self.angleToRotate(area, 20)
+
 
             self.imshow()
-            global stop_vision_thread
+            # global stop_vision_thread
             if cv.waitKey(1) == ord('q'):
                 # When everything done, release the capture
                 self.cycleOn = False
