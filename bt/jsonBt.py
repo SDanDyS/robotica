@@ -7,8 +7,7 @@ from time import sleep
 import json
 import logging
 import threading
-# import
-# i2c as bus
+import bt.i2c as bus
 # from bt import i2c as bus
 from bt.i2c import *
 from vision.robotVision import *
@@ -45,7 +44,10 @@ class btServer(threading.Thread):
             # if len(data) == 0: break
             data = 1
             # time.sleep(4)
-            sock.send(input)
+            sock.send(i2c.getWeight())
+            print(i2c.getWeight())
+            sock.send("\n")
+            sock.send(i2c.getVoltage())
             sock.send("\n")
 
     ly = 0
@@ -213,7 +215,7 @@ class btServer(threading.Thread):
                 elif (driveorGrip == 2):
                     # r.join()
                     self.heightArm(ly)
-                    self.grabber(ry)
+                    self.grabber(rx)
 
     # Raise, lower and stop the height of the arm
     def heightArm(self, ly):
@@ -225,12 +227,12 @@ class btServer(threading.Thread):
             self.bus.lowerHeight()
 
     # Open, close and stop the grabber
-    def grabber(self, ry):
-        if ry > self.HIGH_VALUE:
+    def grabber(self, rx):
+        if rx > self.HIGH_VALUE:
             self.bus.openGrabber()
-        elif ry <= self.HIGH_VALUE and ry >= self.LOW_VALUE:
+        elif rx <= self.HIGH_VALUE and rx >= self.LOW_VALUE:
             self.bus.stopGrabber()
-        elif ry < self.LOW_VALUE:
+        elif rx < self.LOW_VALUE:
             self.bus.closeGrabber()
 
     def receiveData():

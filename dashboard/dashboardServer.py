@@ -5,7 +5,7 @@ from random import randrange
 import subprocess as sp
 import json
 from threading import *
-import os.path
+import os
 from distance.HCSRO4Component import *
 
 class dashboardServer(Thread):
@@ -35,6 +35,10 @@ class dashboardServer(Thread):
         btRead = btRead.replace("\'", "\"")
         parsedData = json.loads(btRead)
 
+        
+        # print("----------------btFile-----------")
+        # print(btFile.getmtime(btFile))
+
         if not 'LY' in parsedData:
             bluetoothData['connected'] = False
             bluetoothData['ly'] = 0
@@ -57,6 +61,11 @@ class dashboardServer(Thread):
         # Weight sensor
         weightFile = open(os.path.dirname(__file__) + '/../weightData')
         data['weight'] = int(weightFile.read())
+
+        # Voltage sensor
+        voltageFile = open(os.path.dirname(__file__) + '/../voltageData')
+        data['voltage'] = voltageFile.read()
+
 
         # # Distance sensor
         data['distance'] = 0

@@ -73,6 +73,7 @@
           <h2>Robot</h2>
           <p>Status: <span id="status">loading...</span></p>
           <p>Weight sensor: <span id="weight">loading...</span></p>
+          <p>Voltage: <span id="voltage">loading...</span></p>
           <p>Distance sensor: <span id="distance">loading...</span></p>
           <hr>
           <h2>Controller</h2>
@@ -178,6 +179,7 @@
           }
 
           document.querySelector("#weight").innerHTML = json.weight + "g";
+          document.querySelector("#voltage").innerHTML = json.voltage.toFixed(2) + "v";
           document.querySelector("#distance").innerHTML = Math.trunc(json.distance) + "cm";
 
           let today = new Date();
