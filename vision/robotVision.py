@@ -72,6 +72,7 @@ class RobotVision(Thread):
             # #FLAG 2 REPRESENTS SIMPLY DETECING A MOVING OBJECT
             if (self.FLAG == 1):
                 self.distance = sensorDistance()
+                print(self.distance)
 
                 blur = cv.GaussianBlur(self.frame, (37, 37), 0)
                 self.hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)

@@ -38,7 +38,7 @@ class i2c(Thread):
             '''
 
             # TODO: replace with actual `data`
-            data = "800@700"
+            # data = "800@700"
 
             if "@" in data:
                 splitData = data.split("@", 1)
