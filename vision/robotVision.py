@@ -267,7 +267,6 @@ class RobotVision(Thread):
         Shows the generated frame from the RobotVision class
     """
     def imshow(self):
-        print("In the imshow")
         cv.imshow("Video capture (Final result)", self.frame)
 
     """

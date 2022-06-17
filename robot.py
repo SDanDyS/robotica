@@ -30,7 +30,8 @@ class Robot():
         # Grab arguments from Python command
         ap = argparse.ArgumentParser()
         # Select camera module; 'pi' grabs PiCamera, 0-9 grabs regular webcam camera. Defaults to 'pi'.
-        ap.add_argument("-cam", "--flag", type=str, nargs='?',const = 'pi', help='Enter \'pi\' for Raspberry Pi cam, 0-9 for regular webcam connection. Defaults to Pi')
+        ap.add_argument("-cam", "--camera", type=str, nargs='?', const ='pi', help='Enter \'pi\' for Raspberry Pi cam, 0-9 for regular webcam connection. Defaults to Pi')
+        ap.add_argument("-flag", "--flag", type=str, const='1', nargs='?', help='flags for vision or dance')
         # Add -bt to set to True
         ap.add_argument("-bt", "--bluetooth", action="store_true", help='Enable the bluetooth receiver/sender')
         # Add -drive to enable manual motors
@@ -42,11 +43,13 @@ class Robot():
         self.bus.start()
 
         # Start camera
-        if args["flag"] == '1' or args["flag"] == '2':
-            print(args["flag"])
+        if  (args["camera"] and (args["flag"] == '1' or args["flag"] == '2')):
             vision = RobotVision()
-            vision.camSelector = args["flag"]
+            vision.camSelector = args["camera"]
+            vision.FLAG = args["flag"]
             vision.start()
+        elif (args["flag"] == "3" or args["flag"] == "4"):
+            print("Requesting something else")
             
         # Start bluetooth connection
         if args["bluetooth"] == True:
