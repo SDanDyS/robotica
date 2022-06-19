@@ -114,7 +114,6 @@ class btServer(threading.Thread):
             self.json = parsedData
 
             if (flag == 0):
-                r.FLAG = flag
                 stop_vision_thread = True
                 stop_dance_thread = True
 
@@ -123,23 +122,27 @@ class btServer(threading.Thread):
                 except:
                     pass
             elif (flag == 1):
-                # start_vision = True
-                # stop_dance_thread = True
-                # stop_vision_thread = False
+                stop_dance_thread = True
+                stop_vision_thread = False
 
-                # if(start_vision == True):
-                #      r.start()
-                #      start_vision = False
-                r.FLAG = flag
+                try:
+                    r.FLAG = flag
+                    r.start()
+                except:
+                    pass
 
             elif (flag == 2):
-                  start_vision = True
-                # r.FLAG = flag
-                print(r.FLAG)
+                stop_dance_thread = True
+                stop_vision_thread = False
+
+                try:
+                    r.FLAG = flag
+                    r.start()
+                except:
+                    pass
             elif (flag == 3):
                 stop_dance_thread = False
                 stop_vision_thread = True
-                start_vision = True
                 try:
                     r.join()
                 except:
