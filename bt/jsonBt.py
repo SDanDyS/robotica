@@ -126,7 +126,7 @@ class btServer(threading.Thread):
                 stop_vision_thread = False
 
                 try:
-                    r.FLAG = flag
+                    r.FLAG = flag##SET FLAGS OUTSIDE OF TRY CATCH
                     r.start()
                 except:
                     pass
