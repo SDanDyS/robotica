@@ -23,10 +23,6 @@ while True:
     hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
                 
     # define range of black color in HSV
-    # lower_val = np.array([0,0,0])
-    # upper_val = np.array([240,255,1])
-    # lower_hue = np.array([0, 5, 50], np.uint8)
-    # upper_hue = np.array([179, 50, 255], np.uint8)
     lower_val = np.array([0,0,0])
     upper_val = np.array([179,100,30])
     # Threshold the HSV image to get only black colors
@@ -42,7 +38,6 @@ while True:
         area = max(cnts, key=cv.contourArea)
         (xg, yg, wg, hg) = cv.boundingRect(area)
         cv.rectangle(frame, (xg, yg), (xg + wg, yg + hg), (0, 255, 0), 2)
-        # cv.drawContours(frame, abscnts, -1, (0,255,0), 3)
     res = cv.bitwise_and(frame, frame, mask= mask)
 
     # invert the mask to get black letters on white background

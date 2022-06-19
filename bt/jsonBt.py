@@ -70,9 +70,8 @@ class btServer(threading.Thread):
 
         stop_vision_thread = False
         stop_dance_thread = False
-        # r = RobotVision()
-        # r.FLAG = 2
-        # r.start()
+        r = RobotVision()
+        r.start()
         start_vision = False
 
         while True:
@@ -114,48 +113,47 @@ class btServer(threading.Thread):
             self.rx = rx
             self.json = parsedData
 
-            # if (flag == 0):
-            #     r.FLAG = flag
-            #     # stop_vision_thread = True
-            #     # stop_dance_thread = True
+            if (flag == 0):
+                r.FLAG = flag
+                stop_vision_thread = True
+                stop_dance_thread = True
 
-            #     # try:
-            #     #     r.join()
-            #     # except:
-            #     #     pass
-            #     pass
-            # elif (flag == 1):
-            #     # start_vision = True
-            #     # stop_dance_thread = True
-            #     # stop_vision_thread = False
+                try:
+                    r.join()
+                except:
+                    pass
+            elif (flag == 1):
+                # start_vision = True
+                # stop_dance_thread = True
+                # stop_vision_thread = False
 
-            #     # if(start_vision == True):
-            #     #      r.start()
-            #     #      start_vision = False
-            #     r.FLAG = flag
+                # if(start_vision == True):
+                #      r.start()
+                #      start_vision = False
+                r.FLAG = flag
 
-            # elif (flag == 2):
-            #       start_vision = True
-            #     # r.FLAG = flag
-            #     print(r.FLAG)
-            # elif (flag == 3):
-            #     stop_dance_thread = False
-            #     stop_vision_thread = True
-            #     start_vision = True
-            #     try:
-            #         r.join()
-            #     except:
-            #         pass
-            #         ##DO DANCE IN EXCEPT
-            #     # TODO: create dance object
-            # elif (flag == 4):
-            #     start_vision = True
-            #     try:
-            #         r.join()
-            #     except:
-            #         pass
-            #     # TODO create an object which would
-            #     # listen to music and dance on it
+            elif (flag == 2):
+                  start_vision = True
+                # r.FLAG = flag
+                print(r.FLAG)
+            elif (flag == 3):
+                stop_dance_thread = False
+                stop_vision_thread = True
+                start_vision = True
+                try:
+                    r.join()
+                except:
+                    pass
+                    ##DO DANCE IN EXCEPT
+                # TODO: create dance object
+            elif (flag == 4):
+                start_vision = True
+                try:
+                    r.join()
+                except:
+                    pass
+                # TODO create an object which would
+                # listen to music and dance on it
             if (driveorGrip == 1 or driveorGrip == 2):
                 # stop_vision_thread = True
                 # stop_dance_thread = True
