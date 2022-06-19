@@ -143,11 +143,10 @@ class RobotVision(Thread):
             elif (self.FLAG == 3):
                 hsv = cv.cvtColor(self.frame, cv.COLOR_BGR2HSV)
                 self.frame = hsv
+                
                 # define range of black color in HSV
-
                 lower_val = np.array([0,0,0])
-
-                upper_val = np.array([179,100,130])
+                upper_val = np.array([240,255,1])
 
 
                 # Threshold the HSV image to get only black colors
