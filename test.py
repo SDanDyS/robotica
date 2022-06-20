@@ -26,8 +26,6 @@ while True:
     lower_val = np.array([0,0,0])
     upper_val = np.array([179,100,30])
     # Threshold the HSV image to get only black colors
-
-    # mask = cv.inRange(hsv, (36, 25, 25), (70, 255,255))
     mask = cv.inRange(hsv, lower_val, upper_val)
     cnts = cv.findContours(mask.copy(), cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[-2]
     abscnts = []
@@ -38,6 +36,9 @@ while True:
         area = max(cnts, key=cv.contourArea)
         (xg, yg, wg, hg) = cv.boundingRect(area)
         cv.rectangle(frame, (xg, yg), (xg + wg, yg + hg), (0, 255, 0), 2)
+   
+   
+   
     res = cv.bitwise_and(frame, frame, mask= mask)
 
     # invert the mask to get black letters on white background

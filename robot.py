@@ -4,12 +4,11 @@ from dashboard.dashboardServer import *
 from bt.jsonBt import *
 from drive.dcMotorIndu import *
 from threading import *
-#from weight.scale import *
 import logging
 import RPi.GPIO as GPIO
 import time
-# from weight.scale import *
 from bt.i2c import *
+from distance.HCSRO4Component import *
 
 import asyncio
 
@@ -66,8 +65,10 @@ class Robot():
 
         # Write sensor data to file for Dashboard
         async def write_data():
+
             while True:
                 await asyncio.sleep(1)
+                voltageValues = {}
 
                 # Write Bluetooth
                 if args["bluetooth"] == True:
@@ -85,10 +86,16 @@ class Robot():
                 voltageFile.write(str(self.bus.getVoltage()))
                 voltageFile.close()
 
+                # voltageValues.insert(self.bus.getVoltage())
+                # print("max_frequency:")
+                # print(max_frequency([1, 2, 3], 3))
 
         loop = asyncio.get_event_loop()
         cors = asyncio.wait([write_data()])
         loop.run_until_complete(cors)
 
 if __name__ == "__main__":
-    Robot()
+    try:
+        Robot()
+    except:
+        GPIO.cleanup()

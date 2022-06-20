@@ -57,7 +57,8 @@ class i2c(Thread):
                 self.weight = int(weightData)
                 self.voltage = int(voltageData)
             else:
-                print("Received invalid data from i2c")
+                pass
+                # print("Received invalid data from i2c")
 
             time.sleep(0.3)
 

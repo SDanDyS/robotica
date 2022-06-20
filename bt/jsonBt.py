@@ -11,6 +11,7 @@ import bt.i2c as bus
 # from bt import i2c as bus
 from bt.i2c import *
 from vision.robotVision import *
+#from drive.dance import *
 
 
 sock = BluetoothSocket(RFCOMM)
@@ -72,6 +73,7 @@ class btServer(threading.Thread):
         stop_dance_thread = False
         r = RobotVision()
         r.start()
+        d = dance()
         start_vision = False
 
         while True:
@@ -144,8 +146,11 @@ class btServer(threading.Thread):
                 stop_dance_thread = False
                 stop_vision_thread = True
                 try:
-                    r.join()
+                    while flag == 3:
+                        dance.spin()
                 except:
+                    while flag == 3:
+                        dance.spin()
                     pass
                     ##DO DANCE IN EXCEPT
                 # TODO: create dance object

@@ -57,7 +57,6 @@ class RobotVision(Thread):
             # Capture frame-by-frame
             if self.camIsPi == True:
                 self.frame = vs.read()
-                #frame = imutils.resize(frame, width=400)
 
             cv.circle(self.frame, (int(self.screenWidth / 2), int(self.screenHeight / 2)), 5, (255, 255, 255), -1)
             #distance and width
@@ -65,6 +64,7 @@ class RobotVision(Thread):
 
             # #FLAG 1 REPRESENTS DETECTING COOKIES
             # #FLAG 2 REPRESENTS SIMPLY DETECING A MOVING OBJECT
+            # FLAG 3 REPRESENTS GOING UP THE PARCOUR
             if (self.FLAG == 1):
                 self.distance = sensorDistance()
 
@@ -113,16 +113,15 @@ class RobotVision(Thread):
                         area = self.detectObject(self.lower_blue, self.upper_blue)
                         self.drawDetectedObject(area)
                         angle = self.angleToRotate(area, offset = -6.1)
-                        if (angle is None):
-                            pass
-                        else:
-                            ##gripperMethod()
-                            pass
+                        # if (angle is None):
+                        #     pass
+                        # else:
+                        #     ##gripperMethod()
+                        #     pass
             elif (self.FLAG == 2):
-                blur = cv.GaussianBlur(self.frame, (9, 9), 0)#self.frame
-                self.hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)#blur
-                # int(self.screenHeight / 2 - 50), int(self.screenHeight / 2 + 50)
-                
+                blur = cv.GaussianBlur(self.frame, (9, 9), 0)
+                self.hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)
+        
                 area = self.detectObject(self.lower_blue, self.upper_blue)
                 if (area is not None):
                     self.drawDetectedObject(area)
@@ -134,41 +133,62 @@ class RobotVision(Thread):
                         motor_left.forward(100)
                         motor_right.forward(100)
             elif (self.FLAG == 3):
+                blur = cv.GaussianBlur(self.frame, (9, 9), 0)
+                # self.hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)
+                # self.areaIsNone = 0
+                # # define range of black color in HSV
+                # lower_val = np.array([0,0,0])
+                # upper_val = np.array([179,100,30])
+
+                # area = self.detectObject(lower_val, upper_val)
+
                 hsv = cv.cvtColor(self.frame, cv.COLOR_BGR2HSV)
-                self.areaIsNone = 0
+                            
                 # define range of black color in HSV
                 lower_val = np.array([0,0,0])
                 upper_val = np.array([179,100,30])
-
+                # Threshold the HSV image to get only black colors
                 mask = cv.inRange(hsv, lower_val, upper_val)
-                area = self.detectObject(lower_val, upper_val)
-                if (area is not None):
-                    angle = self.angleToRotate(area, 15) #change 15 to definitive height later on
-                    if (angle is not None and angle <= -9):
-                        motor_left.forward(11)#11 SHOULD BE 10, BUT THEORY CAN BE DIFFERENT FROM REAL. CHANGE BACK TO 10 IF 11 IS TOO MUCH
-                        motor_right.backward(11)
-                    elif (angle is not None and angle >= 9):
-                        motor_left.backward(11)
-                        motor_right.forward(11)
+                cnts = cv.findContours(mask.copy(), cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[-2]
+                abscnts = []
+                if (len(cnts) > 0):
+                    for cnt in cnts:
+                        if (self.isBadContour(cnt) == False):
+                            abscnts.append(cnt)
+                    area = max(cnts, key=cv.contourArea)
+                    (xg, yg, wg, hg) = cv.boundingRect(area)
+                    cv.rectangle(self.frame, (xg, yg), (xg + wg, yg + hg), (0, 255, 0), 2)
 
-                    time.sleep(1)       
-                    motor_left.stop()
-                    motor_right.stop()
-                    time.sleep(0.5)
-                    motor_left.backwards()
-                    motor_right.backwards()                        
-                elif (area is None):
-                    #cycle 3 times, upon 3 times area is none do a 180 degrees flip on robot
-                    if (self.areaIsNone > 4):
-                        motor_left.backwards()
-                        motor_right.forward()
-                        time.sleep(2)
+                    if (area is not None):
+                        self.drawDetectedObject(area)
+                        angle = self.angleToRotate(area, 15,  offset=-6.1) #change 15 to definitive height later on
+                        if (angle is not None and angle <= -9):
+                            motor_left.backwards(6)#11 SHOULD BE 10, BUT THEORY CAN BE DIFFERENT FROM REAL. CHANGE BACK TO 10 IF 11 IS TOO MUCH
+                            motor_right.forward(6)
+                        elif (angle is not None and angle >= 9):
+                            motor_left.forward(6)
+                            motor_right.backwards(6)
+
+                        time.sleep(1)       
                         motor_left.stop()
                         motor_right.stop()
                         time.sleep(0.5)
-                        self.gaugeAndCrawl()
-                    else:
-                        self.areaIsNone += 1
+                        motor_left.forward()
+                        motor_right.forward()                        
+                # elif (area is None):
+                #     print()
+                #     #cycle 3 times, upon 3 times area is none do a 180 degrees flip on robot
+                #     if (self.areaIsNone > 4):
+                #         motor_left.backwards()
+                #         motor_right.forward()
+                #         time.sleep(2)
+                #         motor_left.stop()
+                #         motor_right.stop()
+                #         time.sleep(0.5)
+                #         print("ENGAGED")
+                #         # self.gaugeAndCrawl()
+                #     else:
+                #         self.areaIsNone += 1
 
             self.imshow()
             # global stop_vision_thread
@@ -183,7 +203,9 @@ class RobotVision(Thread):
         z = True
         absDist = []
         i = 0
+        print("Gauge")
         while (z == True):
+            print("Gauge distance")
             if (i < 4):
                 absDist.append(sensorDistance())
             else:
