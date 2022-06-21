@@ -1,50 +1,53 @@
-from dcMotorIndu import *
+# from dcMotorIndu import *
 import time
 
 class dance():
     
+    def __init__():
+        
+    
     
     
     def spin():       
-        motor_left.forward()
-        motor_right.backwards()
+        self.motor1.forward()
+        self.motor2.backwards()
         
     def forward_backwards():
-        motor_left.forward()
-        motor_right.forward()
+        self.motor2.forward()
+        self.motor2.forward()
         time.sleep(2)
-        motor_left.backwards()
-        motor_right.backwards()
+        self.motor1.backwards()
+        self.motor2.backwards()
         time.sleep(2)
         
     def forward():
-        motor_left.forward()
-        motor_right.forward()
+        self.motor1.forward()
+        self.motor2.forward()
         time.sleep(0.2)
-        motor_left.forward()
-        motor_right.forward()
+        self.motor1.forward()
+        self.motor2.forward()
         time.sleep(0.2)
         
-    def sidetoside():
-        motor_left.forward()
-        motor_right.backwards()
+    def sidetoside(self):
+        self.motor1.forward()
+        self.motor2.backwards()
         time.sleep(1)
-        motor_right.forward()
-        motor_left.backwards()
+        self.motor2.forward()
+        self.motor1.backwards()
         time.sleep(1)
         
-    def switch():
-        motor_left.forward()
-        motor_right.backwards()
+    def switch(self):
+        self.motor1.forward()
+        self.motor2.backwards()
         time.sleep(2)
-        motor_left.forward()
-        motor_right.forward()
+        self.motor1.forward()
+        self.motor2.forward()
         time.sleep(2)
-        motor_left.backwards()
-        motor_right.backwards()
+        self.motor1.backwards()
+        self.motor2.backwards()
         time.sleep(2)
-        motor_right.forward()
-        motor_left.backwards()
+        self.motor2.forward()
+        self.motor1.backwards()
         time.sleep(2)
         
     

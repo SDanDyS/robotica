@@ -32,6 +32,7 @@ class RobotVision(Thread):
         self.i = 0
         self.cycleOn = True
         self.areaIsNone = []
+        self.start_parkour = True
 
         motor_left = dcMotorIndu(0)
         motor_right = dcMotorIndu(1)
@@ -66,8 +67,9 @@ class RobotVision(Thread):
             # #FLAG 2 REPRESENTS SIMPLY DETECING A MOVING OBJECT
             # FLAG 3 REPRESENTS GOING UP THE PARCOUR
             if (self.FLAG == 1):
+                #FORCE A TIME SLEEP TO PREVENT CPU FROM CRASHING
+                time.sleep(1)
                 self.distance = sensorDistance()
-
                 blur = cv.GaussianBlur(self.frame, (37, 37), 0)
                 self.hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)
 
@@ -90,11 +92,18 @@ class RobotVision(Thread):
                         area = self.detectObject(self.lower_blue, self.upper_blue)
                         self.drawDetectedObject(area)
                         angle = self.angleToRotate(area)
-                        # NO CONTOUR FOUND AND THEREFORE NO OBJECT FOUND
-                        if (angle is None):
+                        # NO OBJECT ON CAM, BUT DISTANCE CALCULATED SOME OBJECT
+                        if (angle is None and self.distance > 199):
                             #DO SOME RNG FORWARD, LEFT/RIGHT, BACKWARD MOVEMENT
                             #AS IF IT'S SCANNING FOR SOMETHING
                             pass
+                        elif (angle is None and self.distance < 199):
+                            if (self.distance >= 76):
+                                motor_left.forward(100)
+                                motor_right.forward(100)
+                                time.sleep(1)
+                                motor_left.stop()
+                                motor_right.stop()
                         elif (angle > 0):
                             motor_left.forward(25)
                             motor_right.backwards(25)
@@ -121,7 +130,6 @@ class RobotVision(Thread):
             elif (self.FLAG == 2):
                 blur = cv.GaussianBlur(self.frame, (9, 9), 0)
                 self.hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)
-        
                 area = self.detectObject(self.lower_blue, self.upper_blue)
                 if (area is not None):
                     self.drawDetectedObject(area)
@@ -133,22 +141,41 @@ class RobotVision(Thread):
                         motor_left.forward(100)
                         motor_right.forward(100)
             elif (self.FLAG == 3):
+                if (start_parkour == True):
+                    motor_left.forward(100)
+                    motor_right.forward(100)
+                    time.sleep(3)
+                    motor_left.stop()
+                    motor_right.stop()
+                    start_parkour = False
                 blur = cv.GaussianBlur(self.frame, (9, 9), 0)
                 # self.hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)
                 # self.areaIsNone = 0
-                # # define range of black color in HSV
-                # lower_val = np.array([0,0,0])
-                # upper_val = np.array([179,100,30])
 
                 # area = self.detectObject(lower_val, upper_val)
 
-                hsv = cv.cvtColor(self.frame, cv.COLOR_BGR2HSV)
+                hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)
                             
-                # define range of black color in HSV
-                lower_val = np.array([0,0,0])
-                upper_val = np.array([179,100,30])
-                # Threshold the HSV image to get only black colors
-                mask = cv.inRange(hsv, lower_val, upper_val)
+                # # define range of black color in HSV
+                # lower_val = np.array([0,0,0])
+                # upper_val = np.array([179,100,30])
+                # # Threshold the HSV image to get only black colors
+                # mask = cv.inRange(hsv, lower_val, upper_val)
+
+                # red mask
+                lower_red = np.array([0,50,50])
+                upper_red = np.array([10,255,255])
+
+                red_mask_low = cv2.inRange(hsv, lower_red, upper_red)
+
+                # red mask
+                lower_red = np.array([170,50,50])
+                upper_red = np.array([180,255,255])
+
+                red_mask_upper = cv2.inRange(hsv, lower_red, upper_red)
+
+                mask = red_mask_low | red_mask_upper
+
                 cnts = cv.findContours(mask.copy(), cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[-2]
                 abscnts = []
                 if (len(cnts) > 0):
@@ -161,7 +188,7 @@ class RobotVision(Thread):
 
                     if (area is not None):
                         self.drawDetectedObject(area)
-                        angle = self.angleToRotate(area, 15,  offset=-6.1) #change 15 to definitive height later on
+                        angle = self.angleToRotate(area, 25,  offset=-6.1) #change 15 to definitive height later on
                         if (angle is not None and angle <= -9):
                             motor_left.backwards(6)#11 SHOULD BE 10, BUT THEORY CAN BE DIFFERENT FROM REAL. CHANGE BACK TO 10 IF 11 IS TOO MUCH
                             motor_right.forward(6)
@@ -198,50 +225,6 @@ class RobotVision(Thread):
                 GPIO.cleanup()
                 cv.destroyAllWindows()
                 break
-
-    def gaugeAndCrawl(self):
-        z = True
-        absDist = []
-        i = 0
-        print("Gauge")
-        while (z == True):
-            print("Gauge distance")
-            if (i < 4):
-                absDist.append(sensorDistance())
-            else:
-                d = max_frequency(absDist, len(absDist))
-                i = 0
-                if (d >= 20):
-                    self.motor_left.forward(100)
-                    self.motor_right.forward(100)
-                    time.sleep(0.5)
-                    self.motor_left.stop()
-                    self.motor_right.stop()
-                elif (d >= 10):
-                    self.motor_left.forward(25)
-                    self.motor_right.forward(25)
-                    time.sleep(0.5)
-                    self.motor_left.stop()
-                    self.motor_right.stop()
-                elif (d >= 5):
-                    self.motor_left.forward(10)
-                    self.motor_right.forward(10)
-                    time.sleep(0.5)
-                    self.motor_left.stop()
-                    self.motor_right.stop()
-                else:
-                    if (d <= 2):
-                        self.motor_left.stop()
-                        self.motor_right.stop()
-                    else:
-                        self.motor_left.forward(10)
-                        self.motor_right.forward(10)
-                        time.sleep(0.2)
-                        self.motor_left.stop()
-                        self.motor_right.stop()
-
-
-
 
     """
         Draws a rectangle based on  provided area and prints centroid

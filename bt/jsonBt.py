@@ -10,7 +10,7 @@ import threading
 import bt.i2c as bus
 # from bt import i2c as bus
 from bt.i2c import *
-from vision.robotVision import *
+#from vision.robotVision import *
 #from drive.dance import *
 
 
@@ -71,9 +71,8 @@ class btServer(threading.Thread):
 
         stop_vision_thread = False
         stop_dance_thread = False
-        r = RobotVision()
-        r.start()
-        d = dance()
+#         r = RobotVision()
+#         r.start()
         start_vision = False
 
         while True:
@@ -115,51 +114,50 @@ class btServer(threading.Thread):
             self.rx = rx
             self.json = parsedData
 
-            if (flag == 0):
-                stop_vision_thread = True
-                stop_dance_thread = True
-
-                try:
-                    r.join()
-                except:
-                    pass
-            elif (flag == 1):
-                stop_dance_thread = True
-                stop_vision_thread = False
-
-                try:
-                    r.FLAG = flag##SET FLAGS OUTSIDE OF TRY CATCH
-                    r.start()
-                except:
-                    pass
-
-            elif (flag == 2):
-                stop_dance_thread = True
-                stop_vision_thread = False
-
-                try:
-                    r.FLAG = flag
-                    r.start()
-                except:
-                    pass
-            elif (flag == 3):
-                stop_dance_thread = False
-                stop_vision_thread = True
-                try:
-                    while flag == 3:
-                        dance.spin()
-                except:
-                    while flag == 3:
-                        dance.spin()
-                    pass
-                    ##DO DANCE IN EXCEPT
-                # TODO: create dance object
-            elif (flag == 4):
-                start_vision = True
-                try:
-                    r.join()
-                except:
-                    pass
+#             if (flag == 0):
+#                 stop_vision_thread = True
+#                 stop_dance_thread = True
+# 
+#                 try:
+#                     r.join()
+#                 except:
+#                     pass
+#             elif (flag == 1):
+#                 stop_dance_thread = True
+#                 stop_vision_thread = False
+# 
+#                 try:
+#                     r.FLAG = flag##SET FLAGS OUTSIDE OF TRY CATCH
+#                     r.start()
+#                 except:
+#                     pass
+# 
+#             elif (flag == 2):
+#                 stop_dance_thread = True
+#                 stop_vision_thread = False
+# 
+#                 try:
+#                     r.FLAG = flag
+#                     r.start()
+#                 except:
+#                     pass
+#             elif (flag == 3):
+#                 stop_dance_thread = False
+#                 stop_vision_thread = True
+#                 try:
+#                     print(3)
+#                 except:
+#         
+#     
+#                     pass
+#                     ##DO DANCE IN EXCEPT
+#                 # TODO: create dance object
+#             elif (flag == 4):
+#                 start_vision = True
+#                 try:
+#                     r.join()
+#                 except:
+#                     pass
                 # TODO create an object which would
                 # listen to music and dance on it
             if (driveorGrip == 1 or driveorGrip == 2):

@@ -1,15 +1,16 @@
 import RPi.GPIO as GPIO          
 from time import sleep
 import threading
+GPIO.setwarnings(False)
 """
 manual controls to handle the robot only used for test purposes
 
 """
 # Define pins
-in1 = 6
-in2 = 26
+in1 = 5
+in2 = 6
 in3 = 13
-in4 = 5
+in4 = 25
 ena = 25
 enb = 12
 
