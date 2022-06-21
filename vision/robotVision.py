@@ -143,44 +143,8 @@ class RobotVision(Thread):
                                 motor_right.stop()
                             else:
                                 #CHECK YOUR PHOTO GALLERY FOR IMPLEMENTATION DANIEL
-                            
-
-
-
-
-
-
-
-
-
-
-
-
-                            # self.drawDetectedObject(area)
-                            # angle = self.angleToRotate(area)
-                            #DO SOME RNG FORWARD, LEFT/RIGHT, BACKWARD MOVEMENT
-                            #AS IF IT'S SCANNING FOR SOMETHING
-                            pass
-                        elif (angle is None and self.distance < 199):
-                            if (self.distance >= 76):
-                                motor_left.forward(100)
-                                motor_right.forward(100)
-                                time.sleep(1)
-                                motor_left.stop()
-                                motor_right.stop()
-                        elif (angle > 0):
-                            motor_left.forward(25)
-                            motor_right.backwards(25)
-                        elif (angle < 0):
-                            motor_left.backwards(25)
-                            motor_right.forward(25)
-
-                        time.sleep(0.5)
-                        motor_left.forward(50)
-                        motor_right.forward(50)
-                        time.sleep(1)
-                        motor_left.stop()
-                        motor_right.stop()
+                    else:
+                        #DISTANCE WAS GREATER THAN 199 AND THEREFORE RNG MOVEMENT SHOULD BE IMPLEMENTED
             elif (self.FLAG == 2):
                 blur = cv.GaussianBlur(self.frame, (9, 9), 0)
                 self.hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)
