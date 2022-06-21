@@ -74,11 +74,10 @@ class RobotVision(Thread):
                 self.hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)
 
                 # ENFORCE A CALIBRATED DISTANCE
-                if (self.i == 0):
-                    while (self.i < 5):
-                        freq = str(self.distance).split(".")
-                        self.absoluteDistance.append(freq[0])
-                        self.i += 1
+                if (self.i < 5):
+                    freq = str(self.distance).split(".")
+                    self.absoluteDistance.append(freq[0])
+                    self.i += 1
                 else:
                     freq = str(self.distance).split(".")
                     distanceConfirmed = max_frequency(self.absoluteDistance, len(self.absoluteDistance))
@@ -88,12 +87,77 @@ class RobotVision(Thread):
                     
                     if ((int(freq[0]) + 1) != int(distanceConfirmed) and (int(freq[0]) - 1) != int(distanceConfirmed) and (int(freq[0])) != int(distanceConfirmed)):
                         pass
-                    elif (self.distance > 10):
+                    elif (self.distance > 10 and self.distance <= 199):
                         area = self.detectObject(self.lower_blue, self.upper_blue)
-                        self.drawDetectedObject(area)
-                        angle = self.angleToRotate(area)
                         # NO OBJECT ON CAM, BUT DISTANCE CALCULATED SOME OBJECT
-                        if (angle is None and self.distance > 199):
+                        if (area is None and self.distance <= 199):
+                            if (self.distance > 76):
+                                self.motor_left.forward(100)
+                                self.motor_right.forward(100)
+                                time.sleep(1)
+                                self.motor_left.stop()
+                                self.motor_right.stop()        
+                            else:
+                                pass
+                                #NO OBJECT WAS DETECTED BUT IT SHOULDVE BEEN IN RANGE
+                                #THEREFORE WE CAN SAY THE OBJECT IS A FALSE POSITIVE
+                                #START DOING SOME RNG MOVEMENT AS IF IT'S LOOKING FOR OBJECTS
+
+                        elif (area is not None):
+                            self.drawDetectedObject(area)
+                            if (self.distance >= 40):
+                                angle = self.angleToRotate(area, self.distance)
+                                if (angle <= -9):
+                                    motor_left.backwards(10)
+                                    motor_right.forward(10)
+                                elif (angle is not None and angle >= 9):
+                                    motor_left.forward(10)
+                                    motor_right.backwards(10)
+
+                                time.sleep(1)
+                                motor_left.stop()
+                                motor_right.stop()
+                                time.sleep(0.1) 
+                                motor_left.forward(100)
+                                motor_right.forward(100)
+                                time.sleep(0.5)       
+                                motor_left.stop()
+                                motor_right.stop()
+                            elif (self.distance >= 30):
+                                angle = self.angleToRotate(area, self.distance)
+                                if (angle <= -9):
+                                    motor_left.backwards(10)
+                                    motor_right.forward(10)
+                                elif (angle is not None and angle >= 9):
+                                    motor_left.forward(10)
+                                    motor_right.backwards(10)
+                            
+                                time.sleep(1)
+                                motor_left.stop()
+                                motor_right.stop()
+                                time.sleep(0.1) 
+                                motor_left.forward(15)
+                                motor_right.forward(15)
+                                time.sleep(0.5)       
+                                motor_left.stop()
+                                motor_right.stop()
+                            else:
+                                #CHECK YOUR PHOTO GALLERY FOR IMPLEMENTATION DANIEL
+                            
+
+
+
+
+
+
+
+
+
+
+
+
+                            # self.drawDetectedObject(area)
+                            # angle = self.angleToRotate(area)
                             #DO SOME RNG FORWARD, LEFT/RIGHT, BACKWARD MOVEMENT
                             #AS IF IT'S SCANNING FOR SOMETHING
                             pass
@@ -117,16 +181,6 @@ class RobotVision(Thread):
                         time.sleep(1)
                         motor_left.stop()
                         motor_right.stop()
-                        #SOMETHING WAS MEASURED, BUT NO VISION ON TARGET
-                    elif (self.distance <= 10):
-                        area = self.detectObject(self.lower_blue, self.upper_blue)
-                        self.drawDetectedObject(area)
-                        angle = self.angleToRotate(area, offset = -6.1)
-                        # if (angle is None):
-                        #     pass
-                        # else:
-                        #     ##gripperMethod()
-                        #     pass
             elif (self.FLAG == 2):
                 blur = cv.GaussianBlur(self.frame, (9, 9), 0)
                 self.hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)
@@ -188,7 +242,7 @@ class RobotVision(Thread):
 
                     if (area is not None):
                         self.drawDetectedObject(area)
-                        angle = self.angleToRotate(area, 25,  offset=-6.1) #change 15 to definitive height later on
+                        angle = self.angleToRotate(area, 25,  offset=-6.1) ##MAYBE REMOVE OFFSET, JUST SET THE CAMERA IN ONE LINE WITH THE LINE-TO-FOLLOW
                         if (angle is not None and angle <= -9):
                             motor_left.backwards(6)#11 SHOULD BE 10, BUT THEORY CAN BE DIFFERENT FROM REAL. CHANGE BACK TO 10 IF 11 IS TOO MUCH
                             motor_right.forward(6)
@@ -248,7 +302,7 @@ class RobotVision(Thread):
                     screenW = self.pointZeroToObjectCentroid(int(self.screenWidth / 2), forcedDistance, self.focalLength)
                     rCM = objW - screenW                
             elif (self.distance != 0 and self.distance < 199):
-                distanceToCamera = self.getCameraDistance(self.distance, 12)
+                distanceToCamera = self.getCameraDistance(self.distance, 25)
                 objW = self.pointZeroToObjectCentroid(self.cx(area), distanceToCamera, self.focalLength)
                 screenCentroid = self.pointZeroToObjectCentroid(int(self.screenWidth / 2), distanceToCamera, self.focalLength)
                 if (offset is not False):
