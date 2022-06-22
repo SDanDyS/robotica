@@ -106,7 +106,7 @@ class RobotVision(Thread):
                     (xg, yg, wg, hg) = cv.boundingRect(area)
                     cv.rectangle(self.frame, (xg, yg), (xg + wg, yg + hg), (0, 255, 0), 2)
 
-                    angle = self.angleToRotate(area, self.distance)
+                    angle = self.angleToRotate(area, self.distance) #IF CAM CANNOT BE MIDDLE OFFSET=-6.1
                     if (angle <= -9):
                         motor_left.backwards(10)
                         motor_right.forward(10)
@@ -120,18 +120,17 @@ class RobotVision(Thread):
                         motor_left.stop()
                         motor_right.stop()
                     else:
+                        #OPEN MOUTH
+                        #time.sleep(0.5)
+                        #STOP OPENING MOUTH
                         motor_left.forward(100)
-                        motor_right.forward(100)                       
-
-                    time.sleep(1)
-                    motor_left.stop()
-                    motor_right.stop()
-                    time.sleep(0.1) 
-                    motor_left.forward(100)
-                    motor_right.forward(100)
-                    time.sleep(0.5)       
-                    motor_left.stop()
-                    motor_right.stop()
+                        motor_right.forward(100)
+                        #CLOSE MOUTH
+                        #time.sleep(0.5)
+                        #STOP CLOSING MOUTH
+                        time.sleep(0.5)
+                        motor_left.stop()
+                        motor_right.stop()
                 else:
                     rngMovement = random.randint(0, 3)
                     if (rngMovement == 0):
