@@ -35,7 +35,7 @@ bool only_voltage = true;
 char buf[10] = {};
 int index = 0;
 
-int beatHight = 30;
+int beatHight = 500;
 int beats = 0;
 unsigned int beatStartValue = 350;
 unsigned int beatTime = 0;
@@ -44,6 +44,7 @@ unsigned int beatDelay = beatStartValue;
 unsigned long start = 0;
 unsigned long end = 0;
 float offset = 336;
+bool beat = false;
 
 
 //HX711 constructor:
@@ -92,15 +93,15 @@ void beatDetected(){
   if (beatDelay == beatStartValue || beatDelay < 30){
     beatDelay = beatTime * 0.9;
     beatTiming = beatTime;
-    beat = true
+    beat = true;
   } else if (beatTime < beatDelay) {
     beatDelay = beatTime * 0.9;
     beatTiming = beatTime;
-    beat = true
+    beat = true;
   } else if (beatTime > (beatDelay * 1.05) && beatTime < (beatDelay * 1.45)) {
     beatDelay = beatTime * 0.9;
     beatTiming = beatTime;
-    beat = true
+    beat = true;
   }
   
 //  Serial.print("beatTiming:");
@@ -111,6 +112,62 @@ void beatDetected(){
 //  Serial.print(",");
 //  Serial.print("beatTime:");
 //  Serial.println(beatTime);
+}
+
+// callback for sending data
+void sendData() {
+    Wire.write(buf[index]);
+    ++index;
+    if (index >= 9) {
+      index = 0;
+      start_new_cycle = true; 
+    }
+}
+
+void stopServo(int servoId) {
+  ax12a.setEndless(servoId, OFF);
+//  int posision = ax12a.readPosition(servoId);
+ // ax12a.setMaxTorque(servoId, 0);
+  ax12a.setVoltageLimit(servoId, 0, 0);
+//  ax12a.moveSpeed(servoId, posision, 400);
+}
+
+void startServo(int servoId) {
+  ax12a.setMaxTorque(servoId, 1023);
+}
+
+// Function that executes whenever data is received from master
+void receiveEvent(int howMany) {
+  while (Wire.available()) { // loop through all but the last
+    char c = Wire.read(); // receive byte as a character
+    if(c == 1){
+       ax12a.turn(ID1,LEFT,400);
+        ax12a.turn(ID2,RIGHT,400); 
+          }
+       if(c == 2){
+
+       ax12a.turn(ID1,RIGHT,400);   
+       ax12a.turn(ID2,LEFT,400); 
+       }
+       if(c == 3){
+       ax12a.turn(ID3,RIGHT,500);   
+       }
+
+    if(c == 4){
+       ax12a.turn(ID3,LEFT,600);                  
+       }
+     if(c == 5){
+        ax12a.turn(ID3,LEFT,0);
+        
+     }
+
+     if(c == 0){       
+        ax12a.turn(ID1,LEFT,0);
+        ax12a.turn(ID2,LEFT,0);
+        
+     }
+delay(1000);       
+  }
 }
 
 void setup() {
@@ -131,7 +188,7 @@ void setup() {
   // LED Matrix
   Serial.println("matrix resetting");
   FastLED.addLeds<WS2812,DATA_PIN,RGB>(leds,NUM_LEDS);
-  FastLED.setBrightness(84);
+  FastLED.setBrightness(32);
 
   LoadCell.begin();
   //LoadCell.setReverseOutput(); //uncomment to turn a negative output value to positive
@@ -157,11 +214,28 @@ void loop() {
   // LED matrix
   static uint8_t hue = 0;
 
-  for(int i = 0; i < NUM_LEDS; i++) {
-    leds[i] = CRGB::Red;
+  if (beat) {
+    for(int i = 0; i < NUM_LEDS; i++) {
+      leds[i] = CRGB::Blue;
+    }
+  } else {
+    for(int i = 0; i < NUM_LEDS; i++) {
+      leds[i] = CRGB::Red;
+    }
   }
   FastLED.show();
-//  static boolean newDataReady = 0;
+
+//  for(int i = 0; i < NUM_LEDS; i++) {
+//    leds[i] = CRGB::Red;
+//  }
+//  FastLED.show();
+//
+//  for(int i = 0; i < NUM_LEDS; i++) {
+//    leds[i] = CRGB::Green;
+//  }
+//  FastLED.show();
+
+  static boolean newDataReady = 0;
 //  const int serialPrintInterval = 0; //increase value to slow down serial print activity
 //
 //  // check for new data/start next conversion:
@@ -199,8 +273,8 @@ void loop() {
         Serial.println(dataString);
         dataString.toCharArray(buf, 9);
         start_new_cycle = false;
-     }
-    }
+//     }
+//    }
   }
 
   // receive command from serial terminal
@@ -217,15 +291,7 @@ void loop() {
 //  }
 }
 
-// callback for sending data
-void sendData() {
-    Wire.write(buf[index]);
-    ++index;
-    if (index >= 9) {
-      index = 0;
-      start_new_cycle = true; 
-    }
-}
+
 
 //void calibrate() {
 //  Serial.println("***");
@@ -361,49 +427,3 @@ void sendData() {
 //  Serial.println("End change calibration value");
 //  Serial.println("***");
 //}
-
-void stopServo(int servoId) {
-  ax12a.setEndless(servoId, OFF);
-//  int posision = ax12a.readPosition(servoId);
- // ax12a.setMaxTorque(servoId, 0);
-  ax12a.setVoltageLimit(servoId, 0, 0);
-//  ax12a.moveSpeed(servoId, posision, 400);
-}
-
-void startServo(int servoId) {
-  ax12a.setMaxTorque(servoId, 1023);
-}
-
-// Function that executes whenever data is received from master
-void receiveEvent(int howMany) {
-  while (Wire.available()) { // loop through all but the last
-    char c = Wire.read(); // receive byte as a character
-    if(c == 1){
-       ax12a.turn(ID1,LEFT,400);
-        ax12a.turn(ID2,RIGHT,400); 
-          }
-       if(c == 2){
-
-       ax12a.turn(ID1,RIGHT,400);   
-       ax12a.turn(ID2,LEFT,400); 
-       }
-       if(c == 3){
-       ax12a.turn(ID3,RIGHT,500);   
-       }
-
-    if(c == 4){
-       ax12a.turn(ID3,LEFT,600);                  
-       }
-     if(c == 5){
-        ax12a.turn(ID3,LEFT,0);
-        
-     }
-
-     if(c == 0){       
-        ax12a.turn(ID1,LEFT,0);
-        ax12a.turn(ID2,LEFT,0);
-        
-     }
-delay(1000);       
-  }
-}
