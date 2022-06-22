@@ -9,6 +9,7 @@ from threading import *
 import os
 import time
 import logging
+from bt.i2c import *
 
 try:
     from imutils.video.pivideostream import PiVideoStream
@@ -20,13 +21,14 @@ except ImportError:
     RobotVision class holds all the vision related data
 """
 class RobotVision(Thread):
+    def __init__(self, shared):
+        super(RobotVision, self).__init__()
+
     """
         Entry point of the start method
         Initializes all the required data
         Serves as a controller for the rest of the class
     """
-    bus = None
-
     def run(self):
         print("bus")
         print(self.bus)
@@ -83,26 +85,26 @@ class RobotVision(Thread):
                 if (area is None):
                     rngMovement = random.randint(0, 3)
                     if (rngMovement == 0):
-                        self.motor_left.backwards(50)
-                        self.motor_right.forward(50)
+                        self.motor_left.backwards(100)
+                        self.motor_right.forward(100)
                         time.sleep(1)
                         self.motor_left.stop()
                         self.motor_right.stop() 
                     elif (rngMovement == 1):
-                        self.motor_left.forward(50)
-                        self.motor_right.backwards(50)
+                        self.motor_left.forward(100)
+                        self.motor_right.backwards(100)
                         time.sleep(1)
                         self.motor_left.stop()
                         self.motor_right.stop() 
                     elif (rngMovement == 2):
-                        self.motor_left.backwards(50)
-                        self.motor_right.backwards(50)
+                        self.motor_left.backwards(100)
+                        self.motor_right.backwards(100)
                         time.sleep(1)
                         self.motor_left.stop()
                         self.motor_right.stop()   
                     elif (rngMovement == 3):                                  
-                        self.motor_left.forward(50)
-                        self.motor_right.forward(50)
+                        self.motor_left.forward(100)
+                        self.motor_right.forward(100)
                         time.sleep(1)
                         self.motor_left.stop()
                         self.motor_right.stop()   

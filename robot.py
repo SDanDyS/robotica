@@ -43,10 +43,9 @@ class Robot():
 
         # Start camera
         if  (args["camera"] and (args["flag"] == '1' or args["flag"] == '2' or args["flag"] == '3')):
-            vision = RobotVision()
+            vision = RobotVision(self)
             vision.camSelector = args["camera"]
             vision.FLAG = int(args["flag"])
-            vision.bus = self
             vision.start()
         elif (args["flag"] == "3" or args["flag"] == "4"):
             print("Requesting something else")
