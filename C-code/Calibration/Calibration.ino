@@ -36,8 +36,8 @@ bool only_voltage = true;
 char buf[10] = {};
 int index = 0;
 
-//int beatHight = 30;
-int beatHight = 500;
+int beatHight = 30;
+//int beatHight = 500;
 int beats = 0;
 unsigned int beatStartValue = 350;
 unsigned int beatTime = 0;
