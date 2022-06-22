@@ -10,7 +10,8 @@
 #define ID1       (4u)
 #define ID2       (13u)
 #define ID3       (7u)
-#define microphone (0u)
+//#define microphone (0u)
+#define microphone A6
 
 // LED definitions
 #define NUM_LEDS 64
@@ -35,6 +36,7 @@ bool only_voltage = true;
 char buf[10] = {};
 int index = 0;
 
+//int beatHight = 30;
 int beatHight = 500;
 int beats = 0;
 unsigned int beatStartValue = 350;
