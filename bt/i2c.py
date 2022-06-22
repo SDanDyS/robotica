@@ -76,10 +76,6 @@ class i2c(Thread):
         # 735/12.6
         return self.voltage / 58.3
 
-    def getBeat(self):
-        # 735/12.6
-        return self.beat
-
     # Stops the height servos
     def stopHeight(self):
         self.bus.write_byte(self.addr, 0x0)

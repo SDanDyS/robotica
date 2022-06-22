@@ -46,6 +46,7 @@ class Robot():
             vision = RobotVision()
             vision.camSelector = args["camera"]
             vision.FLAG = int(args["flag"])
+            vision.bus = self
             vision.start()
         elif (args["flag"] == "3" or args["flag"] == "4"):
             print("Requesting something else")

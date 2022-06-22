@@ -25,7 +25,11 @@ class RobotVision(Thread):
         Initializes all the required data
         Serves as a controller for the rest of the class
     """
+    bus = None
+
     def run(self):
+        print("bus")
+        print(self.bus)
         self.lower_blue = np.array([90, 50, 70])
         self.upper_blue = np.array([128, 255, 255])
         self.absoluteDistance = []
@@ -33,6 +37,7 @@ class RobotVision(Thread):
         self.cycleOn = True
         self.areaIsNone = []
         self.start_parkour = True
+        self.finalCycle = False
 
         motor_left = dcMotorIndu(0)
         motor_right = dcMotorIndu(1)
@@ -67,84 +72,118 @@ class RobotVision(Thread):
             # #FLAG 2 REPRESENTS SIMPLY DETECING A MOVING OBJECT
             # FLAG 3 REPRESENTS GOING UP THE PARCOUR
             if (self.FLAG == 1):
-                #FORCE A TIME SLEEP TO PREVENT CPU FROM CRASHING
-                time.sleep(1)
-                self.distance = sensorDistance()
+                self.bus.lowerHeight()
+                # self.distance = sensorDistance()
                 blur = cv.GaussianBlur(self.frame, (37, 37), 0)
                 self.hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)
+                self.distance = 76
 
-                # ENFORCE A CALIBRATED DISTANCE
-                if (self.i < 5):
-                    freq = str(self.distance).split(".")
-                    self.absoluteDistance.append(freq[0])
-                    self.i += 1
-                else:
-                    freq = str(self.distance).split(".")
-                    distanceConfirmed = max_frequency(self.absoluteDistance, len(self.absoluteDistance))
+                area = self.detectObject(self.lower_blue, self.upper_blue)
+                # NO OBJECT ON CAM, DO RNG
+                if (area is None):
+                    rngMovement = random.randint(0, 3)
+                    if (rngMovement == 0):
+                        self.motor_left.backwards(50)
+                        self.motor_right.forward(50)
+                        time.sleep(1)
+                        self.motor_left.stop()
+                        self.motor_right.stop() 
+                    elif (rngMovement == 1):
+                        self.motor_left.forward(50)
+                        self.motor_right.backwards(50)
+                        time.sleep(1)
+                        self.motor_left.stop()
+                        self.motor_right.stop() 
+                    elif (rngMovement == 2):
+                        self.motor_left.backwards(50)
+                        self.motor_right.backwards(50)
+                        time.sleep(1)
+                        self.motor_left.stop()
+                        self.motor_right.stop()   
+                    elif (rngMovement == 3):                                  
+                        self.motor_left.forward(50)
+                        self.motor_right.forward(50)
+                        time.sleep(1)
+                        self.motor_left.stop()
+                        self.motor_right.stop()   
+                elif (area is not None):
+                    self.drawDetectedObject(area)
+                    if (self.distance >= 40):
+                        angle = self.angleToRotate(area, self.distance)
+                        if (angle <= -9):
+                            motor_left.backwards(10)
+                            motor_right.forward(10)
+                        elif (angle >= 9):
+                            motor_left.forward(10)
+                            motor_right.backwards(10)
+
+                        time.sleep(1)
+                        motor_left.stop()
+                        motor_right.stop()
+                        time.sleep(0.1) 
+                        motor_left.forward(100)
+                        motor_right.forward(100)
+                        time.sleep(0.5)       
+                        motor_left.stop()
+                        motor_right.stop()
+                    elif (self.distance >= 30):
+                        angle = self.angleToRotate(area, self.distance)
+                        if (angle <= -9):
+                            motor_left.backwards(10)
+                            motor_right.forward(10)
+                        elif (angle >= 9):
+                            motor_left.forward(10)
+                            motor_right.backwards(10)
                     
-                    self.i = 0
-                    self.absoluteDistance = []
-                    
-                    if ((int(freq[0]) + 1) != int(distanceConfirmed) and (int(freq[0]) - 1) != int(distanceConfirmed) and (int(freq[0])) != int(distanceConfirmed)):
-                        pass
-                    elif (self.distance > 10 and self.distance <= 199):
-                        area = self.detectObject(self.lower_blue, self.upper_blue)
-                        # NO OBJECT ON CAM, BUT DISTANCE CALCULATED SOME OBJECT
-                        if (area is None and self.distance <= 199):
-                            if (self.distance > 76):
-                                self.motor_left.forward(100)
-                                self.motor_right.forward(100)
-                                time.sleep(1)
-                                self.motor_left.stop()
-                                self.motor_right.stop()        
-                            else:
-                                pass
-                                #NO OBJECT WAS DETECTED BUT IT SHOULDVE BEEN IN RANGE
-                                #THEREFORE WE CAN SAY THE OBJECT IS A FALSE POSITIVE
-                                #START DOING SOME RNG MOVEMENT AS IF IT'S LOOKING FOR OBJECTS
-
-                        elif (area is not None):
-                            self.drawDetectedObject(area)
-                            if (self.distance >= 40):
-                                angle = self.angleToRotate(area, self.distance)
-                                if (angle <= -9):
-                                    motor_left.backwards(10)
-                                    motor_right.forward(10)
-                                elif (angle is not None and angle >= 9):
-                                    motor_left.forward(10)
-                                    motor_right.backwards(10)
-
-                                time.sleep(1)
-                                motor_left.stop()
-                                motor_right.stop()
-                                time.sleep(0.1) 
-                                motor_left.forward(100)
-                                motor_right.forward(100)
-                                time.sleep(0.5)       
-                                motor_left.stop()
-                                motor_right.stop()
-                            elif (self.distance >= 30):
-                                angle = self.angleToRotate(area, self.distance)
-                                if (angle <= -9):
-                                    motor_left.backwards(10)
-                                    motor_right.forward(10)
-                                elif (angle is not None and angle >= 9):
-                                    motor_left.forward(10)
-                                    motor_right.backwards(10)
-                            
-                                time.sleep(1)
-                                motor_left.stop()
-                                motor_right.stop()
-                                time.sleep(0.1) 
-                                motor_left.forward(15)
-                                motor_right.forward(15)
-                                time.sleep(0.5)       
-                                motor_left.stop()
-                                motor_right.stop()
-                            else:
-                                #CHECK YOUR PHOTO GALLERY FOR IMPLEMENTATION DANIEL
+                        time.sleep(1)
+                        motor_left.stop()
+                        motor_right.stop()
+                        time.sleep(0.1) 
+                        motor_left.forward(15)
+                        motor_right.forward(15)
+                        time.sleep(0.5)       
+                        motor_left.stop()
+                        motor_right.stop()
                     else:
-                        #DISTANCE WAS GREATER THAN 199 AND THEREFORE RNG MOVEMENT SHOULD BE IMPLEMENTED
+                        keepRotating = True
+                        fd = self.distance
+                        totalAngle = 0
+                        self.bus.lowerHeight()
+                        time.sleep(3.6)
+                        self.bus.stopHeight()
+                        self.bus.openGrabber()
+                        time.sleep(0.5)
+                        self.bus.stopGrabber()
+                        while(keepRotating == True):
+                            angle = self.angleToRotate(area, fd, offset=-6.1)
+                            flAngle = math.floor(angle // 10)
+                            anglePos = range(flAngle, flAngle + 5)
+                            angleNeg = range(flAngle, flAngle - 5)
+                            if (totalAngle in anglePos or totalAngle in angleNeg):
+                                self.bus.closeGrabber()
+                                time.sleep(0.5)
+                                self.bus.stopGrabber()
+                                self.bus.raiseHeight()
+                                time.sleep(3.6)
+                                self.bus.stopHeight()
+                                keepRotating = False
+                            elif (angle <= -9):
+                                motor_left.backwards(10)
+                                motor_right.forward(10)
+                                totalAngle += -4.5
+                                totalAngle = math.floor(totalAngle // 10)
+                            elif (angle >= 9):
+                                motor_left.forward(10)
+                                motor_right.backwards(10)
+                                totalAngle += 4.5
+                                totalAngle = math.floor(totalAngle // 10)
+
+                            time.sleep(0.5)
+                            motor_left.stop()
+                            motor_right.stop()
+                            time.sleep(0.1)
+                            motor_right.forward(50)
+                            motor_left.forward(50)                             
             elif (self.FLAG == 2):
                 blur = cv.GaussianBlur(self.frame, (9, 9), 0)
                 self.hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)
@@ -159,81 +198,71 @@ class RobotVision(Thread):
                         motor_left.forward(100)
                         motor_right.forward(100)
             elif (self.FLAG == 3):
-                if (start_parkour == True):
+                if (self.start_parkour == True):
                     motor_left.forward(100)
                     motor_right.forward(100)
-                    time.sleep(3)
+                    time.sleep(20)
                     motor_left.stop()
                     motor_right.stop()
-                    start_parkour = False
+                    self.start_parkour = False
                 blur = cv.GaussianBlur(self.frame, (9, 9), 0)
-                # self.hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)
-                # self.areaIsNone = 0
+                self.hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)
+                area = self.detectObject((36, 120, 13), (60, 255, 153))
 
-                # area = self.detectObject(lower_val, upper_val)
+                if (area is not None):
+                    self.drawDetectedObject(area)
+                    angle = self.angleToRotate(area, 25)
+                    if (angle is not None and angle <= -9):
+                        motor_left.backwards(10)
+                        motor_right.forward(10)
+                    elif (angle is not None and angle >= 9):
+                        motor_left.forward(10)
+                        motor_right.backwards(10)
 
-                hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)
-                            
-                # # define range of black color in HSV
-                # lower_val = np.array([0,0,0])
-                # upper_val = np.array([179,100,30])
-                # # Threshold the HSV image to get only black colors
-                # mask = cv.inRange(hsv, lower_val, upper_val)
-
-                # red mask
-                lower_red = np.array([0,50,50])
-                upper_red = np.array([10,255,255])
-
-                red_mask_low = cv2.inRange(hsv, lower_red, upper_red)
-
-                # red mask
-                lower_red = np.array([170,50,50])
-                upper_red = np.array([180,255,255])
-
-                red_mask_upper = cv2.inRange(hsv, lower_red, upper_red)
-
-                mask = red_mask_low | red_mask_upper
-
-                cnts = cv.findContours(mask.copy(), cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[-2]
-                abscnts = []
-                if (len(cnts) > 0):
-                    for cnt in cnts:
-                        if (self.isBadContour(cnt) == False):
-                            abscnts.append(cnt)
-                    area = max(cnts, key=cv.contourArea)
-                    (xg, yg, wg, hg) = cv.boundingRect(area)
-                    cv.rectangle(self.frame, (xg, yg), (xg + wg, yg + hg), (0, 255, 0), 2)
-
-                    if (area is not None):
-                        self.drawDetectedObject(area)
-                        angle = self.angleToRotate(area, 25,  offset=-6.1) ##MAYBE REMOVE OFFSET, JUST SET THE CAMERA IN ONE LINE WITH THE LINE-TO-FOLLOW
-                        if (angle is not None and angle <= -9):
-                            motor_left.backwards(6)#11 SHOULD BE 10, BUT THEORY CAN BE DIFFERENT FROM REAL. CHANGE BACK TO 10 IF 11 IS TOO MUCH
-                            motor_right.forward(6)
-                        elif (angle is not None and angle >= 9):
-                            motor_left.forward(6)
-                            motor_right.backwards(6)
-
-                        time.sleep(1)       
+                    time.sleep(1)       
+                    motor_left.stop()
+                    motor_right.stop()
+                    time.sleep(1)
+                    self.distance = sensorDistance()
+                    # ENFORCE A CALIBRATED DISTANCE
+                    if (self.i < 5):
+                        freq = str(self.distance).split(".")
+                        self.absoluteDistance.append(freq[0])
+                        self.i += 1
+                    else:
+                        freq = str(self.distance).split(".")
+                        distanceConfirmed = max_frequency(self.absoluteDistance, len(self.absoluteDistance))
+                        
+                        self.i = 0
+                        self.absoluteDistance = []
+                        print(self.distance)
+                        if ((int(freq[0]) + 1) != int(distanceConfirmed) and (int(freq[0]) - 1) != int(distanceConfirmed) and (int(freq[0])) != int(distanceConfirmed)):
+                            pass
+                        else:
+                            if (self.distance >= 30):
+                                motor_left.forward(25)
+                                motor_right.forward(25)
+                                time.sleep(1)
+                                motor_left.stop()
+                                motor_right.stop()
+                            elif (self.distance > 10 and self.distance < 30): 
+                                motor_left.forward(10)
+                                motor_right.forward(10)
+                                time.sleep(0.5)
+                                motor_left.stop()
+                                motor_right.stop()    
+                            elif (self.distance <= 5):
+                                print(self.distance)
+                                motor_left.stop()
+                                motor_right.stop()        
+                elif (area is None):
+                    if (self.finalCycle == False):
+                        motor_left.forward(25)
+                        motor_right.forward(25)
+                        time.sleep(1)
                         motor_left.stop()
-                        motor_right.stop()
-                        time.sleep(0.5)
-                        motor_left.forward()
-                        motor_right.forward()                        
-                # elif (area is None):
-                #     print()
-                #     #cycle 3 times, upon 3 times area is none do a 180 degrees flip on robot
-                #     if (self.areaIsNone > 4):
-                #         motor_left.backwards()
-                #         motor_right.forward()
-                #         time.sleep(2)
-                #         motor_left.stop()
-                #         motor_right.stop()
-                #         time.sleep(0.5)
-                #         print("ENGAGED")
-                #         # self.gaugeAndCrawl()
-                #     else:
-                #         self.areaIsNone += 1
+                        motor_right.stop()  
+                        self.finalCycle = True
 
             self.imshow()
             # global stop_vision_thread
@@ -243,6 +272,7 @@ class RobotVision(Thread):
                 GPIO.cleanup()
                 cv.destroyAllWindows()
                 break
+                # 70 lower 90 upper
 
     """
         Draws a rectangle based on  provided area and prints centroid
