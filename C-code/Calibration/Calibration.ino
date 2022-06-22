@@ -168,7 +168,7 @@ void loop() {
         dataString.concat(voltageString);
 
         // Send beat info
-        dataString.concat("/");
+        dataString.concat("@");
         if (beat) {
           dataString.concat("1");
         } else {
