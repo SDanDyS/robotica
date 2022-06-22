@@ -1,6 +1,7 @@
 #include <HX711_ADC.h>
 #include <Wire.h>
 #include <AX12A.h>
+#include <FastLED.h>
 
 #define SLAVE_ADDRESS 0x8
 #define DirectionPin   (2u)
@@ -10,6 +11,11 @@
 #define ID2       (13u)
 #define ID3       (7u)
 #define microphone (0u)
+
+// LED definitions
+#define NUM_LEDS 64
+#define DATA_PIN 5
+CRGB leds[NUM_LEDS];
 
 #if defined(ESP8266)|| defined(ESP32) || defined(AVR)
 #include <EEPROM.h>
@@ -122,6 +128,10 @@ void setup() {
   int position2 = 0;
   Serial.println("Starting...");
 
+  // LED Matrix
+  Serial.println("matrix resetting");
+  FastLED.addLeds<WS2812,DATA_PIN,RGB>(leds,NUM_LEDS);
+  FastLED.setBrightness(84);
 
   LoadCell.begin();
   //LoadCell.setReverseOutput(); //uncomment to turn a negative output value to positive
@@ -140,7 +150,17 @@ void setup() {
 //  calibrate(); //start calibration procedure
 }
 
+// led matrix
+void fadeall() { for(int i = 0; i < NUM_LEDS; i++) { leds[i].nscale8(250); } }
+
 void loop() {
+  // LED matrix
+  static uint8_t hue = 0;
+
+  for(int i = 0; i < NUM_LEDS; i++) {
+    leds[i] = CRGB::Red;
+  }
+  FastLED.show();
 //  static boolean newDataReady = 0;
 //  const int serialPrintInterval = 0; //increase value to slow down serial print activity
 //
