@@ -23,6 +23,7 @@ except ImportError:
 class RobotVision(Thread):
     def __init__(self, shared):
         super(RobotVision, self).__init__()
+        self.bus = shared.bus
 
     """
         Entry point of the start method
@@ -30,8 +31,6 @@ class RobotVision(Thread):
         Serves as a controller for the rest of the class
     """
     def run(self):
-        print("bus")
-        print(self.bus)
         self.lower_blue = np.array([90, 50, 70])
         self.upper_blue = np.array([128, 255, 255])
         self.absoluteDistance = []
@@ -77,9 +76,6 @@ class RobotVision(Thread):
                 blur = cv.GaussianBlur(self.frame, (37, 37), 0)
                 self.hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)
                 self.distance = 76
-
-                # area = self.detectObject(self.lower_blue, self.upper_blue)
-
                 # red mask
                 lower_red = np.array([0,50,50])
                 upper_red = np.array([10,255,255])
@@ -120,149 +116,43 @@ class RobotVision(Thread):
                         motor_left.stop()
                         motor_right.stop()
                     else:
-                        #OPEN MOUTH
-                        #time.sleep(0.5)
-                        #STOP OPENING MOUTH
+                        self.bus.openGrabber()
+                        time.sleep(0.5)
+                        self.bus.stopGrabber()
                         motor_left.forward(100)
                         motor_right.forward(100)
-                        #CLOSE MOUTH
-                        #time.sleep(0.5)
-                        #STOP CLOSING MOUTH
+                        self.bus.closeGrabber()
+                        time.sleep(0.5)
+                        self.bus.stopGrabber()
                         time.sleep(0.5)
                         motor_left.stop()
                         motor_right.stop()
                 else:
                     rngMovement = random.randint(0, 3)
                     if (rngMovement == 0):
-                        self.motor_left.backwards(100)
-                        self.motor_right.forward(100)
+                        motor_left.backwards(100)
+                        motor_right.forward(100)
                         time.sleep(1)
-                        self.motor_left.stop()
-                        self.motor_right.stop() 
+                        motor_left.stop()
+                        motor_right.stop() 
                     elif (rngMovement == 1):
-                        self.motor_left.forward(100)
-                        self.motor_right.backwards(100)
+                        motor_left.forward(100)
+                        motor_right.backwards(100)
                         time.sleep(1)
-                        self.motor_left.stop()
-                        self.motor_right.stop() 
+                        motor_left.stop()
+                        motor_right.stop() 
                     elif (rngMovement == 2):
-                        self.motor_left.backwards(100)
-                        self.motor_right.backwards(100)
+                        motor_left.backwards(100)
+                        motor_right.backwards(100)
                         time.sleep(1)
-                        self.motor_left.stop()
-                        self.motor_right.stop()   
+                        motor_left.stop()
+                        motor_right.stop()   
                     elif (rngMovement == 3):                                  
-                        self.motor_left.forward(100)
-                        self.motor_right.forward(100)
+                        motor_left.forward(100)
+                        motor_right.forward(100)
                         time.sleep(1)
-                        self.motor_left.stop()
-                        self.motor_right.stop()   
-
-                # # NO OBJECT ON CAM, DO RNG
-                # if (area is None):
-                #     rngMovement = random.randint(0, 3)
-                #     if (rngMovement == 0):
-                #         self.motor_left.backwards(100)
-                #         self.motor_right.forward(100)
-                #         time.sleep(1)
-                #         self.motor_left.stop()
-                #         self.motor_right.stop() 
-                #     elif (rngMovement == 1):
-                #         self.motor_left.forward(100)
-                #         self.motor_right.backwards(100)
-                #         time.sleep(1)
-                #         self.motor_left.stop()
-                #         self.motor_right.stop() 
-                #     elif (rngMovement == 2):
-                #         self.motor_left.backwards(100)
-                #         self.motor_right.backwards(100)
-                #         time.sleep(1)
-                #         self.motor_left.stop()
-                #         self.motor_right.stop()   
-                #     elif (rngMovement == 3):                                  
-                #         self.motor_left.forward(100)
-                #         self.motor_right.forward(100)
-                #         time.sleep(1)
-                #         self.motor_left.stop()
-                #         self.motor_right.stop()   
-                # elif (area is not None):
-                #     self.drawDetectedObject(area)
-                #     if (self.distance >= 40):
-                #         angle = self.angleToRotate(area, self.distance)
-                #         if (angle <= -9):
-                #             motor_left.backwards(10)
-                #             motor_right.forward(10)
-                #         elif (angle >= 9):
-                #             motor_left.forward(10)
-                #             motor_right.backwards(10)
-
-                #         time.sleep(1)
-                #         motor_left.stop()
-                #         motor_right.stop()
-                #         time.sleep(0.1) 
-                #         motor_left.forward(100)
-                #         motor_right.forward(100)
-                #         time.sleep(0.5)       
-                #         motor_left.stop()
-                #         motor_right.stop()
-                #     elif (self.distance >= 30):
-                #         angle = self.angleToRotate(area, self.distance)
-                #         if (angle <= -9):
-                #             motor_left.backwards(10)
-                #             motor_right.forward(10)
-                #         elif (angle >= 9):
-                #             motor_left.forward(10)
-                #             motor_right.backwards(10)
-                    
-                #         time.sleep(1)
-                #         motor_left.stop()
-                #         motor_right.stop()
-                #         time.sleep(0.1) 
-                #         motor_left.forward(15)
-                #         motor_right.forward(15)
-                #         time.sleep(0.5)       
-                #         motor_left.stop()
-                #         motor_right.stop()
-                #     else:
-                #         keepRotating = True
-                #         fd = self.distance
-                #         totalAngle = 0
-                #         self.bus.lowerHeight()
-                #         time.sleep(3.6)
-                #         self.bus.stopHeight()
-                #         self.bus.openGrabber()
-                #         time.sleep(0.5)
-                #         self.bus.stopGrabber()
-                #         while(keepRotating == True):
-                #             angle = self.angleToRotate(area, fd, offset=-6.1)
-                #             flAngle = math.floor(angle // 10)
-                #             anglePos = range(flAngle, flAngle + 5)
-                #             angleNeg = range(flAngle, flAngle - 5)
-                #             if (totalAngle in anglePos or totalAngle in angleNeg):
-                #                 self.bus.closeGrabber()
-                #                 time.sleep(0.5)
-                #                 self.bus.stopGrabber()
-                #                 self.bus.raiseHeight()
-                #                 time.sleep(3.6)
-                #                 self.bus.stopHeight()
-                #                 keepRotating = False
-                #             elif (angle <= -9):
-                #                 motor_left.backwards(10)
-                #                 motor_right.forward(10)
-                #                 totalAngle += -4.5
-                #                 totalAngle = math.floor(totalAngle // 10)
-                #             elif (angle >= 9):
-                #                 motor_left.forward(10)
-                #                 motor_right.backwards(10)
-                #                 totalAngle += 4.5
-                #                 totalAngle = math.floor(totalAngle // 10)
-
-                #             time.sleep(0.5)
-                #             motor_left.stop()
-                #             motor_right.stop()
-                #             time.sleep(0.1)
-                #             motor_right.forward(50)
-                #             motor_left.forward(50)                             
+                        motor_left.stop()
+                        motor_right.stop()                         
             elif (self.FLAG == 2):
                 blur = cv.GaussianBlur(self.frame, (9, 9), 0)
                 self.hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)
