@@ -2,10 +2,12 @@
 
 This project was created with the help of Electrical engineering, Mechanical engineering and Software engineering as a project for the fourth semester of the second year at NHL Stenden.
 
+Its purpose is to follow objects, detect cookies and pick it up and independently go up a parcour.
+
 ## Students who worked on this project:
 
 ### Software engineering:
-Daniël, Wietze, Luuk, Chris
+Daniël, Wietze, Luuk, Chris-Jan
 
 ### Electrical engineering:
 Rob, Robbin
