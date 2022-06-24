@@ -4,12 +4,11 @@ from dashboard.dashboardServer import *
 from bt.jsonBt import *
 from drive.dcMotorIndu import *
 from threading import *
-#from weight.scale import *
 import logging
 import RPi.GPIO as GPIO
 import time
-# from weight.scale import *
 from bt.i2c import *
+from distance.HCSRO4Component import *
 
 import asyncio
 
@@ -30,7 +29,8 @@ class Robot():
         # Grab arguments from Python command
         ap = argparse.ArgumentParser()
         # Select camera module; 'pi' grabs PiCamera, 0-9 grabs regular webcam camera. Defaults to 'pi'.
-        ap.add_argument("-cam", "--flag", type=str, nargs='?',const = 'pi', help='Enter \'pi\' for Raspberry Pi cam, 0-9 for regular webcam connection. Defaults to Pi')
+        ap.add_argument("-cam", "--camera", type=str, nargs='?', const ='pi', help='Enter \'pi\' for Raspberry Pi cam, 0-9 for regular webcam connection. Defaults to Pi')
+        ap.add_argument("-flag", "--flag", type=str, const='1', nargs='?', help='flags for vision or dance')
         # Add -bt to set to True
         ap.add_argument("-bt", "--bluetooth", action="store_true", help='Enable the bluetooth receiver/sender')
         # Add -drive to enable manual motors
@@ -42,12 +42,14 @@ class Robot():
         self.bus.start()
 
         # Start camera
-        if args["flag"] == '1' or args["flag"] == '2':
-            print(args["flag"])
-            vision = RobotVision()
-            vision.camSelector = args["flag"]
+        if  (args["camera"] and (args["flag"] == '1' or args["flag"] == '2' or args["flag"] == '3')):
+            vision = RobotVision(self)
+            vision.camSelector = args["camera"]
+            vision.FLAG = int(args["flag"])
             vision.start()
-            
+        elif (args["flag"] == "3" or args["flag"] == "4"):
+            print("Requesting something else")
+
         # Start bluetooth connection
         if args["bluetooth"] == True:
             self.motor_left = dcMotorIndu(0)
@@ -63,8 +65,10 @@ class Robot():
 
         # Write sensor data to file for Dashboard
         async def write_data():
+
             while True:
                 await asyncio.sleep(1)
+                voltageValues = {}
 
                 # Write Bluetooth
                 if args["bluetooth"] == True:
@@ -82,10 +86,16 @@ class Robot():
                 voltageFile.write(str(self.bus.getVoltage()))
                 voltageFile.close()
 
+                # voltageValues.insert(self.bus.getVoltage())
+                # print("max_frequency:")
+                # print(max_frequency([1, 2, 3], 3))
 
         loop = asyncio.get_event_loop()
         cors = asyncio.wait([write_data()])
         loop.run_until_complete(cors)
 
 if __name__ == "__main__":
-    Robot()
+    try:
+        Robot()
+    except:
+        GPIO.cleanup()

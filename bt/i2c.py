@@ -11,12 +11,13 @@ import time
 import sys
 import re
 
-
 WEIGHT_ARM = 185
+
 
 class i2c(Thread):
     weight = 0
     voltage = 0
+    beat = False
 
     def run(self):
         self.addr = 0x8  # bus address
@@ -38,17 +39,20 @@ class i2c(Thread):
             '''
 
             # TODO: replace with actual `data`
-            data = "800@700"
+            # data = "800@700"
 
             if "@" in data:
-                splitData = data.split("@", 1)
+                splitData = data.split("@")
+                print(splitData)
                 # Set correct values
                 weightData = splitData[0]
                 voltageData = splitData[1]
+                beatData = splitData[2]
 
                 # Clean up '\x00'
                 weightData = weightData.replace('\x00', '')
                 voltageData = voltageData.replace('\x00', '')
+                beatData = beatData.replace('\x00', '')
                 # print("weightData:")
                 # print(weightData)
                 # print("voltageData:")
@@ -56,8 +60,10 @@ class i2c(Thread):
 
                 self.weight = int(weightData)
                 self.voltage = int(voltageData)
+                self.beat = bool(beatData)
             else:
-                print("Received invalid data from i2c")
+                pass
+                # print("Received invalid data from i2c")
 
             time.sleep(0.3)
 
@@ -65,7 +71,7 @@ class i2c(Thread):
         # if self.weight == 0:
         #     return 0
         return (self.weight - WEIGHT_ARM)
-    
+
     def getVoltage(self):
         # 735/12.6
         return self.voltage / 58.3

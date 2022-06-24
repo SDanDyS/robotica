@@ -10,7 +10,8 @@ import threading
 import bt.i2c as bus
 # from bt import i2c as bus
 from bt.i2c import *
-from vision.robotVision import *
+#from vision.robotVision import *
+from drive.dance import *
 
 
 sock = BluetoothSocket(RFCOMM)
@@ -70,9 +71,9 @@ class btServer(threading.Thread):
 
         stop_vision_thread = False
         stop_dance_thread = False
-        # r = RobotVision()
-        # r.FLAG = 2
-        # r.start()
+#         r = RobotVision()
+#         r.start()
+        d = dance(self.motor_left, self.motor_right)
         start_vision = False
 
         while True:
@@ -114,59 +115,81 @@ class btServer(threading.Thread):
             self.rx = rx
             self.json = parsedData
 
-            # if (flag == 0):
-            #     r.FLAG = flag
-            #     # stop_vision_thread = True
-            #     # stop_dance_thread = True
+            if (flag == 0):
+                stop_vision_thread = True
+                stop_dance_thread = True
 
-            #     # try:
-            #     #     r.join()
-            #     # except:
-            #     #     pass
-            #     pass
-            # elif (flag == 1):
-            #     # start_vision = True
-            #     # stop_dance_thread = True
-            #     # stop_vision_thread = False
+                try:
+                    r.join()
+                except:
+                    pass
+            elif (flag == 1):
+                stop_dance_thread = True
+                stop_vision_thread = False
 
-            #     # if(start_vision == True):
-            #     #      r.start()
-            #     #      start_vision = False
-            #     r.FLAG = flag
+                try:
+                    r.FLAG = flag##SET FLAGS OUTSIDE OF TRY CATCH
+                    r.start()
+                except:
+                    pass
 
-            # elif (flag == 2):
-            #       start_vision = True
-            #     # r.FLAG = flag
-            #     print(r.FLAG)
-            # elif (flag == 3):
-            #     stop_dance_thread = False
-            #     stop_vision_thread = True
-            #     start_vision = True
-            #     try:
-            #         r.join()
-            #     except:
-            #         pass
-            #         ##DO DANCE IN EXCEPT
-            #     # TODO: create dance object
-            # elif (flag == 4):
-            #     start_vision = True
-            #     try:
-            #         r.join()
-            #     except:
-            #         pass
-            #     # TODO create an object which would
-            #     # listen to music and dance on it
-            if (driveorGrip == 1 or driveorGrip == 2):
+            elif (flag == 2):
+                stop_dance_thread = True
+                stop_vision_thread = False
+
+                try:
+                    r.FLAG = flag
+                    r.start()
+                except:
+                    pass
+            elif (flag == 3):
+                stop_dance_thread = False
+                stop_vision_thread = True
+                try:
+                    d.spin(self.motor_left,self.motor_right)
+                    time.sleep(2)
+                    d.forward(self.motor_left,self.motor_right)
+                    time.sleep(2)
+                    self.bus.lowerHeight()
+                    time.sleep(3)
+                    self.bus.closeGrabber()
+                    time.sleep(0.5)
+                    self.bus.openGrabber()
+                    time.sleep(0.5)
+                    self.bus.raiseHeight()
+                    time.sleep(2)
+                    d.switch(self.motor_left,self.motor_right)
+                    d.sidetoside(self.motor_left,self.motor_right)
+                    d.forward_backwards(self.motor_left,self.motor_right)
+                    self.motor_left.forward(20)
+                    time.sleep(1.5)
+                    self.motor_right.forward(20)
+                    time.sleep(3)
+                    self.motor_left.forward(20)
+                    time.sleep(1.5)
+                    
+                    
+                    
+                except:
+                     pass
+            elif (flag == 4):
+                try:
+                    d.linedance(self.bus.beat)
+                    self.bus.beat = False
+                except:
+                    pass
+                # TODO create an object which would
+                # listen to music and dance on it
+            if(driveorGrip == 1 or driveorGrip == 2):
                 # stop_vision_thread = True
                 # stop_dance_thread = True
-
                 # Driver mode
                 if (driveorGrip == 1):
                     # Stop right motor
-                    if ry > 1920 and ry < 1990:
+                    if ry > 1920 and ry < 2150:
                         self.motor_right.stop()
                     # Stop left motor
-                    if ly > 1900 and ly < 1980:
+                    if ly > 1900 and ly < 2150:
                         self.motor_left.stop()
 
                     # Motors both backwards
@@ -195,16 +218,16 @@ class btServer(threading.Thread):
                         self.motor_right.forward(100)
 
                     # Left motor forward
-                    if ly == 4095 and 1900 < ry < 1990:
+                    if ly == 4095 and 1900 < ry < 2150:
                         self.motor_left.forward(100)
 
                     # Right motor forward
-                    if ry == 4095 and 1900 < ly < 1990:
+                    if ry == 4095 and 1900 < ly < 2150:
                         self.motor_right.forward(100)
 
-                    if 2070 < ry < 4095:
+                    if 2151 < ry < 4095:
                         self.motor_right.forward(25)
-                    if 2070 < ly < 4095:
+                    if 2151 < ly < 4095:
                         self.motor_left.forward(25)
                     if 1 < ry < 1850:
                         self.motor_right.backwards(25)

@@ -1,30 +1,59 @@
-#!/usr/bin/python
-import sys
-import smbus
-import time
-bus = smbus.SMBus(1)
-address = 0x8
-weightList = []
-while True:
-    data = ""
-    weightList = []
-    for i in range(0, 9):
-        # data += chr(bus.read_byte(address))
-        data += chr(bus.read_byte(address))
-        # print(chr(bus.read_byte(address)))
-        # print(chr(bus.read_byte(address)))
-        # print(chr(bus.read_byte(address)))
- 
-    # data = int(data.replace(b'\x00', b''))
-    # data.encode('utf-8')
-    # print(data.decode('utf-8'))
+import numpy as np
+import cv2 as cv
 
-    print(data)
-    # print(type(data))
-    # print(data.isnumeric())
-    # print(int(data))
-    # data = data.encode("utf-8")
-    # data = int.from_bytes(data, sys.byteorder)
-    # data = int(data)+191
-    # print(data)
-    time.sleep(1)
+def isBadContour(c):
+    # approximate the contour
+    peri = cv.arcLength(c, True)
+    approx = cv.approxPolyDP(c, 0.02 * peri, True)
+    # the contour is 'bad' if it is not a rectangle
+    return not len(approx) == 4
+
+cap = cv.VideoCapture(0)
+if not cap.isOpened():
+    print("Cannot open camera")
+    exit()
+while True:
+    # Capture frame-by-frame
+    ret, frame = cap.read()
+    # if frame is read correctly ret is True
+    if not ret:
+        print("Can't receive frame (stream end?). Exiting ...")
+        break
+    
+                
+    # # define range of black color in HSV
+    # lower_val = np.array([0,0,0])
+    # upper_val = np.array([179,100,30])
+    # # Threshold the HSV image to get only black colors
+    # mask = cv.inRange(hsv, lower_val, upper_val)
+    blur = cv.GaussianBlur(frame, (19, 19), 0)
+    hsv = cv.cvtColor(blur, cv.COLOR_BGR2HSV)
+    lower_green = np.array([40, 120, 60])
+    upper_green = np.array([70, 255,255])
+    mask = cv.inRange(hsv, lower_green, upper_green)
+
+    cnts = cv.findContours(mask.copy(), cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)[-2]
+    abscnts = []
+    if (len(cnts) > 0):
+        area = max(cnts, key=cv.contourArea)
+        (xg, yg, wg, hg) = cv.boundingRect(area)
+        cv.rectangle(frame, (xg, yg), (xg + wg, yg + hg), (0, 255, 0), 2)
+   
+   
+   
+    res = cv.bitwise_and(frame, frame, mask= mask)
+
+    # invert the mask to get black letters on white background
+
+    res2 = cv.bitwise_not(mask)
+
+    # display image
+
+    cv.imshow("img", res)
+    cv.imshow("img2", res2)
+    cv.imshow("hsv mode", frame)
+    if cv.waitKey(1) == ord('q'):
+        break
+# When everything done, release the capture
+cap.release()
+cv.destroyAllWindows()

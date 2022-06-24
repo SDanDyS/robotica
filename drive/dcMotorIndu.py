@@ -56,7 +56,7 @@ class dcMotorIndu(threading.Thread):
             GPIO.setup(in1,GPIO.OUT)
             GPIO.setup(in2,GPIO.OUT)
             GPIO.setup(ena,GPIO.OUT)
-            self.pwm=GPIO.PWM(ena,1000)
+            self.pwm=GPIO.PWM(ena,100)
         # right motor
         elif motorId == 1:
             print("Init right motor")
@@ -65,9 +65,9 @@ class dcMotorIndu(threading.Thread):
             GPIO.setup(in3,GPIO.OUT)
             GPIO.setup(in4,GPIO.OUT)
             GPIO.setup(enb,GPIO.OUT)
-            self.pwm=GPIO.PWM(enb,1000)
+            self.pwm=GPIO.PWM(enb,100)
 
-    def forward(self, speed):
+    def forward(self, speed = 100):
         """
         :param speed:int
             integer to set the speed when calling the function
