@@ -2,7 +2,7 @@
 
 This project was created with the help of Electrical engineering, Mechanical engineering and Software engineering as a project for the fourth semester of the second year at NHL Stenden.
 
-## Students whom worked on this project:
+## Students who worked on this project:
 
 ### Software engineering:
 Daniël, Wietze, Luuk, Chris
